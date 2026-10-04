@@ -1,0 +1,1 @@
+/Users/apple/Documents/shopipfy-development/athelin-theme/Ayush@athelin/AGENTS.md
