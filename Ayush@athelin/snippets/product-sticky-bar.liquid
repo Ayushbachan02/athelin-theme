@@ -1,0 +1,48 @@
+{% comment %}
+  Athelin Product Sticky Conversion Bar Snippet
+  Matches Figma: Bottom fixed black bar (#000) with thumbnail, title, price/EMI, and Add to cart + Buy Now.
+{% endcomment %}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign emi_amount = current_variant.price | divided_by: 3 -%}
+{%- assign sticky_img = current_variant.featured_image | default: product.featured_image -%}
+
+<div class="product-sticky-bar" data-sticky-bar aria-label="Quick Purchase Bar">
+  <div class="product-sticky-bar__left">
+    <div class="product-sticky-bar__thumb">
+      {%- if sticky_img -%}
+        <img
+          src="{{ sticky_img | image_url: width: 72, height: 72, crop: 'center' }}"
+          alt="{{ product.title | escape }}"
+          class="product-sticky-bar__thumb-img"
+          data-sticky-thumb
+          width="36"
+          height="36"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'product-shoe-1.png' | asset_url }}"
+          alt="{{ product.title | escape }}"
+          class="product-sticky-bar__thumb-img"
+          data-sticky-thumb
+          width="36"
+          height="36"
+        >
+      {%- endif -%}
+    </div>
+
+    <div class="product-sticky-bar__info">
+      <p class="product-sticky-bar__title" data-sticky-title>{{ product.title }}</p>
+      <p class="product-sticky-bar__price" data-sticky-price>{{ current_variant.price | money }} · {{ emi_amount | money }}/mo</p>
+    </div>
+  </div>
+
+  <div class="product-sticky-bar__actions">
+    <button type="button" class="product-sticky-bar__btn-cart" data-sticky-add-cart>
+      Add to cart
+    </button>
+    <button type="button" class="product-sticky-bar__btn-buynow" data-sticky-buy-now>
+      Buy Now
+    </button>
+  </div>
+</div>

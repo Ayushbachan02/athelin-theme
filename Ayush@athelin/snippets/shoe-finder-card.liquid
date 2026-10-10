@@ -1,0 +1,34 @@
+{% doc %}
+  Renders the in-grid promotional Shoe Finder card matching Figma node 159:683.
+  Provides a high-converting entry point into the interactive shoe quiz.
+{% enddoc %}
+
+<div class="shoe-finder-card" data-shoe-finder-card>
+  <div class="shoe-finder-card__visual" aria-hidden="true">
+    <img
+      src="{{ 'shoe-finder-graphic.jpg' | asset_url }}"
+      alt="Endurance running sneaker"
+      width="284"
+      height="248"
+      loading="lazy"
+      class="shoe-finder-card__image"
+    >
+  </div>
+
+  <div class="shoe-finder-card__inner">
+    <div class="shoe-finder-card__content">
+      <h3 class="shoe-finder-card__title">Not sure which shoe?</h3>
+      <p class="shoe-finder-card__description">
+        Four questions. Surface, mileage, cushioning, width.
+      </p>
+      <button
+        type="button"
+        class="shoe-finder-card__btn"
+        data-open-shoe-finder
+        aria-haspopup="dialog"
+      >
+        Open Shoe Finder
+      </button>
+    </div>
+  </div>
+</div>

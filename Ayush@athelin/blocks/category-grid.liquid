@@ -1,0 +1,129 @@
+{% doc %}
+  Renders the "Shop by Product" 4-column category grid.
+{% enddoc %}
+
+<section class="category-section" {{ block.shopify_attributes }}>
+  <div class="section-header">
+    <h2 class="section-title">{{ block.settings.title | default: 'Shop by Product' }}</h2>
+  </div>
+
+  <div class="category-grid">
+    <!-- Category 1: Watches -->
+    <a href="{{ block.settings.cat_1_url | default: '/collections/garmin' }}" class="category-card">
+      <img
+        src="{{ 'category-watches.png' | asset_url }}"
+        alt="Watches"
+        class="category-card__image"
+        loading="lazy"
+        width="278"
+        height="168"
+      >
+      <div class="category-card__overlay">
+        <span class="category-card__title">{{ block.settings.cat_1_title | default: 'Watches' }}</span>
+      </div>
+    </a>
+
+    <!-- Category 2: Apparel -->
+    <a href="{{ block.settings.cat_2_url | default: '/collections/fitness-wear' }}" class="category-card">
+      <img
+        src="{{ 'category-apparel.png' | asset_url }}"
+        alt="Apparel"
+        class="category-card__image"
+        loading="lazy"
+        width="278"
+        height="168"
+      >
+      <div class="category-card__overlay">
+        <span class="category-card__title">{{ block.settings.cat_2_title | default: 'Apparel' }}</span>
+      </div>
+    </a>
+
+    <!-- Category 3: Accessories -->
+    <a href="{{ block.settings.cat_3_url | default: '/collections/accessories' }}" class="category-card">
+      <img
+        src="{{ 'category-accessories.png' | asset_url }}"
+        alt="Accessories"
+        class="category-card__image"
+        loading="lazy"
+        width="278"
+        height="168"
+      >
+      <div class="category-card__overlay">
+        <span class="category-card__title">{{ block.settings.cat_3_title | default: 'Accessories' }}</span>
+      </div>
+    </a>
+
+    <!-- Category 4: Sunglasses -->
+    <a href="{{ block.settings.cat_4_url | default: '/collections/oakley' }}" class="category-card">
+      <img
+        src="{{ 'category-sunglasses.png' | asset_url }}"
+        alt="Sunglasses"
+        class="category-card__image"
+        loading="lazy"
+        width="274"
+        height="168"
+      >
+      <div class="category-card__overlay">
+        <span class="category-card__title">{{ block.settings.cat_4_title | default: 'Sunglasses' }}</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Category Grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Shop by Product"
+    },
+    {
+      "type": "text",
+      "id": "cat_1_title",
+      "label": "Category 1 Title",
+      "default": "Watches"
+    },
+    {
+      "type": "url",
+      "id": "cat_1_url",
+      "label": "Category 1 Link"
+    },
+    {
+      "type": "text",
+      "id": "cat_2_title",
+      "label": "Category 2 Title",
+      "default": "Apparel"
+    },
+    {
+      "type": "url",
+      "id": "cat_2_url",
+      "label": "Category 2 Link"
+    },
+    {
+      "type": "text",
+      "id": "cat_3_title",
+      "label": "Category 3 Title",
+      "default": "Accessories"
+    },
+    {
+      "type": "url",
+      "id": "cat_3_url",
+      "label": "Category 3 Link"
+    },
+    {
+      "type": "text",
+      "id": "cat_4_title",
+      "label": "Category 4 Title",
+      "default": "Sunglasses"
+    },
+    {
+      "type": "url",
+      "id": "cat_4_url",
+      "label": "Category 4 Link"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,35 @@
+{% doc %}
+  Renders the in-grid promotional Watch Finder card for GPS smartwatch collections
+  matching Figma node 1:272.
+{% enddoc %}
+
+<div class="watch-finder-card" data-watch-finder-card>
+  <div class="watch-finder-card__visual" aria-hidden="true">
+    <img
+      src="{{ 'watch-finder-graphic.png' | asset_url }}"
+      alt="Garmin Endurance Smartwatches"
+      width="284"
+      height="180"
+      loading="lazy"
+      class="watch-finder-card__image"
+    >
+  </div>
+
+  <div class="watch-finder-card__inner">
+    <div class="watch-finder-card__content">
+      <span class="watch-finder-card__tag">GPS Advisor</span>
+      <h3 class="watch-finder-card__title">Not sure which watch?</h3>
+      <p class="watch-finder-card__description">
+        Five questions. Battery, mapping, GPS precision, solar.
+      </p>
+      <button
+        type="button"
+        class="watch-finder-card__btn"
+        data-open-watch-finder
+        aria-haspopup="dialog"
+      >
+        Open Watch Finder
+      </button>
+    </div>
+  </div>
+</div>

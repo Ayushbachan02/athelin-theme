@@ -1,0 +1,85 @@
+{% doc %}
+  Renders the Athelin homepage Hero section with split headline copy,
+  interactive pill CTAs, and the floating hero watch lineup.
+{% enddoc %}
+
+<section class="hero-banner" {{ block.shopify_attributes }}>
+  <div class="hero-banner__inner">
+    <div class="hero-banner__content">
+      <h1 class="hero-banner__title">
+        {{ block.settings.title_line_1 | default: 'Train for the distance.' }}<br>
+        {{ block.settings.title_line_2 | default: "We'll handle the kit." }}
+      </h1>
+      <p class="hero-banner__subtitle">
+        {{ block.settings.subtitle | default: "India's endurance specialist. Garmin, Brooks, Hoka, Castelli — fitted properly." }}
+      </p>
+      <div class="hero-banner__cta-group">
+        <a href="{{ block.settings.primary_cta_link | default: '/collections/garmin' }}" class="btn-pill btn-pill--dark">
+          {{ block.settings.primary_cta_text | default: 'Find your watch' }}
+        </a>
+        <a href="{{ block.settings.secondary_cta_link | default: routes.all_products_collection_url }}" class="btn-pill btn-pill--outline">
+          {{ block.settings.secondary_cta_text | default: 'Explore Collection' }}
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-banner__media">
+      <img
+        src="{{ 'athelin-hero-watches.png' | asset_url }}"
+        alt="Garmin Endurance Watches"
+        width="555"
+        height="277"
+        class="hero-banner__image"
+        loading="eager"
+      >
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title_line_1",
+      "label": "Title Line 1",
+      "default": "Train for the distance."
+    },
+    {
+      "type": "text",
+      "id": "title_line_2",
+      "label": "Title Line 2",
+      "default": "We'll handle the kit."
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "India's endurance specialist. Garmin, Brooks, Hoka, Castelli — fitted properly."
+    },
+    {
+      "type": "text",
+      "id": "primary_cta_text",
+      "label": "Primary Button Text",
+      "default": "Find your watch"
+    },
+    {
+      "type": "url",
+      "id": "primary_cta_link",
+      "label": "Primary Button Link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_cta_text",
+      "label": "Secondary Button Text",
+      "default": "Explore Collection"
+    },
+    {
+      "type": "url",
+      "id": "secondary_cta_link",
+      "label": "Secondary Button Link"
+    }
+  ]
+}
+{% endschema %}

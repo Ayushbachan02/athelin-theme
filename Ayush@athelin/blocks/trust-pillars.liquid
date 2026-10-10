@@ -1,0 +1,121 @@
+{% doc %}
+  Renders the 4-column trust pillars / guarantees strip.
+{% enddoc %}
+
+<section class="trust-pillars" {{ block.shopify_attributes }}>
+  <div class="trust-pillars__inner">
+    <div class="trust-pillar">
+      <div class="trust-pillar__icon-wrap" aria-hidden="true">
+        <svg class="trust-icon trust-icon--shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path class="anim-shield-base" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path class="anim-shield-check" d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="trust-pillar__content">
+        <span class="trust-pillar__title">{{ block.settings.pillar_1_title | default: 'Authorised dealer' }}</span>
+        <span class="trust-pillar__desc">{{ block.settings.pillar_1_desc | default: 'Every brand, verified' }}</span>
+      </div>
+    </div>
+
+    <div class="trust-pillar">
+      <div class="trust-pillar__icon-wrap" aria-hidden="true">
+        <svg class="trust-icon trust-icon--card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect class="anim-card-body" x="2" y="5" width="20" height="14" rx="2"/>
+          <line class="anim-card-line" x1="2" y1="10" x2="22" y2="10"/>
+          <circle class="anim-card-chip" cx="6" cy="15" r="1.5" fill="currentColor"/>
+          <line class="anim-card-split" x1="14" y1="15" x2="19" y2="15" stroke-dasharray="2 2"/>
+        </svg>
+      </div>
+      <div class="trust-pillar__content">
+        <span class="trust-pillar__title">{{ block.settings.pillar_2_title | default: 'No Cost EMI' }}</span>
+        <span class="trust-pillar__desc">{{ block.settings.pillar_2_desc | default: '3 months, major banks' }}</span>
+      </div>
+    </div>
+
+    <div class="trust-pillar">
+      <div class="trust-pillar__icon-wrap" aria-hidden="true">
+        <svg class="trust-icon trust-icon--warranty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle class="anim-warranty-ring" cx="12" cy="9" r="6" stroke-dasharray="3 3"/>
+          <path class="anim-warranty-check" d="M10 9l1.5 1.5L14 8"/>
+          <path class="anim-warranty-ribbon" d="M8.2 14.5L7 21l5-2 5 2-1.2-6.5"/>
+        </svg>
+      </div>
+      <div class="trust-pillar__content">
+        <span class="trust-pillar__title">{{ block.settings.pillar_3_title | default: 'Warranty registered' }}</span>
+        <span class="trust-pillar__desc">{{ block.settings.pillar_3_desc | default: 'Done for you at dispatch' }}</span>
+      </div>
+    </div>
+
+    <div class="trust-pillar">
+      <div class="trust-pillar__icon-wrap" aria-hidden="true">
+        <svg class="trust-icon trust-icon--pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <g class="anim-pin-body">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3" fill="currentColor"/>
+          </g>
+          <ellipse class="anim-pin-radar" cx="12" cy="22" rx="4" ry="1.5"/>
+        </svg>
+      </div>
+      <div class="trust-pillar__content">
+        <span class="trust-pillar__title">{{ block.settings.pillar_4_title | default: 'Visit us in Delhi NCR' }}</span>
+        <span class="trust-pillar__desc">{{ block.settings.pillar_4_desc | default: 'Book a fitting' }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Trust Pillars",
+  "settings": [
+    {
+      "type": "text",
+      "id": "pillar_1_title",
+      "label": "Pillar 1 Title",
+      "default": "Authorised dealer"
+    },
+    {
+      "type": "text",
+      "id": "pillar_1_desc",
+      "label": "Pillar 1 Description",
+      "default": "Every brand, verified"
+    },
+    {
+      "type": "text",
+      "id": "pillar_2_title",
+      "label": "Pillar 2 Title",
+      "default": "No Cost EMI"
+    },
+    {
+      "type": "text",
+      "id": "pillar_2_desc",
+      "label": "Pillar 2 Description",
+      "default": "3 months, major banks"
+    },
+    {
+      "type": "text",
+      "id": "pillar_3_title",
+      "label": "Pillar 3 Title",
+      "default": "Warranty registered"
+    },
+    {
+      "type": "text",
+      "id": "pillar_3_desc",
+      "label": "Pillar 3 Description",
+      "default": "Done for you at dispatch"
+    },
+    {
+      "type": "text",
+      "id": "pillar_4_title",
+      "label": "Pillar 4 Title",
+      "default": "Visit us in Delhi NCR"
+    },
+    {
+      "type": "text",
+      "id": "pillar_4_desc",
+      "label": "Pillar 4 Description",
+      "default": "Book a fitting"
+    }
+  ]
+}
+{% endschema %}

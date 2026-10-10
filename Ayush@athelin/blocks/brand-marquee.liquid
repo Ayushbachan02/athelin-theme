@@ -1,0 +1,72 @@
+{% doc %}
+  Renders the partner brands infinite scrolling marquee.
+  All brand icons are uniformly sized.
+  Hovering or clicking over the marquee stops/pauses the scrolling,
+  and clicking a brand logo opens that brand's collection page.
+{% enddoc %}
+
+{%- assign speed = block.settings.speed | default: 34 -%}
+
+{% capture brand_items %}
+  <a href="{{ routes.collections_url }}/garmin" class="brand-marquee__item" aria-label="Garmin Collection">
+    <img src="{{ 'brand-garmin.png' | asset_url }}" alt="Garmin" class="brand-marquee__logo" width="131" height="35" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/brooks" class="brand-marquee__item" aria-label="Brooks Collection">
+    <img src="{{ 'brand-brooks.png' | asset_url }}" alt="Brooks" class="brand-marquee__logo" width="167" height="111" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/saucony" class="brand-marquee__item" aria-label="Saucony Collection">
+    <img src="{{ 'brand-saucony.png' | asset_url }}" alt="Saucony" class="brand-marquee__logo" width="138" height="138" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/oakley" class="brand-marquee__item" aria-label="Oakley Collection">
+    <img src="{{ 'brand-oakley.png' | asset_url }}" alt="Oakley" class="brand-marquee__logo" width="80" height="45" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/shokz" class="brand-marquee__item" aria-label="Shokz Collection">
+    <img src="{{ 'brand-shokz.png' | asset_url }}" alt="Shokz" class="brand-marquee__logo" width="119" height="49" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/hyperice" class="brand-marquee__item" aria-label="Hyperice Collection">
+    <img src="{{ 'brand-hyperice.png' | asset_url }}" alt="Hyperice" class="brand-marquee__logo" width="246" height="52" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/vibram" class="brand-marquee__item" aria-label="Vibram Collection">
+    <img src="{{ 'brand-vibram.png' | asset_url }}" alt="Vibram" class="brand-marquee__logo" width="75" height="52" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/running" class="brand-marquee__item" aria-label="Nike Running Collection">
+    <img src="{{ 'brand-nike.png' | asset_url }}" alt="Nike" class="brand-marquee__logo" width="120" height="45" loading="lazy">
+  </a>
+  <a href="{{ routes.collections_url }}/running" class="brand-marquee__item" aria-label="Adidas Running Collection">
+    <img src="{{ 'brand-adidas.png' | asset_url }}" alt="Adidas" class="brand-marquee__logo" width="120" height="45" loading="lazy">
+  </a>
+{% endcapture %}
+
+<section
+  class="brand-marquee"
+  data-brand-marquee
+  style="--brand-marquee-speed: {{ speed }}s;"
+  aria-label="Partner Brands"
+  {{ block.shopify_attributes }}
+>
+  <div class="brand-marquee__track" data-brand-track>
+    <div class="brand-marquee__group">
+      {{ brand_items }}
+    </div>
+    <div class="brand-marquee__group" aria-hidden="true">
+      {{ brand_items }}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Brand Marquee",
+  "settings": [
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll Speed (seconds)",
+      "min": 15,
+      "max": 60,
+      "step": 5,
+      "default": 35
+    }
+  ]
+}
+{% endschema %}

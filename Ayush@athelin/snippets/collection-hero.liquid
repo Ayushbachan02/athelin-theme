@@ -1,0 +1,96 @@
+{% doc %}
+  Renders the collection hero banner with dynamic category background,
+  breadcrumb navigation, headline, and product catalog metadata.
+
+  @param {collection} [collection] - The Shopify collection object
+  @param {string} [title] - Optional title override
+  @param {string} [subtitle] - Optional subtitle override
+{% enddoc %}
+
+{%- assign coll_handle = collection.handle | default: '' | downcase -%}
+{%- assign coll_title_raw = collection.title | default: 'Collection' -%}
+{%- assign hero_title = title | default: coll_title_raw -%}
+{%- assign hero_count = collection.all_products_count | default: collection.products.size | default: 0 -%}
+
+{%- assign parent_nav_title = 'Collections' -%}
+{%- assign parent_nav_url = routes.all_products_collection_url -%}
+{%- assign hero_bg_asset = 'collection-hero-runner.jpg' -%}
+{%- assign default_subtext = hero_count | append: ' products in this collection' -%}
+
+{%- if coll_handle contains 'garmin' or coll_handle contains 'watch' or hero_title contains 'watch' or hero_title contains 'Watch' -%}
+  {%- assign parent_nav_title = 'Watches' -%}
+  {%- assign parent_nav_url = routes.collections_url | append: '/garmin' -%}
+  {%- assign hero_bg_asset = 'athelin-hero-watches.png' -%}
+  {%- assign default_subtext = hero_count | append: ' GPS smartwatches from Garmin' -%}
+{%- elsif coll_handle contains 'running' or coll_handle contains 'shoe' or coll_handle contains 'hoka' or coll_handle contains 'brooks' or coll_handle contains 'saucony' or hero_title contains 'Running' or hero_title contains 'Shoes' -%}
+  {%- assign parent_nav_title = 'Run' -%}
+  {%- assign parent_nav_url = routes.collections_url | append: '/running' -%}
+  {%- assign hero_bg_asset = 'collection-hero-runner.jpg' -%}
+  {%- assign default_subtext = hero_count | append: ' products from Brooks, Hoka, Saucony, Luna and Vibram' -%}
+{%- elsif coll_handle contains 'cycling' or coll_handle contains 'ride' or coll_handle contains 'castelli' or hero_title contains 'Cycling' -%}
+  {%- assign parent_nav_title = 'Ride' -%}
+  {%- assign parent_nav_url = routes.collections_url | append: '/cycling' -%}
+  {%- assign hero_bg_asset = 'category-accessories.png' -%}
+  {%- assign default_subtext = hero_count | append: ' cycling apparel and equipment from Castelli, Camelbak and Giro' -%}
+{%- elsif coll_handle contains 'triathlon' or hero_title contains 'Triathlon' -%}
+  {%- assign parent_nav_title = 'Tri' -%}
+  {%- assign parent_nav_url = routes.collections_url | append: '/triathlon' -%}
+  {%- assign hero_bg_asset = 'category-apparel.png' -%}
+  {%- assign default_subtext = hero_count | append: ' race-proven triathlon essentials and apparel' -%}
+{%- elsif coll_handle contains 'fitness' or coll_handle contains 'recover' or hero_title contains 'Fitness' -%}
+  {%- assign parent_nav_title = 'Train & Recover' -%}
+  {%- assign parent_nav_url = routes.collections_url | append: '/fitness' -%}
+  {%- assign hero_bg_asset = 'category-accessories.png' -%}
+  {%- assign default_subtext = hero_count | append: ' endurance training and recovery products from Hyperice, CEP, and 2XU' -%}
+{%- elsif coll_handle contains 'oakley' or hero_title contains 'Oakley' -%}
+  {%- assign parent_nav_title = 'Sunglasses' -%}
+  {%- assign parent_nav_url = routes.collections_url | append: '/oakley' -%}
+  {%- assign hero_bg_asset = 'category-sunglasses.png' -%}
+  {%- assign default_subtext = hero_count | append: ' performance sports eyewear from Oakley' -%}
+{%- endif -%}
+
+<div class="collection-hero-wrap">
+  <!-- Breadcrumbs -->
+  <nav class="collection-breadcrumbs" aria-label="Breadcrumb">
+    <ol class="collection-breadcrumbs__list">
+      <li class="collection-breadcrumbs__item">
+        <a href="{{ routes.root_url }}" class="collection-breadcrumbs__link">Home</a>
+      </li>
+      <li class="collection-breadcrumbs__separator" aria-hidden="true">/</li>
+      <li class="collection-breadcrumbs__item">
+        <a href="{{ parent_nav_url }}" class="collection-breadcrumbs__link">{{ parent_nav_title }}</a>
+      </li>
+      <li class="collection-breadcrumbs__separator" aria-hidden="true">/</li>
+      <li class="collection-breadcrumbs__item collection-breadcrumbs__item--current" aria-current="page">
+        {{ hero_title }}
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Hero Banner -->
+  <div class="collection-hero-banner" role="banner">
+    <div class="collection-hero-banner__content">
+      <h1 class="collection-hero-banner__title">{{ hero_title }}</h1>
+      <p class="collection-hero-banner__subtitle">
+        {%- if subtitle != blank -%}
+          {{ subtitle }}
+        {%- elsif collection.description != blank -%}
+          {{ collection.description | strip_html | truncatewords: 20 }}
+        {%- else -%}
+          {{ default_subtext }}
+        {%- endif -%}
+      </p>
+    </div>
+    
+    <div class="collection-hero-banner__visual" aria-hidden="true">
+      <img
+        src="{{ hero_bg_asset | asset_url }}"
+        alt="{{ hero_title | escape }}"
+        width="1000"
+        height="230"
+        loading="eager"
+        class="collection-hero-banner__image"
+      >
+    </div>
+  </div>
+</div>

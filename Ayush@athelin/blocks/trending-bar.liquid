@@ -1,0 +1,31 @@
+{% doc %}
+  Renders the trending searches/filter ticker with pill tags.
+{% enddoc %}
+
+<div class="trending-bar" {{ block.shopify_attributes }}>
+  <div class="trending-bar__inner">
+    <div class="trending-bar__badge">Trending Now</div>
+    <div class="trending-bar__tags">
+      <a href="{{ routes.search_url }}?q=Garmin+Fenix" class="trending-bar__tag">Garmin Fenix 9 Pro</a>
+      <a href="{{ routes.search_url }}?q=COROS+Pace+3" class="trending-bar__tag">COROS Pace 3</a>
+      <a href="{{ routes.search_url }}?q=Fitbit" class="trending-bar__tag">Fitbit Air</a>
+      <a href="{{ routes.search_url }}?q=Noxgear" class="trending-bar__tag">Noxgear Tracer360 Vest</a>
+      <a href="{{ routes.search_url }}?q=Polar+H10" class="trending-bar__tag">Polar H10</a>
+      <a href="{{ routes.search_url }}?q=Shokz+OpenRun" class="trending-bar__tag">Shokz OpenRun</a>
+      <a href="{{ routes.search_url }}?q=Garmin+CIRQA" class="trending-bar__tag">Garmin CIRQA</a>
+      <a href="{{ routes.search_url }}?q=Suunto+Race" class="trending-bar__tag">Suunto Race Titanium</a>
+      <a href="{{ routes.search_url }}?q=Oura+Ring" class="trending-bar__tag">Oura Ring Gen 3</a>
+      <a href="{{ routes.search_url }}?q=Maurten" class="trending-bar__tag">Maurten Hydrogel</a>
+      <a href="{{ routes.search_url }}?q=Oakley" class="trending-bar__tag">Oakley Radar EV</a>
+      <a href="{{ routes.search_url }}?q=Wahoo" class="trending-bar__tag">Wahoo ELEMNT Bolt</a>
+      <a href="{{ routes.search_url }}?q=Brooks+Ghost" class="trending-bar__tag">Brooks Ghost Max</a>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Trending Bar",
+  "settings": []
+}
+{% endschema %}

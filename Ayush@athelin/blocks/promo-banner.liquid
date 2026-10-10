@@ -1,0 +1,45 @@
+{% doc %}
+  Renders the full-width promotional banner (e.g. Garmin water splash banner).
+{% enddoc %}
+
+<section class="promo-banner" {{ block.shopify_attributes }}>
+  <a href="{{ block.settings.link | default: '/collections/garmin' }}" class="promo-banner__card">
+    <img
+      src="{{ 'garmin-banner-bg.png' | asset_url }}"
+      alt="Garmin Collection"
+      class="promo-banner__bg"
+      loading="lazy"
+      width="1200"
+      height="145"
+    >
+    <div class="promo-banner__content">
+      <img
+        src="{{ 'garmin-banner-logo.png' | asset_url }}"
+        alt="Garmin"
+        class="promo-banner__logo-img"
+        width="180"
+        height="50"
+      >
+      <span class="promo-banner__subtext">{{ block.settings.subtext | default: 'latest collection NOW available' }}</span>
+    </div>
+  </a>
+</section>
+
+{% schema %}
+{
+  "name": "Promo Banner",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "latest collection NOW available"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Banner Link"
+    }
+  ]
+}
+{% endschema %}

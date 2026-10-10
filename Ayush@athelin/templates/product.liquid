@@ -1,37 +1,28 @@
-{% block 'container' %}
-  <div class="product-images">
-    {% for image in product.images %}
-      {% render 'image', class: 'product-image', image: image %}
-    {% endfor %}
-  </div>
+{% comment %}
+  Athelin Dynamic Product Detail Page (PDP)
+  Matches Figma: 03-product-page-desktop 2 (Node 167:807)
+  Full-width laptop layout with real Shopify data, interactive gallery,
+  buy box with lime EMI pill, swatches, tabs, setup bundle, and sticky conversion bar.
+{% endcomment %}
 
-  <div class="product-info">
-    <h1>{{ product.title }}</h1>
-    <p>{{ product.price | money }}</p>
-    <p>{{ product.description }}</p>
-  </div>
+{{ 'athelin-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'athelin-product.js' | asset_url }}" defer="defer"></script>
 
-  <div class="product-form">
-    {% form 'product', product %}
-      {% assign current_variant = product.selected_or_first_available_variant %}
+{% block 'container', tag: 'div' %}
+  <div class="product-page" data-product-page>
+    <!-- 1. Breadcrumbs Navigation -->
+    {% render 'product-breadcrumbs', product: product, collection: collection %}
 
-      <select name="id">
-        {% for variant in product.variants %}
-          <option
-            value="{{ variant.id }}"
-            {% if variant == current_variant %}
-              selected="selected"
-            {% endif %}
-          >
-            {{ variant.title }} - {{ variant.price | money }}
-          </option>
-        {% endfor %}
-      </select>
+    <!-- 2. Hero Section: Left Vertical Gallery Strip & Right Buy Box Card -->
+    <div class="product-hero">
+      {% render 'product-gallery', product: product %}
+      {% render 'product-buy-box', product: product %}
+    </div>
 
-      <input type="text" name="quantity" min="1" value="1">
+    <!-- 3. Navigation Tabs: Overview (Why this product + Complete your setup), Specs, Compare, Reviews, Q&A, Shipping -->
+    {% render 'product-tabs', product: product %}
 
-      <input type="submit" value="Add to cart">
-      {{ form | payment_button }}
-    {% endform %}
+    <!-- 4. Sticky Conversion Bottom Bar -->
+    {% render 'product-sticky-bar', product: product %}
   </div>
 {% endblock %}

@@ -1,0 +1,113 @@
+{% comment %}
+  Athelin Product Gallery Snippet
+  Matches Figma: Vertical left thumbnail strip (angles + video) + Large main image container (#f3f4f6)
+{% endcomment %}
+
+{%- assign main_media = product.selected_or_first_available_variant.featured_media | default: product.featured_media | default: product.featured_image -%}
+
+<div class="product-gallery" data-product-gallery>
+  <!-- Left Vertical Thumbnail Strip -->
+  <div class="product-gallery__thumbs" aria-label="Product Media Thumbnails">
+    {%- if product.media.size > 0 -%}
+      {%- for media in product.media -%}
+        <button
+          type="button"
+          class="product-gallery__thumb-item{% if forloop.first %} is-active{% endif %}"
+          data-gallery-thumb
+          data-media-id="{{ media.id }}"
+          data-img-src="{{ media | image_url: width: 1200 }}"
+          aria-label="View media {{ forloop.index }} of {{ product.title | escape }}"
+        >
+          <img
+            src="{{ media.preview_image | default: media | image_url: width: 200 }}"
+            alt="{{ media.alt | default: product.title | escape }}"
+            class="product-gallery__thumb-img"
+            width="72"
+            height="72"
+            loading="lazy"
+          >
+          {%- if media.media_type == 'video' or media.media_type == 'external_video' or forloop.index == 5 -%}
+            <span class="product-gallery__video-badge" aria-hidden="true">
+              <svg class="product-gallery__play-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </span>
+          {%- endif -%}
+        </button>
+      {%- endfor -%}
+    {%- elsif product.images.size > 0 -%}
+      {%- for image in product.images -%}
+        <button
+          type="button"
+          class="product-gallery__thumb-item{% if forloop.first %} is-active{% endif %}"
+          data-gallery-thumb
+          data-img-src="{{ image | image_url: width: 1200 }}"
+          aria-label="View image {{ forloop.index }} of {{ product.title | escape }}"
+        >
+          <img
+            src="{{ image | image_url: width: 200 }}"
+            alt="{{ image.alt | default: product.title | escape }}"
+            class="product-gallery__thumb-img"
+            width="72"
+            height="72"
+            loading="lazy"
+          >
+          {%- if forloop.index == 5 -%}
+            <span class="product-gallery__video-badge" aria-hidden="true">
+              <svg class="product-gallery__play-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </span>
+          {%- endif -%}
+        </button>
+      {%- endfor -%}
+    {%- else -%}
+      <!-- Fallback when product has no uploaded media -->
+      <button type="button" class="product-gallery__thumb-item is-active" data-gallery-thumb data-img-src="{{ 'product-shoe-1.png' | asset_url }}">
+        <img src="{{ 'product-shoe-1.png' | asset_url }}" alt="{{ product.title | escape }}" class="product-gallery__thumb-img" width="72" height="72">
+      </button>
+      <button type="button" class="product-gallery__thumb-item" data-gallery-thumb data-img-src="{{ 'product-shoe-2.png' | asset_url }}">
+        <img src="{{ 'product-shoe-2.png' | asset_url }}" alt="Angle 2" class="product-gallery__thumb-img" width="72" height="72">
+      </button>
+      <button type="button" class="product-gallery__thumb-item" data-gallery-thumb data-img-src="{{ 'product-shoe-3.png' | asset_url }}">
+        <img src="{{ 'product-shoe-3.png' | asset_url }}" alt="Angle 3" class="product-gallery__thumb-img" width="72" height="72">
+      </button>
+      <button type="button" class="product-gallery__thumb-item" data-gallery-thumb data-img-src="{{ 'product-shoe-4.png' | asset_url }}">
+        <img src="{{ 'product-shoe-4.png' | asset_url }}" alt="Angle 4" class="product-gallery__thumb-img" width="72" height="72">
+      </button>
+      <button type="button" class="product-gallery__thumb-item" data-gallery-thumb data-img-src="{{ 'product-shoe-1.png' | asset_url }}">
+        <img src="{{ 'product-shoe-1.png' | asset_url }}" alt="Video Preview" class="product-gallery__thumb-img" width="72" height="72">
+        <span class="product-gallery__video-badge" aria-hidden="true">
+          <svg class="product-gallery__play-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </span>
+      </button>
+    {%- endif -%}
+  </div>
+
+  <!-- Main Large Media Display Container -->
+  <div class="product-gallery__main" data-gallery-main>
+    {%- if main_media -%}
+      <img
+        src="{{ main_media | image_url: width: 1200 }}"
+        alt="{{ main_media.alt | default: product.title | escape }}"
+        class="product-gallery__main-img"
+        data-gallery-main-img
+        width="600"
+        height="600"
+        loading="eager"
+      >
+    {%- else -%}
+      <img
+        src="{{ 'product-shoe-1.png' | asset_url }}"
+        alt="{{ product.title | escape }}"
+        class="product-gallery__main-img"
+        data-gallery-main-img
+        width="600"
+        height="600"
+        loading="eager"
+      >
+    {%- endif -%}
+  </div>
+</div>

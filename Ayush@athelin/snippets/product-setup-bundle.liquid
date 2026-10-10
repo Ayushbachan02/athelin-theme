@@ -1,0 +1,69 @@
+{% comment %}
+  Athelin Product Overview Cards: "Why this [product]" & "Complete your setup"
+  Matches Figma: 2-column cards grid with highlights & 3-item accessory bundle with Add to Cart.
+{% endcomment %}
+
+{%- assign type_label = product.type | default: 'product' | downcase -%}
+{%- if type_label == blank or type_label == 'default' -%}
+  {%- assign title_lower = product.title | downcase -%}
+  {%- if title_lower contains 'watch' or title_lower contains 'forerunner' or title_lower contains 'fenix' or title_lower contains 'garmin' -%}
+    {%- assign type_label = 'watch' -%}
+  {%- elsif title_lower contains 'shoe' or title_lower contains 'vomero' or title_lower contains 'pegasus' or title_lower contains 'hoka' -%}
+    {%- assign type_label = 'shoe' -%}
+  {%- else -%}
+    {%- assign type_label = 'gear' -%}
+  {%- endif -%}
+{%- endif -%}
+
+<div class="product-overview-cards">
+  <!-- Card 1: Why this [product/watch/shoe] -->
+  <div class="product-overview-card">
+    <div>
+      <h2 class="product-overview-card__title">Why this {{ type_label }}</h2>
+      <div class="product-overview-card__body">
+        <p class="product-overview-card__p">
+          Six highlights, written by Athelin — battery stamina, precision biometric tracking, running economy, ECG sensor, titanium casing, and rapid recovery sync.
+        </p>
+        <p class="product-overview-card__p">
+          <strong>Best for:</strong> marathon training, triathlon, trail running, and high-intensity interval conditioning.
+        </p>
+        <p class="product-overview-card__p">
+          <strong>Step up from:</strong> Forerunner 570 · <strong>Step down from:</strong> Fenix 8
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Complete your setup -->
+  <div class="product-overview-card">
+    <div>
+      <h2 class="product-overview-card__title">Complete your setup</h2>
+      <div class="product-setup-bundle">
+        <div class="product-setup-bundle__items">
+          <!-- Item 1: Performance Socks -->
+          <div class="product-setup-bundle__thumb" title="Compression Socks">
+            <img src="{{ 'category-accessories.png' | asset_url }}" alt="Compression Socks" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+          </div>
+          <!-- Item 2: Cleaner / Care Foam -->
+          <div class="product-setup-bundle__thumb" title="Shoe Cleaner Foam">
+            <img src="{{ 'product-shoe-2.png' | asset_url }}" alt="Cleaner Care" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+          </div>
+          <!-- Item 3: Storage Bag / Strap -->
+          <div class="product-setup-bundle__thumb" title="Ventilated Shoe Bag">
+            <img src="{{ 'category-apparel.png' | asset_url }}" alt="Accessory Bag" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+          </div>
+        </div>
+
+        <div class="product-setup-bundle__meta">
+          <div class="product-setup-bundle__meta-title">In-stock accessories only:</div>
+          <div class="product-setup-bundle__meta-items"><strong>Socks, Shoe Cleaner, Bags</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bundle Add to Cart CTA -->
+    <button type="button" class="product-setup-bundle__btn" data-bundle-add-btn>
+      Add to cart
+    </button>
+  </div>
+</div>

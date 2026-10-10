@@ -1,0 +1,105 @@
+{% doc %}
+  Renders the interactive Watch Finder modal quiz based on Figma frame 1:272.
+{% enddoc %}
+
+<div class="watch-finder-modal" data-watch-finder-modal role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="watch-finder-modal__backdrop" data-close-watch-finder></div>
+  
+  <div class="watch-finder-modal__container">
+    <div class="watch-finder-modal__header">
+      <div class="watch-finder-modal__progress">
+        <span class="watch-finder-modal__step-text" data-watch-step-text>Question 1 of 3</span>
+        <div class="watch-finder-modal__bar">
+          <div class="watch-finder-modal__bar-fill" data-watch-progress style="width: 33%;"></div>
+        </div>
+      </div>
+      <button type="button" class="watch-finder-modal__close" data-close-watch-finder aria-label="Close dialog">
+        ✕
+      </button>
+    </div>
+
+    <div class="watch-finder-modal__body">
+      <!-- Step 1: Training Distance (from Figma 1:272) -->
+      <div class="watch-quiz-step watch-quiz-step--active" data-watch-step="1">
+        <h4 class="watch-quiz-step__question">What's the longest you train for?</h4>
+        <p class="watch-quiz-step__hint">Battery life and GPS precision depend heavily on event duration.</p>
+        <div class="watch-quiz-options">
+          <button type="button" class="watch-quiz-option" data-watch-select="distance" data-value="5k-10k">
+            <span class="watch-quiz-option__title">5K to 10K</span>
+            <span class="watch-quiz-option__desc">Daily training, some racing. Battery is not the constraint.</span>
+          </button>
+          <button type="button" class="watch-quiz-option" data-watch-select="distance" data-value="marathon">
+            <span class="watch-quiz-option__title">Half to marathon</span>
+            <span class="watch-quiz-option__desc">Structured plans, race pacing, recovery tracking.</span>
+          </button>
+          <button type="button" class="watch-quiz-option" data-watch-select="distance" data-value="ultra">
+            <span class="watch-quiz-option__title">Ultra and trail</span>
+            <span class="watch-quiz-option__desc">Multi-day battery, offline mapping, solar charging.</span>
+          </button>
+          <button type="button" class="watch-quiz-option" data-watch-select="distance" data-value="triathlon">
+            <span class="watch-quiz-option__title">Triathlon</span>
+            <span class="watch-quiz-option__desc">Open water swimming, transitions, multisport profiles.</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Screen & Battery -->
+      <div class="watch-quiz-step" data-watch-step="2">
+        <h4 class="watch-quiz-step__question">Display &amp; Battery preference?</h4>
+        <p class="watch-quiz-step__hint">Choose between high-contrast AMOLED or ultra-endurance solar MIP.</p>
+        <div class="watch-quiz-options">
+          <button type="button" class="watch-quiz-option" data-watch-select="display" data-value="amoled">
+            <span class="watch-quiz-option__title">AMOLED Ultra-Bright Touchscreen</span>
+            <span class="watch-quiz-option__desc">Crisp colors, smartwatch apps, and modern high-definition display.</span>
+          </button>
+          <button type="button" class="watch-quiz-option" data-watch-select="display" data-value="solar">
+            <span class="watch-quiz-option__title">Solar Memory-in-Pixel (MIP)</span>
+            <span class="watch-quiz-option__desc">Direct sunlight readability with weeks of solar-assisted battery.</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Navigation -->
+      <div class="watch-quiz-step" data-watch-step="3">
+        <h4 class="watch-quiz-step__question">Do you require onboard topo maps?</h4>
+        <p class="watch-quiz-step__hint">Essential for trail running, hiking, and unfamiliar race courses.</p>
+        <div class="watch-quiz-options">
+          <button type="button" class="watch-quiz-option" data-watch-select="maps" data-value="yes">
+            <span class="watch-quiz-option__title">Full-colour Onboard TopoActive Maps</span>
+            <span class="watch-quiz-option__desc">Navigate trails and streets without phone connectivity.</span>
+          </button>
+          <button type="button" class="watch-quiz-option" data-watch-select="maps" data-value="basic">
+            <span class="watch-quiz-option__title">Breadcrumb / Turn-by-turn Navigation</span>
+            <span class="watch-quiz-option__desc">Sufficient for road running and track intervals.</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Result Comparison (from Figma 1:272) -->
+      <div class="watch-quiz-step" data-watch-step="4">
+        <div class="watch-quiz-result">
+          <div class="watch-quiz-result__badge">Top Shortlist Match</div>
+          <h4 class="watch-quiz-result__title" data-watch-result-title>Garmin Fēnix 8 Solar 51mm</h4>
+          <p class="watch-quiz-result__pricing">₹1,48,990 · ₹49,663/mo EMI</p>
+          <div class="watch-quiz-result__specs-grid">
+            <div class="watch-quiz-spec">
+              <span class="watch-quiz-spec__label">GPS Battery</span>
+              <span class="watch-quiz-spec__value" data-watch-result-battery>Up to 84 h (Solar)</span>
+            </div>
+            <div class="watch-quiz-spec">
+              <span class="watch-quiz-spec__label">Mapping</span>
+              <span class="watch-quiz-spec__value" data-watch-result-map>Full colour, onboard</span>
+            </div>
+            <div class="watch-quiz-spec">
+              <span class="watch-quiz-spec__label">Weight</span>
+              <span class="watch-quiz-spec__value" data-watch-result-weight>91 g</span>
+            </div>
+          </div>
+          <button type="button" class="watch-quiz-result__apply-btn" data-watch-apply-btn>
+            View Recommended Watch in Collection →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

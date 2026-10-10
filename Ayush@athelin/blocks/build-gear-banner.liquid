@@ -1,0 +1,56 @@
+{% doc %}
+  Renders the "Build Your Gear" consultation banner with background visual and CONTACT CTA.
+{% enddoc %}
+
+<section class="build-gear" {{ block.shopify_attributes }}>
+  <div class="build-gear__card">
+    <img
+      src="{{ 'build-gear-banner.png' | asset_url }}"
+      alt="Build Your Gear"
+      class="build-gear__bg"
+      loading="lazy"
+      width="1200"
+      height="242"
+    >
+    <div class="build-gear__content">
+      <h2 class="build-gear__title">{{ block.settings.title | default: 'Build Your Gear' }}</h2>
+      <p class="build-gear__subtitle">
+        {{ block.settings.subtitle | default: 'Lets us know your requirement and we will get you the best product the suites you.' }}
+      </p>
+      <a href="{{ block.settings.btn_link | default: '/pages/contact' }}" class="btn-contact">
+        {{ block.settings.btn_text | default: 'CONTACT' }}
+      </a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Build Your Gear Banner",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Build Your Gear"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Lets us know your requirement and we will get you the best product the suites you."
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "CONTACT"
+    },
+    {
+      "type": "url",
+      "id": "btn_link",
+      "label": "Button Link"
+    }
+  ]
+}
+{% endschema %}

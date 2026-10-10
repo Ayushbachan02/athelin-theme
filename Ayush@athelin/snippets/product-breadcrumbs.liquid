@@ -1,0 +1,42 @@
+{% comment %}
+  Athelin Product Breadcrumbs Snippet
+  Matches Figma: Home / [Collection] / [Vendor] / [Product Title]
+{% endcomment %}
+
+<nav class="product-breadcrumbs" aria-label="Breadcrumb">
+  <ol class="product-breadcrumbs__list">
+    <li class="product-breadcrumbs__item">
+      <a href="{{ routes.root_url }}" class="product-breadcrumbs__link">Home</a>
+    </li>
+    <li class="product-breadcrumbs__separator" aria-hidden="true">/</li>
+
+    {%- if collection -%}
+      <li class="product-breadcrumbs__item">
+        <a href="{{ collection.url }}" class="product-breadcrumbs__link">{{ collection.title }}</a>
+      </li>
+      <li class="product-breadcrumbs__separator" aria-hidden="true">/</li>
+    {%- elsif product.collections.size > 0 -%}
+      {%- assign first_coll = product.collections.first -%}
+      <li class="product-breadcrumbs__item">
+        <a href="{{ first_coll.url }}" class="product-breadcrumbs__link">{{ first_coll.title }}</a>
+      </li>
+      <li class="product-breadcrumbs__separator" aria-hidden="true">/</li>
+    {%- elsif product.type != blank -%}
+      <li class="product-breadcrumbs__item">
+        <a href="{{ routes.all_products_collection_url }}?filter.p.product_type={{ product.type | url_encode }}" class="product-breadcrumbs__link">{{ product.type }}</a>
+      </li>
+      <li class="product-breadcrumbs__separator" aria-hidden="true">/</li>
+    {%- endif -%}
+
+    {%- if product.vendor != blank -%}
+      <li class="product-breadcrumbs__item">
+        <span class="product-breadcrumbs__link">{{ product.vendor }}</span>
+      </li>
+      <li class="product-breadcrumbs__separator" aria-hidden="true">/</li>
+    {%- endif -%}
+
+    <li class="product-breadcrumbs__item">
+      <span class="product-breadcrumbs__current" aria-current="page">{{ product.title }}</span>
+    </li>
+  </ol>
+</nav>

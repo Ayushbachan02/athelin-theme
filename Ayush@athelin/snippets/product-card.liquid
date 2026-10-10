@@ -1,0 +1,367 @@
+{% doc %}
+  Renders an endurance sports product card with Shopify data,
+  including brand logo header, clean white background, in-stock badge,
+  real variant color swatches with image switching, and EMI monthly pricing.
+
+  @param {product} [product] - Shopify product object
+  @param {string} [fallback_title] - Fallback title
+  @param {string} [fallback_brand] - Fallback vendor brand
+  @param {string} [fallback_price] - Fallback price string
+  @param {string} [fallback_emi] - Fallback monthly EMI string
+  @param {string} [fallback_image] - Asset filename for image
+  @param {string} [fallback_swatches] - Comma-separated hex colors
+  @param {string} [badge] - Custom status badge text
+  @param {string} [fallback_badge] - Fallback status badge text
+  @param {string} [card_image_bg] - Image background color
+  @param {string} [fallback_card_bg] - Fallback background color
+  @param {string} [specs] - Shoe specifications line
+  @param {string} [fallback_specs] - Fallback specs line
+  @param {number} [rating_count] - Star rating review count
+  @param {string} [surface] - Running surface tag
+  @param {string} [cushioning] - Cushioning level tag
+  @param {string} [size] - UK shoe size tag
+  @param {number} [fallback_price_raw] - Raw price in cents
+{% enddoc %}
+
+{%- assign card_product = product -%}
+{%- assign has_product = false -%}
+{%- if card_product != blank and card_product.title != blank -%}
+  {%- assign has_product = true -%}
+{%- endif -%}
+
+{%- comment -%} Determine Brand & Logo Asset {%- endcomment -%}
+{%- assign brand_key = '' -%}
+{%- if has_product -%}
+  {%- assign brand_search = card_product.vendor | append: ' ' | append: card_product.title | append: ' ' | append: card_product.tags | downcase -%}
+{%- else -%}
+  {%- assign brand_search = fallback_brand | default: '' | downcase -%}
+{%- endif -%}
+
+{%- if brand_search contains 'garmin' -%}
+  {%- assign brand_key = 'garmin' -%}
+{%- elsif brand_search contains 'adidas' -%}
+  {%- assign brand_key = 'adidas' -%}
+{%- elsif brand_search contains 'nike' -%}
+  {%- assign brand_key = 'nike' -%}
+{%- elsif brand_search contains 'brooks' -%}
+  {%- assign brand_key = 'brooks' -%}
+{%- elsif brand_search contains 'saucony' -%}
+  {%- assign brand_key = 'saucony' -%}
+{%- elsif brand_search contains 'asics' -%}
+  {%- assign brand_key = 'asics' -%}
+{%- elsif brand_search contains 'on' -%}
+  {%- assign brand_key = 'on' -%}
+{%- elsif brand_search contains 'oakley' -%}
+  {%- assign brand_key = 'oakley' -%}
+{%- elsif brand_search contains 'shokz' -%}
+  {%- assign brand_key = 'shokz' -%}
+{%- elsif brand_search contains 'hyperice' -%}
+  {%- assign brand_key = 'hyperice' -%}
+{%- elsif brand_search contains 'vibram' -%}
+  {%- assign brand_key = 'vibram' -%}
+{%- elsif brand_search contains 'hoka' -%}
+  {%- assign brand_key = 'hoka' -%}
+{%- endif -%}
+
+{%- assign effective_image_bg = card_image_bg | default: fallback_card_bg | default: '#ffffff' -%}
+
+{%- assign display_badge = badge -%}
+{%- if display_badge == blank -%}
+  {%- if has_product -%}
+    {%- if card_product.available -%}
+      {%- assign display_badge = 'In stock' -%}
+    {%- endif -%}
+  {%- else -%}
+    {%- assign display_badge = fallback_badge | default: 'In stock' -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} Watch series & attributes {%- endcomment -%}
+{%- assign watch_series = '' -%}
+{%- assign watch_display = '' -%}
+{%- assign watch_size = '' -%}
+{%- assign watch_activity = '' -%}
+
+{%- if has_product -%}
+  {%- assign title_low = card_product.title | downcase -%}
+  {%- assign tags_low = card_product.tags | join: ' ' | downcase -%}
+  {%- assign all_meta_text = title_low | append: ' ' | append: tags_low -%}
+
+  {%- if title_low contains 'forerunner' -%}
+    {%- assign watch_series = 'forerunner' -%}
+  {%- elsif title_low contains 'fenix' or title_low contains 'fēnix' or title_low contains 'epix' -%}
+    {%- assign watch_series = 'fenix' -%}
+  {%- elsif title_low contains 'instinct' -%}
+    {%- assign watch_series = 'instinct' -%}
+  {%- elsif title_low contains 'marq' -%}
+    {%- assign watch_series = 'marq' -%}
+  {%- elsif title_low contains 'venu' or title_low contains 'vívo' or title_low contains 'vivo' or title_low contains 'lily' -%}
+    {%- assign watch_series = 'venu' -%}
+  {%- elsif title_low contains 'edge' -%}
+    {%- assign watch_series = 'edge' -%}
+  {%- elsif title_low contains 'approach' -%}
+    {%- assign watch_series = 'approach' -%}
+  {%- elsif title_low contains 'enduro' -%}
+    {%- assign watch_series = 'enduro' -%}
+  {%- endif -%}
+
+  {%- if all_meta_text contains 'amoled' -%}
+    {%- assign watch_display = watch_display | append: ' amoled' -%}
+  {%- endif -%}
+  {%- if all_meta_text contains 'solar' or all_meta_text contains 'mip' -%}
+    {%- assign watch_display = watch_display | append: ' solar' -%}
+  {%- endif -%}
+
+  {%- if title_low contains '40mm' or title_low contains '41mm' or title_low contains '42mm' or title_low contains '43mm' or title_low contains '42 mm' or title_low contains '43 mm' or title_low contains '41 mm' -%}
+    {%- assign watch_size = '41-43' -%}
+  {%- elsif title_low contains '45mm' or title_low contains '46mm' or title_low contains '47mm' or title_low contains '45 mm' or title_low contains '47 mm' -%}
+    {%- assign watch_size = '45-47' -%}
+  {%- elsif title_low contains '50mm' or title_low contains '51mm' or title_low contains '50 mm' or title_low contains '51 mm' -%}
+    {%- assign watch_size = '50-51' -%}
+  {%- endif -%}
+
+  {%- if all_meta_text contains 'run' or all_meta_text contains 'marathon' -%}
+    {%- assign watch_activity = watch_activity | append: ' running' -%}
+  {%- endif -%}
+  {%- if all_meta_text contains 'trail' or all_meta_text contains 'outdoor' or all_meta_text contains 'tactical' -%}
+    {%- assign watch_activity = watch_activity | append: ' trail' -%}
+  {%- endif -%}
+  {%- if all_meta_text contains 'cycl' or all_meta_text contains 'bike' -%}
+    {%- assign watch_activity = watch_activity | append: ' cycling' -%}
+  {%- endif -%}
+  {%- if all_meta_text contains 'golf' -%}
+    {%- assign watch_activity = watch_activity | append: ' golf' -%}
+  {%- endif -%}
+  {%- if all_meta_text contains 'swim' or all_meta_text contains 'triathlon' -%}
+    {%- assign watch_activity = watch_activity | append: ' triathlon' -%}
+  {%- endif -%}
+{%- endif -%}
+
+<div
+  class="product-card"
+  data-product-card
+  data-brand="{{ brand_key | default: brand_search | escape }}"
+  data-surface="{{ surface | default: 'road' | escape }}"
+  data-cushioning="{{ cushioning | default: 'plush' | escape }}"
+  data-size="{{ size | default: '9' | escape }}"
+  data-price="{% if has_product %}{{ card_product.price }}{% else %}{{ fallback_price_raw | default: 1599900 }}{% endif %}"
+  data-available="{% if has_product %}{{ card_product.available }}{% else %}true{% endif %}"
+  data-series="{{ watch_series | strip | escape }}"
+  data-display="{{ watch_display | strip | escape }}"
+  data-watch-size="{{ watch_size | strip | escape }}"
+  data-activity="{{ watch_activity | strip | escape }}"
+>
+  <div
+    class="product-card__image-wrap"
+    style="--product-image-bg: {{ effective_image_bg }}; background-color: {{ effective_image_bg }};"
+  >
+    {%- if display_badge != blank -%}
+      <span class="product-card__badge product-card__badge--{{ display_badge | handleize }}">{{ display_badge }}</span>
+    {%- endif -%}
+
+    {%- if has_product -%}
+      <a href="{{ card_product.url }}" class="product-card__image-link" aria-label="{{ card_product.title | escape }}">
+        {%- if card_product.featured_image -%}
+          <img
+            src="{{ card_product.featured_image | image_url: width: 600 }}"
+            alt="{{ card_product.featured_image.alt | default: card_product.title | escape }}"
+            loading="lazy"
+            width="270"
+            height="194"
+            class="product-card__image product-card__image--primary"
+            data-main-image
+            crossorigin="anonymous"
+          >
+        {%- else -%}
+          <div class="product-card__image-placeholder">No image</div>
+        {%- endif -%}
+      </a>
+    {%- else -%}
+      <a href="{{ routes.all_products_collection_url }}" class="product-card__image-link" aria-label="{{ fallback_title | default: 'Product' | escape }}">
+        <img
+          src="{{ fallback_image | asset_url }}"
+          alt="{{ fallback_title | escape }}"
+          loading="lazy"
+          width="270"
+          height="194"
+          class="product-card__image product-card__image--primary"
+          data-main-image
+          crossorigin="anonymous"
+        >
+      </a>
+    {%- endif -%}
+
+    <button
+      type="button"
+      class="product-card__wishlist"
+      aria-label="Add to wishlist"
+      data-wishlist-btn
+    >
+      <svg class="icon-heart-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="product-card__details">
+    <div class="product-card__header-meta">
+      <div class="product-card__brand">
+        {%- case brand_key -%}
+          {%- when 'garmin' -%}
+            <img src="{{ 'brand-garmin.png' | asset_url }}" alt="Garmin" class="product-card__brand-logo product-card__brand-logo--garmin" width="70" height="12" loading="lazy">
+          {%- when 'adidas' -%}
+            <img src="{{ 'brand-adidas.png' | asset_url }}" alt="Adidas" class="product-card__brand-logo product-card__brand-logo--adidas" width="45" height="16" loading="lazy">
+          {%- when 'nike' -%}
+            <img src="{{ 'brand-nike.png' | asset_url }}" alt="Nike" class="product-card__brand-logo product-card__brand-logo--nike" width="48" height="14" loading="lazy">
+          {%- when 'brooks' -%}
+            <img src="{{ 'brand-brooks.png' | asset_url }}" alt="Brooks" class="product-card__brand-logo product-card__brand-logo--brooks" width="65" height="12" loading="lazy">
+          {%- when 'saucony' -%}
+            <img src="{{ 'brand-saucony.png' | asset_url }}" alt="Saucony" class="product-card__brand-logo product-card__brand-logo--saucony" width="60" height="12" loading="lazy">
+          {%- when 'oakley' -%}
+            <img src="{{ 'brand-oakley.png' | asset_url }}" alt="Oakley" class="product-card__brand-logo product-card__brand-logo--oakley" width="50" height="14" loading="lazy">
+          {%- when 'shokz' -%}
+            <img src="{{ 'brand-shokz.png' | asset_url }}" alt="Shokz" class="product-card__brand-logo product-card__brand-logo--shokz" width="55" height="14" loading="lazy">
+          {%- when 'hyperice' -%}
+            <img src="{{ 'brand-hyperice.png' | asset_url }}" alt="Hyperice" class="product-card__brand-logo product-card__brand-logo--hyperice" width="65" height="12" loading="lazy">
+          {%- when 'vibram' -%}
+            <img src="{{ 'brand-vibram.png' | asset_url }}" alt="Vibram" class="product-card__brand-logo product-card__brand-logo--vibram" width="40" height="14" loading="lazy">
+          {%- when 'asics' -%}
+            <span class="product-card__brand-text product-card__brand-text--asics" style="font-weight: 800; font-size: 13px; letter-spacing: -0.04em; color: #001e62;">asics</span>
+          {%- when 'on' -%}
+            <span class="product-card__brand-text product-card__brand-text--on" style="font-weight: 800; font-size: 13px; letter-spacing: 0.05em; color: #000000;">On</span>
+          {%- when 'hoka' -%}
+            <img src="{{ 'brand-hoka.png' | asset_url }}" alt="Hoka" class="product-card__brand-logo product-card__brand-logo--hoka" width="55" height="13" loading="lazy">
+          {%- else -%}
+            <span class="product-card__vendor">
+              {%- if has_product -%}
+                {{ card_product.vendor }}
+              {%- else -%}
+                {{ fallback_brand | default: 'ATHELIN' }}
+              {%- endif -%}
+            </span>
+        {%- endcase -%}
+      </div>
+
+      <div class="product-card__rating">
+        <span class="product-card__stars">★★★★★</span>
+        <span class="product-card__rating-count">{{ rating_count | default: 64 }}</span>
+      </div>
+    </div>
+
+    <h3 class="product-card__title">
+      {%- if has_product -%}
+        <a href="{{ card_product.url }}">{{ card_product.title }}</a>
+      {%- else -%}
+        <a href="{{ routes.all_products_collection_url }}">{{ fallback_title | default: 'Forerunner 970' }}</a>
+      {%- endif -%}
+    </h3>
+
+    {%- assign effective_specs = specs | default: fallback_specs -%}
+    {%- if effective_specs != blank -%}
+      <div class="product-card__specs">{{ effective_specs }}</div>
+    {%- elsif has_product -%}
+      <div class="product-card__specs">
+        {%- if card_product.type != blank -%}{{ card_product.type }}{%- else -%}Road · Plush · 8mm drop{%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="product-card__pricing">
+      <span class="product-card__price">
+        {%- if has_product -%}
+          {{ card_product.price | money }}
+        {%- else -%}
+          {{ fallback_price | default: '₹92,990' }}
+        {%- endif -%}
+      </span>
+      <span class="product-card__emi">
+        {%- if has_product -%}
+          {%- assign emi_amount = card_product.price | divided_by: 3 -%}
+          {{ emi_amount | money }}/mo
+        {%- else -%}
+          {{ fallback_emi | default: '₹30,997/mo' }}
+        {%- endif -%}
+      </span>
+    </div>
+
+    <div class="product-card__swatches" data-swatches>
+      {%- if has_product -%}
+        {%- if card_product.variants.size > 1 -%}
+          {%- for variant in card_product.variants limit: 5 -%}
+            {%- assign var_title_lower = variant.title | downcase -%}
+            {%- assign swatch_bg = '#18181b' -%}
+
+            {%- if var_title_lower contains 'white' or var_title_lower contains 'snow' -%}
+              {%- assign swatch_bg = '#ffffff' -%}
+            {%- elsif var_title_lower contains 'black' or var_title_lower contains 'stealth' or var_title_lower contains 'dark' or var_title_lower contains 'carbon' or var_title_lower contains 'onyx' -%}
+              {%- assign swatch_bg = '#18181b' -%}
+            {%- elsif var_title_lower contains 'blue' or var_title_lower contains 'navy' or var_title_lower contains 'captain' or var_title_lower contains 'ocean' or var_title_lower contains 'regatta' -%}
+              {%- assign swatch_bg = '#1e3a8a' -%}
+            {%- elsif var_title_lower contains 'silver' or var_title_lower contains 'titanium' or var_title_lower contains 'grey' or var_title_lower contains 'gray' or var_title_lower contains 'slate' or var_title_lower contains 'steel' -%}
+              {%- assign swatch_bg = '#94a3b8' -%}
+            {%- elsif var_title_lower contains 'red' or var_title_lower contains 'crimson' -%}
+              {%- assign swatch_bg = '#dc2626' -%}
+            {%- elsif var_title_lower contains 'green' or var_title_lower contains 'olive' or var_title_lower contains 'sage' -%}
+              {%- assign swatch_bg = '#15803d' -%}
+            {%- elsif var_title_lower contains 'orange' or var_title_lower contains 'amber' -%}
+              {%- assign swatch_bg = '#ea580c' -%}
+            {%- elsif var_title_lower contains 'yellow' or var_title_lower contains 'gold' -%}
+              {%- assign swatch_bg = '#eab308' -%}
+            {%- elsif var_title_lower contains 'purple' or var_title_lower contains 'violet' -%}
+              {%- assign swatch_bg = '#7e22ce' -%}
+            {%- elsif var_title_lower contains 'pink' or var_title_lower contains 'rose' -%}
+              {%- assign swatch_bg = '#ec4899' -%}
+            {%- elsif var_title_lower contains 'brown' or var_title_lower contains 'tan' -%}
+              {%- assign swatch_bg = '#78350f' -%}
+            {%- elsif var_title_lower contains 'teal' or var_title_lower contains 'cyan' -%}
+              {%- assign swatch_bg = '#0d9488' -%}
+            {%- else -%}
+              {%- assign swatch_bg = '#475569' -%}
+            {%- endif -%}
+
+            {%- assign var_img_url = '' -%}
+            {%- if variant.featured_image -%}
+              {%- assign var_img_url = variant.featured_image | image_url: width: 600 -%}
+            {%- elsif card_product.images[forloop.index0] -%}
+              {%- assign var_img_url = card_product.images[forloop.index0] | image_url: width: 600 -%}
+            {%- else -%}
+              {%- assign var_img_url = card_product.featured_image | image_url: width: 600 -%}
+            {%- endif -%}
+
+            <button
+              type="button"
+              class="product-card__swatch {% if forloop.first %}product-card__swatch--active{% endif %}"
+              data-variant-img="{{ var_img_url }}"
+              style="background-color: {{ swatch_bg }};{% if swatch_bg == '#ffffff' %} border: 1.5px solid #cbd5e1;{% endif %}"
+              aria-label="Select {{ variant.title | escape }}"
+              title="{{ variant.title | escape }}"
+            ></button>
+          {%- endfor -%}
+        {%- elsif card_product.images.size > 1 -%}
+          {%- comment -%} Single variant product with multiple gallery photos {%- endcomment -%}
+          {%- for image in card_product.images limit: 4 -%}
+            <button
+              type="button"
+              class="product-card__swatch product-card__swatch--thumb {% if forloop.first %}product-card__swatch--active{% endif %}"
+              data-variant-img="{{ image | image_url: width: 600 }}"
+              style="background-image: url('{{ image | image_url: width: 140 }}');"
+              aria-label="View photo {{ forloop.index }}"
+              title="View photo {{ forloop.index }}"
+            ></button>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- else -%}
+        {%- if fallback_swatches != blank -%}
+          {%- assign swatch_list = fallback_swatches | split: ',' -%}
+          {%- for color in swatch_list -%}
+            <button
+              type="button"
+              class="product-card__swatch {% if forloop.first %}product-card__swatch--active{% endif %}"
+              style="background-color: {{ color | strip }};"
+              aria-label="Color {{ color | strip }}"
+            ></button>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </div>
+</div>

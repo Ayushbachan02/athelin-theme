@@ -1,0 +1,48 @@
+{% doc %}
+  Renders an ultra-smooth site preloader with branded Athelin athletic styling.
+  Fades out seamlessly once assets and DOM are ready.
+{% enddoc %}
+
+<div id="site-preloader" class="site-preloader" aria-hidden="true">
+  <div class="site-preloader__inner">
+    <div class="site-preloader__logo">
+      <img
+        src="{{ 'athelin-logo.png' | asset_url }}"
+        alt="Athelin"
+        width="140"
+        height="33"
+        class="site-preloader__img"
+      >
+      <div class="site-preloader__tagline">Train for the distance</div>
+    </div>
+    <div class="site-preloader__track">
+      <div class="site-preloader__bar"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var preloader = document.getElementById('site-preloader');
+    if (!preloader) return;
+    
+    function hidePreloader() {
+      if (preloader.classList.contains('site-preloader--hidden')) return;
+      preloader.classList.add('site-preloader--fade-out');
+      setTimeout(function() {
+        preloader.classList.add('site-preloader--hidden');
+        document.body.classList.add('site-loaded');
+      }, 550);
+    }
+
+    if (document.readyState === 'complete') {
+      setTimeout(hidePreloader, 300);
+    } else {
+      window.addEventListener('load', function() {
+        setTimeout(hidePreloader, 300);
+      });
+      // Safety timeout after 1.8s
+      setTimeout(hidePreloader, 1800);
+    }
+  })();
+</script>

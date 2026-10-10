@@ -1,0 +1,114 @@
+{% doc %}
+  Renders the interactive 4-step Shoe Finder modal wizard.
+{% enddoc %}
+
+<div class="shoe-finder-modal" data-shoe-finder-modal role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="shoe-finder-modal__backdrop" data-close-shoe-finder></div>
+  
+  <div class="shoe-finder-modal__container">
+    <div class="shoe-finder-modal__header">
+      <div class="shoe-finder-modal__progress">
+        <span class="shoe-finder-modal__step-text" data-quiz-step-text>Question 1 of 4</span>
+        <div class="shoe-finder-modal__bar">
+          <div class="shoe-finder-modal__bar-fill" data-quiz-progress style="width: 25%;"></div>
+        </div>
+      </div>
+      <button type="button" class="shoe-finder-modal__close" data-close-shoe-finder aria-label="Close dialog">
+        ✕
+      </button>
+    </div>
+
+    <div class="shoe-finder-modal__body">
+      <!-- Step 1: Surface -->
+      <div class="quiz-step quiz-step--active" data-quiz-step="1">
+        <h4 class="quiz-step__question">Where do you run most often?</h4>
+        <p class="quiz-step__hint">Select your primary running surface.</p>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-quiz-select="surface" data-value="road">
+            <span class="quiz-option__title">Road &amp; Pavement</span>
+            <span class="quiz-option__desc">Asphalt, sidewalks, and urban running</span>
+          </button>
+          <button type="button" class="quiz-option" data-quiz-select="surface" data-value="trail">
+            <span class="quiz-option__title">Off-Road Trail</span>
+            <span class="quiz-option__desc">Dirt, gravel, technical roots and rocks</span>
+          </button>
+          <button type="button" class="quiz-option" data-quiz-select="surface" data-value="track">
+            <span class="quiz-option__title">Track &amp; Race Day</span>
+            <span class="quiz-option__desc">Fast intervals and competition</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Mileage -->
+      <div class="quiz-step" data-quiz-step="2">
+        <h4 class="quiz-step__question">What is your typical weekly mileage?</h4>
+        <p class="quiz-step__hint">Helps determine durability and cushioning needs.</p>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-quiz-select="mileage" data-value="light">
+            <span class="quiz-option__title">Under 20 km / week</span>
+            <span class="quiz-option__desc">Fitness runs and casual jogs</span>
+          </button>
+          <button type="button" class="quiz-option" data-quiz-select="mileage" data-value="medium">
+            <span class="quiz-option__title">20 – 50 km / week</span>
+            <span class="quiz-option__desc">Half marathon training and consistent miles</span>
+          </button>
+          <button type="button" class="quiz-option" data-quiz-select="mileage" data-value="heavy">
+            <span class="quiz-option__title">50+ km / week</span>
+            <span class="quiz-option__desc">Full marathon prep and ultramarathon volume</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Cushioning -->
+      <div class="quiz-step" data-quiz-step="3">
+        <h4 class="quiz-step__question">How much cushioning do you prefer?</h4>
+        <p class="quiz-step__hint">Choose the underfoot feeling you love.</p>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-quiz-select="cushioning" data-value="plush">
+            <span class="quiz-option__title">Plush &amp; Max Cushion</span>
+            <span class="quiz-option__desc">Cloud-like impact absorption for easy recovery</span>
+          </button>
+          <button type="button" class="quiz-option" data-quiz-select="cushioning" data-value="balanced">
+            <span class="quiz-option__title">Balanced &amp; Responsive</span>
+            <span class="quiz-option__desc">The sweet spot between comfort and ground feel</span>
+          </button>
+          <button type="button" class="quiz-option" data-quiz-select="cushioning" data-value="firm">
+            <span class="quiz-option__title">Firm &amp; Propulsive</span>
+            <span class="quiz-option__desc">Snappy energy return for speed workouts</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Width -->
+      <div class="quiz-step" data-quiz-step="4">
+        <h4 class="quiz-step__question">What shoe width fits you best?</h4>
+        <p class="quiz-step__hint">Ensures optimal toe splay and lockdown.</p>
+        <div class="quiz-options">
+          <button type="button" class="quiz-option" data-quiz-select="width" data-value="regular">
+            <span class="quiz-option__title">Standard / Regular Fit</span>
+            <span class="quiz-option__desc">Fits true to size for standard feet</span>
+          </button>
+          <button type="button" class="quiz-option" data-quiz-select="width" data-value="wide">
+            <span class="quiz-option__title">Wide Fit (2E / 4E)</span>
+            <span class="quiz-option__desc">Extra volume across the forefoot and instep</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 5: Result -->
+      <div class="quiz-step" data-quiz-step="5">
+        <div class="quiz-result">
+          <div class="quiz-result__badge">Top Match For You</div>
+          <h4 class="quiz-result__shoe-title" data-quiz-result-title>Hoka Clifton 11</h4>
+          <p class="quiz-result__shoe-specs" data-quiz-result-specs>Road · Plush Cushioning · 8mm Drop</p>
+          <p class="quiz-result__shoe-summary" data-quiz-result-desc>
+            Engineered for smooth everyday transitions with ultra-cushioned EVA midsole foam and early-stage Meta-Rocker geometry.
+          </p>
+          <button type="button" class="quiz-result__apply-btn" data-quiz-apply-btn>
+            Filter Collection for this Shoe →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

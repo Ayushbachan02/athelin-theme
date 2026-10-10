@@ -1,51 +1,132 @@
 {% doc %}
-  Renders the theme's storefront header: shop title, main menu,
-  customer account entry, and cart link. Composed directly in
-  layout/theme.liquid so it wraps every page.
+  Renders the storefront header: top announcement bar, Athelin brand logo,
+  primary sports navigation menu, search pill input, and account/wishlist/cart actions.
 {% enddoc %}
 
-<header {{ block.shopify_attributes }}>
-  <h2 class="header__title">
-    {{ shop.name | link_to: routes.root_url }}
-  </h2>
+<header class="athelin-header-wrapper full-width" {{ block.shopify_attributes }}>
+  <!-- Top Announcement Bar (Infinite Slow Marquee) -->
+  <div class="announcement-bar" role="region" aria-label="Announcements">
+    {% capture usp_content %}
+      <span class="announcement-bar__item">{{ block.settings.usp_1 | default: 'Trusted by 20,000+ people' }}</span>
+      <span class="announcement-bar__separator">•</span>
+      <span class="announcement-bar__item">{{ block.settings.usp_2 | default: 'No Cost EMI from ₹3,099/mo' }}</span>
+      <span class="announcement-bar__separator">•</span>
+      <span class="announcement-bar__item">{{ block.settings.usp_3 | default: 'Free shipping over ₹2,000' }}</span>
+      <span class="announcement-bar__separator">•</span>
+    {% endcapture %}
 
-  <div class="header__menu">
-    {% for link in block.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
+    <div class="announcement-bar__track">
+      <div class="announcement-bar__group">
+        {{ usp_content }}
+        {{ usp_content }}
+      </div>
+      <div class="announcement-bar__group" aria-hidden="true">
+        {{ usp_content }}
+        {{ usp_content }}
+      </div>
+    </div>
   </div>
 
-  <div class="header__icons">
-    {% if shop.customer_accounts_enabled %}
-      <shopify-account menu="{{ block.settings.customer_account_menu }}">
-        {{ 'icon-account.svg' | inline_asset_content }}
-      </shopify-account>
-    {% endif %}
+  <!-- Main Navigation Header (Black Bar) -->
+  <div class="athelin-header">
+    <div class="athelin-header__inner">
+      <div class="athelin-header__left">
+        <a href="{{ routes.root_url }}" class="athelin-header__logo" aria-label="Athelin Home">
+          <img
+            src="{{ 'athelin-logo.png' | asset_url }}"
+            alt="Athelin"
+            width="105"
+            height="22"
+            class="athelin-header__logo-img"
+          >
+        </a>
 
-    <a href="{{ routes.cart_url }}">
-      {% if cart.item_count > 0 %}
-        <sup>{{ cart.item_count }}</sup>
-      {% endif %}
+        <nav class="athelin-header__nav" aria-label="Main Navigation">
+          {%- if block.settings.menu != blank and block.settings.menu.links.size > 0 -%}
+            {%- for link in block.settings.menu.links -%}
+              <a href="{{ link.url }}" class="athelin-header__nav-link">{{ link.title }}</a>
+            {%- endfor -%}
+          {%- else -%}
+            <a href="{{ routes.collections_url }}/running" class="athelin-header__nav-link">Run</a>
+            <a href="{{ routes.collections_url }}/cycling" class="athelin-header__nav-link">Ride</a>
+            <a href="{{ routes.all_products_collection_url }}" class="athelin-header__nav-link">Tri</a>
+            <a href="{{ routes.collections_url }}/fitness" class="athelin-header__nav-link">Train & Recover</a>
+            <a href="{{ routes.collections_url }}/garmin" class="athelin-header__nav-link">Watches</a>
+            <a href="/blogs/guides" class="athelin-header__nav-link">Guides</a>
+            <a href="/pages/contact" class="athelin-header__nav-link">Our store</a>
+          {%- endif -%}
+        </nav>
+      </div>
 
-      {{ 'icon-cart.svg' | inline_asset_content }}
-    </a>
+      <div class="athelin-header__right">
+        <div class="athelin-header__search-wrap">
+          <form action="{{ routes.search_url }}" method="get" role="search" class="athelin-header__search-form">
+            <input
+              type="search"
+              name="q"
+              class="athelin-header__search-input"
+              placeholder="Search watches, shoes, guides…"
+              aria-label="Search watches, shoes, guides"
+            >
+          </form>
+        </div>
+
+        <div class="athelin-header__actions">
+          <!-- Wishlist -->
+          <a href="/pages/wishlist" class="athelin-header__action-btn" aria-label="Wishlist">
+            <img src="{{ 'icon-heart.svg' | asset_url }}" alt="Wishlist" width="18" height="18">
+          </a>
+
+          <!-- Cart -->
+          <a href="{{ routes.cart_url }}" class="athelin-header__action-btn" aria-label="Shopping Cart">
+            <img src="{{ 'icon-bag.svg' | asset_url }}" alt="Cart" width="18" height="18">
+            {%- if cart.item_count > 0 -%}
+              <span class="athelin-header__cart-badge">{{ cart.item_count }}</span>
+            {%- endif -%}
+          </a>
+
+          <!-- Account -->
+          {%- if shop.customer_accounts_enabled -%}
+            <a href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" class="athelin-header__action-btn" aria-label="Account">
+              <img src="{{ 'icon-user.svg' | asset_url }}" alt="Account" width="18" height="18">
+            </a>
+          {%- else -%}
+            <a href="{{ routes.account_login_url }}" class="athelin-header__action-btn" aria-label="Account">
+              <img src="{{ 'icon-user.svg' | asset_url }}" alt="Account" width="18" height="18">
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
 {% schema %}
 {
-  "name": "t:general.header",
+  "name": "Header & Announcement",
   "settings": [
     {
       "type": "link_list",
       "id": "menu",
-      "label": "t:labels.menu"
+      "label": "Navigation Menu"
     },
     {
-      "type": "link_list",
-      "id": "customer_account_menu",
-      "label": "t:labels.customer_account_menu",
-      "default": "customer-account-main-menu"
+      "type": "text",
+      "id": "usp_1",
+      "label": "USP 1",
+      "default": "Trusted by 20,000+ people"
+    },
+    {
+      "type": "text",
+      "id": "usp_2",
+      "label": "USP 2",
+      "default": "No Cost EMI from ₹3,099/mo"
+    },
+    {
+      "type": "text",
+      "id": "usp_3",
+      "label": "USP 3",
+      "default": "Free shipping over ₹2,000"
     }
   ]
 }

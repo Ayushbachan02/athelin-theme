@@ -1,0 +1,191 @@
+{% comment %}
+  Athelin Product Navigation Tabs Snippet
+  Matches Figma: Overview, Specifications, Compare models, Reviews (128), Q&A, Shipping & returns
+{% endcomment %}
+
+<div class="product-tabs-section" data-product-tabs>
+  <!-- Horizontal Tab Bar -->
+  <nav class="product-tabs-nav" role="tablist" aria-label="Product Details Tabs">
+    <button
+      type="button"
+      class="product-tab-btn is-active"
+      role="tab"
+      aria-selected="true"
+      data-tab-target="overview"
+      id="tab-btn-overview"
+    >
+      Overview
+    </button>
+    <button
+      type="button"
+      class="product-tab-btn"
+      role="tab"
+      aria-selected="false"
+      data-tab-target="specifications"
+      id="tab-btn-specifications"
+    >
+      Specifications
+    </button>
+    <button
+      type="button"
+      class="product-tab-btn"
+      role="tab"
+      aria-selected="false"
+      data-tab-target="compare"
+      id="tab-btn-compare"
+    >
+      Compare models
+    </button>
+    <button
+      type="button"
+      class="product-tab-btn"
+      role="tab"
+      aria-selected="false"
+      data-tab-target="reviews"
+      id="tab-btn-reviews"
+    >
+      Reviews (128)
+    </button>
+    <button
+      type="button"
+      class="product-tab-btn"
+      role="tab"
+      aria-selected="false"
+      data-tab-target="qa"
+      id="tab-btn-qa"
+    >
+      Q&amp;A
+    </button>
+    <button
+      type="button"
+      class="product-tab-btn"
+      role="tab"
+      aria-selected="false"
+      data-tab-target="shipping"
+      id="tab-btn-shipping"
+    >
+      Shipping &amp; returns
+    </button>
+  </nav>
+
+  <!-- Tab Content Panels -->
+  <!-- 1. Overview Panel -->
+  <div class="product-tab-panel is-active" role="tabpanel" data-tab-panel="overview" aria-labelledby="tab-btn-overview">
+    {% render 'product-setup-bundle', product: product %}
+
+    {%- if product.description != blank -%}
+      <div class="product-description-container" data-product-description-container style="margin-top: 24px;">
+        <div class="product-description-raw" data-product-description-raw style="display: none;">
+          {{ product.description }}
+        </div>
+        <div class="product-description-formatted" data-product-description-formatted>
+          <div class="product-overview-card">
+            <h3 class="product-overview-card__title">Product Overview &amp; Specifications</h3>
+            <div class="product-overview-card__body">
+              {{ product.description }}
+            </div>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <!-- 2. Specifications Panel -->
+  <div class="product-tab-panel" role="tabpanel" data-tab-panel="specifications" aria-labelledby="tab-btn-specifications">
+    <div class="product-overview-card">
+      <h3 class="product-overview-card__title">Technical Specifications</h3>
+      <table class="product-specs-table">
+        <tbody>
+          <tr>
+            <th>Brand</th>
+            <td>{{ product.vendor | default: 'Athelin Athletics' }}</td>
+          </tr>
+          <tr>
+            <th>Product Category</th>
+            <td>{{ product.type | default: 'Endurance Performance' }}</td>
+          </tr>
+          <tr>
+            <th>SKU / Model</th>
+            <td>{{ product.selected_or_first_available_variant.sku | default: 'ATH-2026-X' }}</td>
+          </tr>
+          <tr>
+            <th>Barcode</th>
+            <td>{{ product.selected_or_first_available_variant.barcode | default: '8901234567890' }}</td>
+          </tr>
+          <tr>
+            <th>Warranty</th>
+            <td>1 Year Authorised Brand Warranty · Instant digital registration</td>
+          </tr>
+          <tr>
+            <th>Box Contents</th>
+            <td>1x Unit, Quick Start Guide, Charging Cable / Fit Toolkit, Verification Card</td>
+          </tr>
+        </tbody>
+      </table>
+      <div data-specs-extra-container style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- 3. Compare Models Panel -->
+  <div class="product-tab-panel" role="tabpanel" data-tab-panel="compare" aria-labelledby="tab-btn-compare">
+    <div class="product-overview-card">
+      <h3 class="product-overview-card__title">Endurance Lineup Comparison</h3>
+      <div class="product-overview-card__body">
+        <p class="product-overview-card__p">
+          <strong>Entry Tier:</strong> Standard battery life, core biometric tracking, baseline cushioning.
+        </p>
+        <p class="product-overview-card__p">
+          <strong>This Model ({{ product.title }}):</strong> Multi-band GPS, titanium / carbon engineered support, advanced race pace &amp; heart rate metrics, rapid charging.
+        </p>
+        <p class="product-overview-card__p">
+          <strong>Flagship Pro Tier:</strong> Solar charging lens, ultra-durable sapphire glass, expedition maps, 30+ day stamina.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Reviews Panel -->
+  <div class="product-tab-panel" id="product-tab-reviews" role="tabpanel" data-tab-panel="reviews" aria-labelledby="tab-btn-reviews">
+    <div class="product-overview-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <h3 class="product-overview-card__title" style="margin: 0;">Verified Athlete Reviews (128)</h3>
+        <span style="font-size: 11px; font-weight: 700; color: #10b981;">★ 4.6 Overall Score</span>
+      </div>
+      <div class="product-overview-card__body">
+        <div style="border-bottom: 1px solid #f1f2f4; padding-bottom: 12px; margin-bottom: 12px;">
+          <div style="font-weight: 700; margin-bottom: 2px;">"Game changer for marathon build-up" ★★★★★</div>
+          <div style="color: #767d96; font-size: 9.5px; margin-bottom: 4px;">Arjun M. · Verified Runner · 2 weeks ago</div>
+          <div>Unbelievable comfort and battery stamina. Athelin fitted and delivered within 48 hours.</div>
+        </div>
+        <div>
+          <div style="font-weight: 700; margin-bottom: 2px;">"Exact sizing, premium feel" ★★★★☆</div>
+          <div style="color: #767d96; font-size: 9.5px; margin-bottom: 4px;">Pooja K. · Verified Triathlete · 1 month ago</div>
+          <div>Responsive cushioning with solid energy return. Highly recommend opting for the accessories bundle.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Q&A Panel -->
+  <div class="product-tab-panel" role="tabpanel" data-tab-panel="qa" aria-labelledby="tab-btn-qa">
+    <div class="product-overview-card">
+      <h3 class="product-overview-card__title">Frequently Asked Questions (12)</h3>
+      <div class="product-overview-card__body">
+        <p class="product-overview-card__p"><strong>Q: Is this authentic with manufacturer warranty?</strong><br>A: Yes, Athelin is an authorised dealer. Your device warranty is automatically registered upon order confirmation.</p>
+        <p class="product-overview-card__p"><strong>Q: What is the return and exchange window?</strong><br>A: 10-day complimentary door-to-door returns. We send a courier to collect the package at zero extra cost.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Shipping & Returns Panel -->
+  <div class="product-tab-panel" role="tabpanel" data-tab-panel="shipping" aria-labelledby="tab-btn-shipping">
+    <div class="product-overview-card">
+      <h3 class="product-overview-card__title">Shipping &amp; Delivery Information</h3>
+      <div class="product-overview-card__body">
+        <p class="product-overview-card__p"><strong>Fast Track Metro Dispatch:</strong> Orders placed before 2:00 PM are handed over to express couriers same-day.</p>
+        <p class="product-overview-card__p"><strong>10-Day Hassle-Free Returns:</strong> If size or fit does not suit you, we pick up directly from your doorstep with no return fees.</p>
+        <p class="product-overview-card__p"><strong>Payment Methods:</strong> Instant UPI, GPay, PhonePe, Debit/Credit cards, and 3/6-month No-Cost EMI.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,198 @@
+{% doc %}
+  Renders a collection product row ("In stock now — Garmin", "In stock now — Shoes").
+  Fetches live product data directly from Shopify collections with fallbacks and skeleton support.
+
+  @param {string} [title] - Header title
+  @param {collection} [collection] - Target Shopify collection
+  @param {number} [products_to_show] - Product limit (default: 4)
+  @param {string} [view_all_url] - URL for "View all"
+  @param {string} [fallback_type] - 'garmin' or 'shoes'
+{% enddoc %}
+
+{%- assign fallback_mode = fallback_type | default: block.settings.fallback_type | default: 'garmin' -%}
+{%- assign collection_handle = collection | default: block.settings.collection -%}
+{%- if fallback_mode == 'shoes' -%}
+  {%- if collection_handle == blank or collection_handle == 'brooks' -%}
+    {%- assign collection_handle = 'hoka' -%}
+  {%- endif -%}
+{%- endif -%}
+{%- assign target_collection = collections[collection_handle] -%}
+{%- assign limit = block.settings.products_to_show | default: 4 -%}
+
+<section class="collection-section" {{ block.shopify_attributes }}>
+  <div class="section-header">
+    <h2 class="section-title">
+      {{ title | default: block.settings.title | default: 'In stock now' }}
+    </h2>
+    <a href="{{ block.settings.view_all_url | default: target_collection.url | default: routes.all_products_collection_url }}" class="section-link">
+      {{ block.settings.view_all_text | default: 'View all →' }}
+    </a>
+  </div>
+
+  <template class="product-skeleton-template" aria-hidden="true">
+    {% render 'product-card-skeleton' %}
+  </template>
+
+  <div class="products-grid">
+    {%- if target_collection != blank and target_collection.products.size > 0 -%}
+      {%- assign products_rendered = 0 -%}
+      {%- for product in target_collection.products -%}
+        {%- if product.available -%}
+          {% render 'product-card', product: product %}
+          {%- assign products_rendered = products_rendered | plus: 1 -%}
+          {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if products_rendered < limit -%}
+        {%- for product in target_collection.products -%}
+          {%- unless product.available -%}
+            {% render 'product-card', product: product %}
+            {%- assign products_rendered = products_rendered | plus: 1 -%}
+            {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
+          {%- endunless -%}
+        {%- endfor -%}
+      {%- endif -%}
+      {%- if fallback_mode == 'shoes' and products_rendered < limit -%}
+        {%- for p in collections['saucony'].products -%}
+          {%- assign p_title_lower = p.title | downcase -%}
+          {%- if p_title_lower contains 'triumph' or p_title_lower contains 'shoe' -%}
+            {% render 'product-card', product: p %}
+            {%- assign products_rendered = products_rendered | plus: 1 -%}
+            {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      {%- if fallback_mode == 'shoes' and products_rendered < limit -%}
+        {%- for p in collections['giro'].products -%}
+          {%- assign p_title_lower = p.title | downcase -%}
+          {%- if p_title_lower contains 'shoe' or p_title_lower contains 'cadet' -%}
+            {% render 'product-card', product: p %}
+            {%- assign products_rendered = products_rendered | plus: 1 -%}
+            {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- else -%}
+      {%- if fallback_mode == 'shoes' -%}
+        {% render 'product-card',
+          fallback_title: 'AdiZERO Adios Pro',
+          fallback_brand: 'ADIDAS',
+          fallback_price: '₹19,000/-',
+          fallback_emi: '₹3,997/mo',
+          fallback_image: 'product-shoe-1.png',
+          fallback_card_bg: '#d1d2cc',
+          fallback_swatches: '#171b2e,#dc2626,#16a34a'
+        %}
+        {% render 'product-card',
+          fallback_title: 'AdiZERO Boston 12',
+          fallback_brand: 'NIKE',
+          fallback_price: '₹19,000/-',
+          fallback_emi: '₹3,997/mo',
+          fallback_image: 'product-shoe-2.png',
+          fallback_card_bg: '#f1f1f1',
+          fallback_swatches: '#16a34a,#dc2626,#171b2e'
+        %}
+        {% render 'product-card',
+          fallback_title: 'AdiZERO Prime X2',
+          fallback_brand: 'NIKE',
+          fallback_price: '₹18,000/-',
+          fallback_emi: '₹3,887/mo',
+          fallback_image: 'product-shoe-3.png',
+          fallback_card_bg: '#f1f1f1',
+          fallback_swatches: '#8b5cf6,#171b2e,#dc2626'
+        %}
+        {% render 'product-card',
+          fallback_title: 'AdiZERO Takumi Sen',
+          fallback_brand: 'NIKE',
+          fallback_price: '₹19,000/-',
+          fallback_emi: '₹3,997/mo',
+          fallback_image: 'product-shoe-4.png',
+          fallback_card_bg: '#f1f1f1',
+          fallback_swatches: '#000000,#ef4444,#3b82f6'
+        %}
+      {%- else -%}
+        {% render 'product-card',
+          fallback_title: 'Forerunner 970',
+          fallback_brand: 'GARMIN',
+          fallback_price: '₹92,990',
+          fallback_emi: '₹30,997/mo',
+          fallback_image: 'product-garmin-1.png',
+          fallback_swatches: '#65a30d,#000000,#f97316'
+        %}
+        {% render 'product-card',
+          fallback_title: 'Epix Pro (Gen 2) Sapphire',
+          fallback_brand: 'GARMIN',
+          fallback_price: '₹92,990',
+          fallback_emi: '₹30,997/mo',
+          fallback_image: 'product-garmin-2.png',
+          fallback_swatches: '#000000,#65a30d,#f97316'
+        %}
+        {% render 'product-card',
+          fallback_title: 'Forerunner 970 Slate',
+          fallback_brand: 'GARMIN',
+          fallback_price: '₹82,990',
+          fallback_emi: '₹30,997/mo',
+          fallback_image: 'product-garmin-3.png',
+          fallback_swatches: '#f97316,#000000,#65a30d'
+        %}
+        {% render 'product-card',
+          fallback_title: 'Forerunner 970 Solar',
+          fallback_brand: 'GARMIN',
+          fallback_price: '₹92,990',
+          fallback_emi: '₹30,997/mo',
+          fallback_image: 'product-garmin-4.png',
+          fallback_swatches: '#f97316,#65a30d,#000000'
+        %}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "In stock now — Garmin"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4,
+      "label": "Products to show"
+    },
+    {
+      "type": "text",
+      "id": "view_all_text",
+      "label": "View All Text",
+      "default": "View all →"
+    },
+    {
+      "type": "url",
+      "id": "view_all_url",
+      "label": "View All Link"
+    },
+    {
+      "type": "select",
+      "id": "fallback_type",
+      "label": "Fallback Type",
+      "options": [
+        { "value": "garmin", "label": "Garmin Watches" },
+        { "value": "shoes", "label": "Athletic Shoes" }
+      ],
+      "default": "garmin"
+    }
+  ]
+}
+{% endschema %}

@@ -1,5 +1,10 @@
-{% block 'container' %}
-  {% block 'hello-world' %}
-    {% block 'liquid-tips', tips: ['hello_world.liquid_tips_1', 'hello_world.liquid_tips_2', 'hello_world.liquid_tips_3'] %}{% endblock %}
-  {% endblock %}
-{% endblock %}
+{% block 'trending-bar' %}{% endblock %}
+{% block 'hero-banner' %}{% endblock %}
+{% block 'reviews-ticker' %}{% endblock %}
+{% block 'brand-marquee' %}{% endblock %}
+{% block 'category-grid' %}{% endblock %}
+{% block 'promo-banner' %}{% endblock %}
+{% block 'featured-collection', title: 'In stock now — Garmin', collection: 'garmin', fallback_type: 'garmin' %}{% endblock %}
+{% block 'build-gear-banner' %}{% endblock %}
+{% block 'featured-collection', title: 'In stock now — Shoes', collection: 'hoka', fallback_type: 'shoes' %}{% endblock %}
+{% block 'trust-pillars' %}{% endblock %}

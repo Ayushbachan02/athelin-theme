@@ -1,28 +1,84 @@
-{% block 'container' %}
-  <h1>{{ collection.title }}</h1>
+{% comment %}
+  Athelin Dynamic Collection Page Template
+  Loads live products from the active collection with 12 items per page pagination,
+  full-width responsive layout, and category-aware Find Your Shoe / Watch advisor cards.
+{% endcomment %}
 
-  <div class="collection-products">
-    {% paginate collection.products by 20 %}
-      {% for product in collection.products %}
-        <div class="collection-product">
-          {% if product.featured_image %}
-            {% render 'image',
-              class: 'collection-product__image',
-              image: product.featured_image,
-              url: product.url,
-              width: 400,
-              height: 400,
-              crop: 'center'
-            %}
-          {% endif %}
-          <div class="collection-product__content">
-            <p>{{ product.title | escape | link_to: product.url }}</p>
-            <p>{{ product.price | money }}</p>
+{{ 'athelin-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'athelin-collection.js' | asset_url }}" defer="defer"></script>
+
+{%- assign coll_handle = collection.handle | default: '' | downcase -%}
+{%- assign coll_title = collection.title | default: '' | downcase -%}
+
+{%- assign is_shoe_category = false -%}
+{%- if coll_handle contains 'running' or coll_handle contains 'shoe' or coll_handle contains 'hoka' or coll_handle contains 'brooks' or coll_handle contains 'saucony' or coll_title contains 'shoe' or coll_title contains 'running' -%}
+  {%- assign is_shoe_category = true -%}
+{%- endif -%}
+
+{%- assign is_watch_category = false -%}
+{%- if coll_handle contains 'garmin' or coll_handle contains 'watch' or coll_title contains 'watch' -%}
+  {%- assign is_watch_category = true -%}
+{%- endif -%}
+
+{% block 'container', tag: 'div' %}
+  <div class="collection-page" data-collection-page>
+    <!-- 1. Breadcrumbs & Dynamic Category Hero Header -->
+    {% render 'collection-hero', collection: collection %}
+
+    <!-- 2. Filter Toolbar (Active Filter Badges & Sort Dropdown) -->
+    {% render 'collection-active-pills' %}
+
+    <!-- 3. Dual-Column Full-Width Layout: Sidebar Filters + Products Grid -->
+    <div class="collection-layout">
+      <!-- Desktop Left Sidebar (240px) -->
+      {% render 'collection-sidebar', collection: collection, is_mobile: false %}
+
+      <!-- Products Grid (48 products per page + Pagination) -->
+      <div class="collection-products-wrap" style="width: 100%;">
+        {% paginate collection.products by 48 %}
+          <div class="collection-grid" data-collection-grid>
+            {%- if collection.products.size > 0 -%}
+              {%- for product in collection.products -%}
+                {% render 'product-card', product: product %}
+
+                {%- comment -%} In-grid advisor promo card shown ONLY for shoe or watch collections {%- endcomment -%}
+                {%- if forloop.index == 4 -%}
+                  {%- if is_shoe_category -%}
+                    {% render 'shoe-finder-card' %}
+                  {%- elsif is_watch_category -%}
+                    {% render 'watch-finder-card' %}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- else -%}
+              <!-- Empty state if the collection has 0 products -->
+              <div class="collection-empty">
+                <h3 class="collection-empty__title">No products found in {{ collection.title }}</h3>
+                <p class="collection-empty__text">Check back soon or explore our other endurance sports collections.</p>
+                <a href="{{ routes.all_products_collection_url }}" class="collection-empty__btn">
+                  Explore All Products →
+                </a>
+              </div>
+            {%- endif -%}
           </div>
-        </div>
-      {% endfor %}
 
-      {{ paginate | default_pagination }}
-    {% endpaginate %}
+          {%- if paginate.pages > 1 -%}
+            <nav class="collection-pagination" aria-label="Pagination">
+              {{ paginate | default_pagination: next: 'Next →', previous: '← Previous' }}
+            </nav>
+          {%- endif -%}
+        {% endpaginate %}
+      </div>
+    </div>
+
+    <!-- 4. Mobile Bottom Sheet Filter Drawer -->
+    {% render 'collection-sidebar', collection: collection, is_mobile: true %}
+
+    <!-- 5. Advisor Modals (Rendered conditionally based on category) -->
+    {%- if is_shoe_category -%}
+      {% render 'shoe-finder-modal' %}
+    {%- elsif is_watch_category -%}
+      {% render 'watch-finder-modal' %}
+    {%- endif -%}
   </div>
 {% endblock %}

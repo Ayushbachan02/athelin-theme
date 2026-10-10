@@ -1,0 +1,273 @@
+{% doc %}
+  Renders the desktop sidebar filters and mobile bottom drawer filter sheet
+  dynamically tailored to the active collection category (Running, Watches, or Gear).
+
+  @param {collection} [collection] - The Shopify collection object
+  @param {boolean} [is_mobile] - Render mobile drawer layout
+{% enddoc %}
+
+{%- assign coll_handle = collection.handle | default: '' | downcase -%}
+{%- assign coll_title = collection.title | default: '' | downcase -%}
+
+{%- assign is_shoe_category = false -%}
+{%- if coll_handle contains 'running' or coll_handle contains 'shoe' or coll_handle contains 'hoka' or coll_handle contains 'brooks' or coll_handle contains 'saucony' or coll_title contains 'shoe' or coll_title contains 'running' -%}
+  {%- assign is_shoe_category = true -%}
+{%- endif -%}
+
+{%- assign is_watch_category = false -%}
+{%- if coll_handle contains 'garmin' or coll_handle contains 'watch' or coll_title contains 'watch' -%}
+  {%- assign is_watch_category = true -%}
+{%- endif -%}
+
+<aside
+  class="collection-sidebar {% if is_mobile %}collection-sidebar--mobile{% endif %}"
+  data-collection-sidebar
+  {% if is_mobile %}data-mobile-drawer{% endif %}
+>
+  {%- if is_mobile -%}
+    <div class="collection-sidebar__drawer-backdrop" data-mobile-drawer-close></div>
+    <div class="collection-sidebar__drawer-content">
+      <div class="collection-sidebar__drag-handle" aria-hidden="true"></div>
+  {%- endif -%}
+
+  <div class="collection-sidebar__header">
+    <h2 class="collection-sidebar__title">Filters</h2>
+    <button type="button" class="collection-sidebar__clear" data-filters-clear>
+      Clear
+    </button>
+  </div>
+
+  <form class="collection-sidebar__form" data-filter-form>
+    {%- if is_shoe_category -%}
+      <!-- 1. Surface Filter Group -->
+      <div class="filter-group" data-filter-group="surface">
+        <h3 class="filter-group__title">Surface</h3>
+        <div class="filter-group__options">
+          <label class="filter-checkbox">
+            <input type="checkbox" name="surface" value="road" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Road</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="surface" value="trail" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Trail</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="surface" value="track" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Track &amp; race</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 2. Cushioning Filter Group -->
+      <div class="filter-group" data-filter-group="cushioning">
+        <h3 class="filter-group__title">Cushioning</h3>
+        <div class="filter-pills">
+          <button type="button" class="filter-pill" data-filter-pill="cushioning" data-value="plush">Plush</button>
+          <button type="button" class="filter-pill" data-filter-pill="cushioning" data-value="balanced">Balanced</button>
+          <button type="button" class="filter-pill" data-filter-pill="cushioning" data-value="firm">Firm</button>
+        </div>
+      </div>
+
+      <!-- 3. Size (UK) Filter Group -->
+      <div class="filter-group" data-filter-group="size">
+        <h3 class="filter-group__title">Size (UK)</h3>
+        <div class="filter-sizes">
+          <button type="button" class="filter-size-btn" data-filter-size="7">7</button>
+          <button type="button" class="filter-size-btn" data-filter-size="8">8</button>
+          <button type="button" class="filter-size-btn" data-filter-size="9">9</button>
+          <button type="button" class="filter-size-btn" data-filter-size="10">10</button>
+        </div>
+      </div>
+
+    {%- elsif is_watch_category -%}
+      <!-- 1. Watch Series Filter Group -->
+      <div class="filter-group" data-filter-group="series">
+        <h3 class="filter-group__title">Series</h3>
+        <div class="filter-group__options">
+          <label class="filter-checkbox">
+            <input type="checkbox" name="series" value="forerunner" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Forerunner®</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="series" value="fenix" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Fēnix® &amp; Epix™</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="series" value="instinct" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Instinct® Rugged</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="series" value="marq" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">MARQ® Luxury</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="series" value="venu" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Venu® &amp; Fitness</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="series" value="approach" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Approach® Golf</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="series" value="edge" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Edge® Cycling</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 2. Display Technology -->
+      <div class="filter-group" data-filter-group="display">
+        <h3 class="filter-group__title">Display</h3>
+        <div class="filter-pills">
+          <button type="button" class="filter-pill" data-filter-pill="display" data-value="amoled">AMOLED</button>
+          <button type="button" class="filter-pill" data-filter-pill="display" data-value="solar">Solar MIP</button>
+        </div>
+      </div>
+
+      <!-- 3. Case Size Filter Group -->
+      <div class="filter-group" data-filter-group="watch-size">
+        <h3 class="filter-group__title">Case Size</h3>
+        <div class="filter-sizes">
+          <button type="button" class="filter-size-btn" data-filter-watch-size="41-43" title="41–43 mm (Compact wrist)">42mm</button>
+          <button type="button" class="filter-size-btn" data-filter-watch-size="45-47" title="45–47 mm (Standard wrist)">47mm</button>
+          <button type="button" class="filter-size-btn" data-filter-watch-size="50-51" title="50–51 mm (Large wrist)">51mm</button>
+        </div>
+      </div>
+
+      <!-- 4. Sport & Discipline Focus -->
+      <div class="filter-group" data-filter-group="activity">
+        <h3 class="filter-group__title">Sport &amp; Focus</h3>
+        <div class="filter-links">
+          <button type="button" class="filter-link" data-filter-activity="running">Running</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-activity="trail">Trail / Outdoor</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-activity="cycling">Cycling</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-activity="golf">Golf</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-activity="triathlon">Triathlon</button>
+        </div>
+      </div>
+
+    {%- else -%}
+      <!-- General Category: Product Type / Brands -->
+      <div class="filter-group" data-filter-group="brand">
+        <h3 class="filter-group__title">Brand / Line</h3>
+        <div class="filter-links">
+          <button type="button" class="filter-link" data-filter-brand="castelli">Castelli</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="camelbak">Camelbak</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="cep">CEP</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="hyperice">Hyperice</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="oakley">Oakley</button>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <!-- Price Filter Group (Applies to all) -->
+    <div class="filter-group" data-filter-group="price">
+      <h3 class="filter-group__title">Price</h3>
+      <div class="filter-price">
+        <div class="filter-price__slider-container">
+          <div class="filter-price__track"></div>
+          <div class="filter-price__range" data-price-range-fill style="left: 0%; right: 0%;"></div>
+          <input
+            type="range"
+            min="0"
+            max="300000"
+            step="1000"
+            value="0"
+            class="filter-price__input filter-price__input--min"
+            data-price-min
+            aria-label="Minimum price"
+          >
+          <input
+            type="range"
+            min="0"
+            max="300000"
+            step="1000"
+            value="300000"
+            class="filter-price__input filter-price__input--max"
+            data-price-max
+            aria-label="Maximum price"
+          >
+        </div>
+        <div class="filter-price__values">
+          <span data-price-label>₹0 — ₹3,00,000</span>
+        </div>
+      </div>
+    </div>
+
+    {%- if is_shoe_category -%}
+      <!-- Brand Filter Group for Shoes -->
+      <div class="filter-group" data-filter-group="brand">
+        <h3 class="filter-group__title">Brand</h3>
+        <div class="filter-links">
+          <button type="button" class="filter-link" data-filter-brand="brooks">Brooks</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="hoka">Hoka</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="saucony">Saucony</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="luna">Luna</button>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <!-- Availability Filter Group (Applies to all) -->
+    <div class="filter-group" data-filter-group="availability">
+      <h3 class="filter-group__title">Availability</h3>
+      <div class="filter-group__options">
+        <label class="filter-checkbox">
+          <input
+            type="checkbox"
+            name="availability"
+            value="in-stock"
+            class="filter-checkbox__input"
+          >
+          <span class="filter-checkbox__box" aria-hidden="true"></span>
+          <span class="filter-checkbox__label">In stock only</span>
+        </label>
+      </div>
+    </div>
+
+    {%- if is_shoe_category -%}
+      <!-- Drop & Width Filter Group -->
+      <div class="filter-group" data-filter-group="drop-width">
+        <h3 class="filter-group__title">Drop &amp; width</h3>
+        <div class="filter-links">
+          <button type="button" class="filter-link" data-filter-drop="0-4">0–4mm</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-drop="5-8">5–8mm</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-drop="9plus">9mm+</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-width="wide">Wide</button>
+        </div>
+      </div>
+    {%- endif -%}
+  </form>
+
+  {%- if is_mobile -%}
+      <div class="collection-sidebar__drawer-footer">
+        <button type="button" class="collection-sidebar__drawer-apply" data-mobile-drawer-close>
+          Show products
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+</aside>

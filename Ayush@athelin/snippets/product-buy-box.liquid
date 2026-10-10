@@ -1,0 +1,189 @@
+{% comment %}
+  Athelin Product Buy Box Snippet
+  Matches Figma: Brand logo, Title, Stars, Price, Lime EMI Pill, Swatches,
+  Live Stock, Delivery Estimator, Add to Cart, Compare, Trust Badges, WhatsApp Support.
+{% endcomment %}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign vendor_lower = product.vendor | default: '' | downcase -%}
+
+<div class="product-buy-box" data-product-buy-box>
+  <!-- 1. Brand Logo / Vendor Identification -->
+  <div class="product-buy-box__brand-wrap">
+    {%- if vendor_lower contains 'nike' -%}
+      <svg class="product-buy-box__brand-logo" viewBox="0 0 50 18" fill="#000000" aria-label="Nike">
+        <path d="M11.5 17.5C7.2 17.5 3.5 15.6 1.1 12.5C-0.8 10 -0.3 6.5 2.1 4.2C3.3 3.1 5 2.3 6.8 1.9C6.4 2.8 6.2 3.8 6.2 4.9C6.2 9.6 10.6 13.5 16.5 14.1L49 2.5L16.2 16.7C14.7 17.2 13.1 17.5 11.5 17.5Z"/>
+      </svg>
+    {%- elsif vendor_lower contains 'garmin' -%}
+      <img src="{{ 'brand-garmin.png' | asset_url }}" alt="Garmin" class="product-buy-box__brand-logo" width="80" height="20">
+    {%- elsif vendor_lower contains 'oakley' -%}
+      <img src="{{ 'brand-oakley.png' | asset_url }}" alt="Oakley" class="product-buy-box__brand-logo" width="80" height="20">
+    {%- elsif vendor_lower contains 'adidas' -%}
+      <img src="{{ 'brand-adidas.png' | asset_url }}" alt="Adidas" class="product-buy-box__brand-logo" width="70" height="20">
+    {%- elsif vendor_lower contains 'hoka' -%}
+      <img src="{{ 'brand-hoka.png' | asset_url }}" alt="Hoka" class="product-buy-box__brand-logo" width="70" height="20">
+    {%- elsif vendor_lower contains 'brooks' -%}
+      <img src="{{ 'brand-brooks.png' | asset_url }}" alt="Brooks" class="product-buy-box__brand-logo" width="80" height="20">
+    {%- elsif vendor_lower contains 'saucony' -%}
+      <img src="{{ 'brand-saucony.png' | asset_url }}" alt="Saucony" class="product-buy-box__brand-logo" width="80" height="20">
+    {%- elsif vendor_lower contains 'shokz' -%}
+      <img src="{{ 'brand-shokz.png' | asset_url }}" alt="Shokz" class="product-buy-box__brand-logo" width="80" height="20">
+    {%- elsif vendor_lower contains 'hyperice' -%}
+      <img src="{{ 'brand-hyperice.png' | asset_url }}" alt="Hyperice" class="product-buy-box__brand-logo" width="80" height="20">
+    {%- else -%}
+      <span class="product-buy-box__brand-name">{{ product.vendor | default: 'ATHELIN' }}</span>
+    {%- endif -%}
+  </div>
+
+  <!-- 2. Product Title -->
+  <h1 class="product-buy-box__title">{{ product.title }}</h1>
+
+  <!-- 3. Review Rating Stars -->
+  <a href="#product-tab-reviews" class="product-buy-box__reviews">
+    <span class="product-buy-box__stars" aria-hidden="true">★★★★☆</span>
+    <span class="product-buy-box__rating-meta">4.6 · 128 reviews · 12 Q&amp;A</span>
+  </a>
+
+  <!-- 4. Price & Lime EMI Pill -->
+  <div class="product-buy-box__price-wrap">
+    <div class="product-buy-box__price-row">
+      <span class="product-buy-box__price" data-product-price>{{ current_variant.price | money }}</span>
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <span class="product-buy-box__compare-price">{{ current_variant.compare_at_price | money }}</span>
+      {%- endif -%}
+    </div>
+
+    <!-- Figma Accent Pill: Electric Lime #d4f933 -->
+    {%- assign emi_amount = current_variant.price | divided_by: 3 -%}
+    <div class="product-buy-box__emi-pill">
+      <span>or <span data-product-emi>{{ emi_amount | money }}/mo</span> · No Cost EMI</span>
+      <span class="product-buy-box__emi-info" title="Zero cost 3-month equal installment plans available at checkout">ⓘ</span>
+    </div>
+  </div>
+
+  <!-- 5. Product Form & Variant Selector -->
+  {% form 'product', product, id: 'product-form' %}
+    <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id-input>
+    <input type="hidden" name="quantity" value="1">
+
+    {%- if product.variants.size > 1 -%}
+      <div class="product-buy-box__variants">
+        <div class="product-buy-box__variant-label-row">
+          <span class="product-buy-box__variant-label-title">Colour</span>
+          <span class="product-buy-box__variant-label-value" data-variant-active-val>{{ current_variant.title }}</span>
+        </div>
+
+        <div class="product-buy-box__swatch-list">
+          {%- for variant in product.variants -%}
+            <button
+              type="button"
+              class="product-buy-box__swatch-btn{% if variant.id == current_variant.id %} is-selected{% endif %}"
+              data-swatch-variant
+              data-variant-id="{{ variant.id }}"
+              data-variant-title="{{ variant.title | escape }}"
+              data-variant-price="{{ variant.price | money }}"
+              data-variant-available="{{ variant.available }}"
+              data-variant-img="{% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 }}{% endif %}"
+              title="{{ variant.title | escape }}{% unless variant.available %} (Sold out){% endunless %}"
+            >
+              {%- if variant.featured_image -%}
+                <img
+                  src="{{ variant.featured_image | image_url: width: 120, height: 120 }}"
+                  alt="{{ variant.title | escape }}"
+                  class="product-buy-box__swatch-img"
+                  width="44"
+                  height="44"
+                >
+              {%- else -%}
+                <span style="display:block;width:100%;height:100%;border-radius:50%;background:#e2e8f0;"></span>
+              {%- endif -%}
+            </button>
+
+            {%- unless variant.available -%}
+              <span class="product-buy-box__swatch-soldout-badge">{{ variant.title }} — sold out</span>
+            {%- endunless -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <!-- 6. Live Stock Indicator -->
+    <div class="product-buy-box__stock-indicator">
+      <span class="product-buy-box__stock-dot{% unless current_variant.available %} is-soldout{% endunless %}" data-stock-dot></span>
+      <span data-stock-text>
+        {%- if current_variant.available -%}
+          In stock · dispatched today
+        {%- else -%}
+          Sold out · currently unavailable
+        {%- endif -%}
+      </span>
+    </div>
+
+    <!-- 7. Delivery Estimator Box -->
+    <div class="product-buy-box__delivery-box">
+      <span class="product-buy-box__delivery-text">
+        Deliver to <strong data-pincode-value>121003</strong> — <span data-delivery-date>Thu 18 Sep</span>
+      </span>
+      <button type="button" class="product-buy-box__pincode-trigger" data-pincode-trigger>Change</button>
+    </div>
+
+    <!-- 8. Action Buttons (Add to Cart + Compare) -->
+    <div class="product-buy-box__cta-row">
+      <button
+        type="submit"
+        class="product-buy-box__btn-cart"
+        data-add-to-cart-btn
+        {% unless current_variant.available %}disabled{% endunless %}
+      >
+        {%- if current_variant.available -%}
+          Add to cart
+        {%- else -%}
+          Sold out
+        {%- endif -%}
+      </button>
+
+      <button type="button" class="product-buy-box__btn-compare" onclick="alert('Added to product comparison');">
+        Compare
+      </button>
+    </div>
+  {% endform %}
+
+  <!-- 9. Trust & Dealer Guarantees -->
+  <div class="product-buy-box__trust-row">
+    Warranty registered for you · 10-day returns, we pay the courier
+  </div>
+
+  <div class="product-buy-box__dealer-row">
+    <span>Authorised {{ product.vendor | default: 'Athelin' }} Dealer · Free shipping · Pay by UPI, card or EMI</span>
+    <div class="product-buy-box__payment-icons">
+      <!-- UPI & Payment Icons -->
+      <svg class="product-buy-box__payment-icon" viewBox="0 0 38 24" fill="none" aria-label="UPI Payment">
+        <rect width="38" height="24" rx="4" fill="#097939"/>
+        <path d="M19 6L24 18H20.5L19 14.5H15L19 6Z" fill="#FFFFFF"/>
+      </svg>
+      <svg class="product-buy-box__payment-icon" viewBox="0 0 38 24" fill="none" aria-label="GPay">
+        <rect width="38" height="24" rx="4" fill="#5F6368"/>
+        <path d="M12 12C12 8.7 14.7 6 18 6C19.7 6 21.1 6.7 22.1 7.7L20.2 9.6C19.6 9 18.9 8.7 18 8.7C16.2 8.7 14.7 10.2 14.7 12C14.7 13.8 16.2 15.3 18 15.3C19.3 15.3 20.3 14.6 20.7 13.7H18V11.2H23.2C23.3 11.6 23.4 12 23.4 12.5C23.4 15.8 21.1 18 18 18C14.7 18 12 15.3 12 12Z" fill="#FFFFFF"/>
+      </svg>
+      <svg class="product-buy-box__payment-icon" viewBox="0 0 38 24" fill="none" aria-label="Paytm">
+        <rect width="38" height="24" rx="4" fill="#002E6E"/>
+        <circle cx="19" cy="12" r="5" fill="#00BAF2"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 10. WhatsApp & Store Fitting Support -->
+  <div class="product-buy-box__support-line">
+    <span>Need help choosing? Message us on </span>
+    <a
+      href="https://wa.me/?text={{ 'Hi Athelin, I would like guidance on ' | append: product.title | url_encode }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="product-buy-box__support-link"
+    >
+      💬 WhatsApp
+    </a>
+    <span>·</span>
+    <a href="#store-fitting" class="product-buy-box__support-link">Book a fitting in store</a>
+  </div>
+</div>
