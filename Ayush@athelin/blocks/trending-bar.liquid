@@ -4,21 +4,31 @@
 
 <div class="trending-bar" {{ block.shopify_attributes }}>
   <div class="trending-bar__inner">
-    <div class="trending-bar__badge">Trending Now</div>
+    <div class="trending-bar__badge">{{ block.settings.badge_text | default: 'Trending Now' }}</div>
     <div class="trending-bar__tags">
-      <a href="{{ routes.search_url }}?q=Garmin+Fenix" class="trending-bar__tag">Garmin Fenix 9 Pro</a>
-      <a href="{{ routes.search_url }}?q=COROS+Pace+3" class="trending-bar__tag">COROS Pace 3</a>
-      <a href="{{ routes.search_url }}?q=Fitbit" class="trending-bar__tag">Fitbit Air</a>
-      <a href="{{ routes.search_url }}?q=Noxgear" class="trending-bar__tag">Noxgear Tracer360 Vest</a>
-      <a href="{{ routes.search_url }}?q=Polar+H10" class="trending-bar__tag">Polar H10</a>
-      <a href="{{ routes.search_url }}?q=Shokz+OpenRun" class="trending-bar__tag">Shokz OpenRun</a>
-      <a href="{{ routes.search_url }}?q=Garmin+CIRQA" class="trending-bar__tag">Garmin CIRQA</a>
-      <a href="{{ routes.search_url }}?q=Suunto+Race" class="trending-bar__tag">Suunto Race Titanium</a>
-      <a href="{{ routes.search_url }}?q=Oura+Ring" class="trending-bar__tag">Oura Ring Gen 3</a>
-      <a href="{{ routes.search_url }}?q=Maurten" class="trending-bar__tag">Maurten Hydrogel</a>
-      <a href="{{ routes.search_url }}?q=Oakley" class="trending-bar__tag">Oakley Radar EV</a>
-      <a href="{{ routes.search_url }}?q=Wahoo" class="trending-bar__tag">Wahoo ELEMNT Bolt</a>
-      <a href="{{ routes.search_url }}?q=Brooks+Ghost" class="trending-bar__tag">Brooks Ghost Max</a>
+      {%- if block.settings.menu != blank and block.settings.menu.links.size > 0 -%}
+        {%- for link in block.settings.menu.links -%}
+          <a href="{{ link.url }}" class="trending-bar__tag">{{ link.title }}</a>
+        {%- endfor -%}
+      {%- elsif block.settings.tags_list != blank -%}
+        {%- assign custom_tags = block.settings.tags_list | split: ',' -%}
+        {%- for tag in custom_tags -%}
+          {%- assign clean_tag = tag | strip -%}
+          {%- if clean_tag != blank -%}
+            <a href="{{ routes.search_url }}?q={{ clean_tag | url_encode }}" class="trending-bar__tag">{{ clean_tag }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        <a href="{{ routes.search_url }}?q=Garmin+Fenix" class="trending-bar__tag">Garmin Fenix 8</a>
+        <a href="{{ routes.search_url }}?q=COROS+Pace+3" class="trending-bar__tag">COROS Pace 3</a>
+        <a href="{{ routes.search_url }}?q=Brooks+Ghost" class="trending-bar__tag">Brooks Ghost Max</a>
+        <a href="{{ routes.search_url }}?q=Hoka+Clifton" class="trending-bar__tag">Hoka Clifton 9</a>
+        <a href="{{ routes.search_url }}?q=Polar+H10" class="trending-bar__tag">Polar H10</a>
+        <a href="{{ routes.search_url }}?q=Shokz+OpenRun" class="trending-bar__tag">Shokz OpenRun</a>
+        <a href="{{ routes.search_url }}?q=Suunto+Race" class="trending-bar__tag">Suunto Race</a>
+        <a href="{{ routes.search_url }}?q=Maurten" class="trending-bar__tag">Maurten Hydrogel</a>
+        <a href="{{ routes.search_url }}?q=Oakley" class="trending-bar__tag">Oakley Radar EV</a>
+      {%- endif -%}
     </div>
   </div>
 </div>
@@ -26,6 +36,31 @@
 {% schema %}
 {
   "name": "Trending Bar",
-  "settings": []
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "Trending Now"
+    },
+    {
+      "type": "textarea",
+      "id": "tags_list",
+      "label": "Comma-Separated Tags",
+      "default": "Garmin Fenix 8, COROS Pace 3, Brooks Ghost Max, Hoka Clifton 9, Polar H10, Shokz OpenRun, Suunto Race, Maurten Hydrogel, Oakley Radar EV",
+      "info": "List search tags separated by commas. Each tag automatically links to the search page."
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Custom Navigation Menu",
+      "info": "Optional menu override. If set, links are pulled from this menu instead."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trending Bar"
+    }
+  ]
 }
 {% endschema %}

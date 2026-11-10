@@ -1,0 +1,51 @@
+{% comment %}
+  Athelin Standard Page Section
+  Controllable via Shopify Theme Editor schema
+{% endcomment %}
+
+<div class="section-main-page" style="--page-max-width: {{ section.settings.content_max_width | default: 800 }}px;" {{ section.shopify_attributes }}>
+  <div class="athelin-standard-page" style="max-width: var(--page-max-width); margin: 0 auto; padding: 24px 20px 80px;">
+    {%- if section.settings.show_breadcrumbs -%}
+      <nav class="cart-breadcrumbs" aria-label="Breadcrumb">
+        <ol class="cart-breadcrumbs__list">
+          <li><a href="{{ routes.root_url }}" class="cart-breadcrumbs__link">Home</a></li>
+          <li class="cart-breadcrumbs__sep" aria-hidden="true">/</li>
+          <li><span class="cart-breadcrumbs__current" aria-current="page">{{ page.title }}</span></li>
+        </ol>
+      </nav>
+    {%- endif -%}
+
+    <div class="athelin-standard-page__header" style="margin-bottom: 24px;">
+      <h1 class="athelin-standard-page__title">{{ page.title }}</h1>
+    </div>
+
+    <div class="athelin-standard-page__content" style="line-height: 1.7; color: #334155;">
+      {{ page.content }}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Standard Page Content",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Show Breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content Maximum Width",
+      "min": 600,
+      "max": 1200,
+      "step": 40,
+      "default": 800,
+      "unit": "px"
+    }
+  ]
+}
+{% endschema %}
+

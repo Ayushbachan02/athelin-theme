@@ -1,0 +1,107 @@
+{% comment %}
+  Athelin Main Product Detail Section
+  Controllable via Shopify Theme Editor schema
+{% endcomment %}
+
+{{ 'athelin-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'athelin-product.js' | asset_url }}" defer="defer"></script>
+
+<div class="section-main-product" {{ section.shopify_attributes }}>
+  <div class="product-page" data-product-page>
+    <!-- 1. Breadcrumbs Navigation -->
+    {%- if section.settings.show_breadcrumbs -%}
+      {% render 'product-breadcrumbs', product: product, collection: collection %}
+    {%- endif -%}
+
+    <!-- 2. Hero Section: Left Vertical Gallery Strip & Right Buy Box Card -->
+    <div class="product-hero">
+      {% render 'product-gallery', product: product %}
+      {% render 'product-buy-box',
+        product: product,
+        enable_emi_pill: section.settings.enable_emi_pill,
+        enable_compare_btn: section.settings.enable_compare_btn,
+        enable_wishlist_btn: section.settings.enable_wishlist_btn
+      %}
+    </div>
+
+    <!-- 3. Navigation Tabs: Overview, Specs, Compare, Reviews, Q&A, Shipping -->
+    {%- if section.settings.show_tabs -%}
+      {% render 'product-tabs',
+        product: product,
+        show_setup_bundle: section.settings.show_setup_bundle
+      %}
+    {%- endif -%}
+
+    <!-- 4. Sticky Conversion Bottom Bar -->
+    {%- if section.settings.show_sticky_bar -%}
+      {% render 'product-sticky-bar', product: product %}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product Detail Page",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Navigation & Breadcrumbs"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Show Category Breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Buy Box & Actions"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_emi_pill",
+      "label": "Show No Cost EMI Badge",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_compare_btn",
+      "label": "Show Compare Product Button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_wishlist_btn",
+      "label": "Show Wishlist Button",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Tabs & Extra Sections"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tabs",
+      "label": "Show Specifications & Reviews Tabs",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_setup_bundle",
+      "label": "Show Complete Your Setup Bundle",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Conversion Sticky Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sticky_bar",
+      "label": "Enable Sticky Bottom Conversion Bar",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
+

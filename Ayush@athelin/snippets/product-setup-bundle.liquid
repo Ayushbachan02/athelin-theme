@@ -1,69 +1,575 @@
 {% comment %}
-  Athelin Product Overview Cards: "Why this [product]" & "Complete your setup"
-  Matches Figma: 2-column cards grid with highlights & 3-item accessory bundle with Add to Cart.
+  Athelin Product Overview Cards: Dynamic "Why this [category]" & "Complete your setup (Pair it with)"
+  Dynamically adapts copy, model comparison tiers, and paired in-stock accessories
+  based on the active product's category (Watch, Running Shoe, Eyewear, Cycling, Recovery, Audio, Apparel).
 {% endcomment %}
 
-{%- assign type_label = product.type | default: 'product' | downcase -%}
-{%- if type_label == blank or type_label == 'default' -%}
-  {%- assign title_lower = product.title | downcase -%}
-  {%- if title_lower contains 'watch' or title_lower contains 'forerunner' or title_lower contains 'fenix' or title_lower contains 'garmin' -%}
-    {%- assign type_label = 'watch' -%}
-  {%- elsif title_lower contains 'shoe' or title_lower contains 'vomero' or title_lower contains 'pegasus' or title_lower contains 'hoka' -%}
-    {%- assign type_label = 'shoe' -%}
-  {%- else -%}
-    {%- assign type_label = 'gear' -%}
-  {%- endif -%}
+{%- assign title_low = product.title | default: '' | downcase -%}
+{%- assign type_low = product.type | default: '' | downcase -%}
+{%- assign vendor_low = product.vendor | default: '' | downcase -%}
+{%- assign tags_low = product.tags | join: ' ' | downcase -%}
+
+{%- assign coll_handles = '' -%}
+{%- for c in product.collections -%}
+  {%- assign coll_handles = coll_handles | append: ' ' | append: c.handle | downcase -%}
+{%- endfor -%}
+
+{%- assign meta_all = title_low | append: ' ' | append: type_low | append: ' ' | append: vendor_low | append: ' ' | append: tags_low | append: ' ' | append: coll_handles -%}
+
+{%- comment -%} 1. Detect Primary Product Category {%- endcomment -%}
+{%- assign prod_category = 'gear' -%}
+{%- assign is_watch_accessory = false -%}
+{%- if title_low contains 'strap' or title_low contains 'band' or title_low contains 'quickfit' or title_low contains 'hrm' or title_low contains 'chest' or title_low contains 'mount' or title_low contains 'cable' or title_low contains 'sensor' -%}
+  {%- assign is_watch_accessory = true -%}
 {%- endif -%}
 
-<div class="product-overview-cards">
-  <!-- Card 1: Why this [product/watch/shoe] -->
+{%- if is_watch_accessory -%}
+  {%- assign prod_category = 'watch_accessory' -%}
+{%- elsif meta_all contains 'forerunner' or meta_all contains 'fenix' or meta_all contains 'fēnix' or meta_all contains 'epix' or meta_all contains 'instinct' or meta_all contains 'venu' or meta_all contains 'vivo' or meta_all contains 'vívo' or meta_all contains 'lily' or meta_all contains 'marq' or meta_all contains 'enduro' or meta_all contains 'approach' or meta_all contains 'watch' or vendor_low contains 'garmin' -%}
+  {%- if title_low contains 'edge' or title_low contains 'varia' or title_low contains 'rally' or title_low contains 'tacx' -%}
+    {%- assign prod_category = 'cycling_tech' -%}
+  {%- else -%}
+    {%- assign prod_category = 'watch' -%}
+  {%- endif -%}
+{%- elsif title_low contains 'sock' or type_low contains 'sock' -%}
+  {%- assign prod_category = 'socks' -%}
+{%- elsif meta_all contains 'shoe' or meta_all contains 'footwear' or meta_all contains 'hoka' or meta_all contains 'brooks' or meta_all contains 'saucony' or meta_all contains 'vibram' or meta_all contains 'luna' or meta_all contains 'clifton' or meta_all contains 'bondi' or meta_all contains 'mach' or meta_all contains 'speedgoat' or meta_all contains 'arahi' or meta_all contains 'ghost' or meta_all contains 'glycerin' or meta_all contains 'hyperion' or meta_all contains 'adrenaline' or meta_all contains 'triumph' or meta_all contains 'endorphin' or meta_all contains 'kinvara' or meta_all contains 'peregrine' or meta_all contains 'adizero' or meta_all contains 'vomero' or meta_all contains 'pegasus' or meta_all contains 'fivefingers' -%}
+  {%- assign prod_category = 'shoe' -%}
+{%- elsif meta_all contains 'oakley' or meta_all contains 'sunglass' or meta_all contains 'eyewear' or meta_all contains 'sutro' or meta_all contains 'radar' or meta_all contains 'holbrook' or meta_all contains 'kato' or meta_all contains 'corridor' or meta_all contains 'sphaera' or meta_all contains 'bisphaera' or meta_all contains 'jawbreaker' or meta_all contains 'flak' -%}
+  {%- assign prod_category = 'eyewear' -%}
+{%- elsif meta_all contains 'shokz' or meta_all contains 'openrun' or meta_all contains 'openswim' or meta_all contains 'openfit' or meta_all contains 'openmove' or meta_all contains 'headphone' -%}
+  {%- assign prod_category = 'audio' -%}
+{%- elsif meta_all contains 'hyperice' or meta_all contains 'normatec' or meta_all contains 'hypervolt' or meta_all contains 'venom' or meta_all contains 'vyper' or meta_all contains 'hypersphere' or meta_all contains 'recovery' -%}
+  {%- assign prod_category = 'recovery' -%}
+{%- elsif meta_all contains 'cycling' or meta_all contains 'castelli' or meta_all contains 'giro' or meta_all contains 'camelbak' or meta_all contains 'helmet' or meta_all contains 'jersey' or meta_all contains 'bib' -%}
+  {%- assign prod_category = 'cycling' -%}
+{%- elsif meta_all contains 'cep' or meta_all contains '2xu' or meta_all contains 'compression' or meta_all contains 'apparel' or meta_all contains 'short' or meta_all contains 'tight' or meta_all contains 'singlet' or meta_all contains 'jacket' -%}
+  {%- assign prod_category = 'apparel' -%}
+{%- endif -%}
+
+{%- comment -%} 2. Build Dynamic Copy for Card 1 ("Why this ...") {%- endcomment -%}
+{%- case prod_category -%}
+  {%- when 'watch' -%}
+    {%- assign why_heading = 'Why this GPS watch' -%}
+    {%- if title_low contains 'forerunner' -%}
+      {%- assign why_heading = 'Why this Forerunner' -%}
+      {%- assign why_highlights = 'Six highlights, tested by Athelin — featherweight race-ready bezel, multi-band SatIQ™ GPS accuracy, morning Training Readiness & HRV tracking, wrist-based running dynamics, crisp sunlight-readable display, and adaptive marathon coach plans.' -%}
+      {%- assign why_best_for = 'road marathon training, triathlon transitions, track intervals, and structured daily pacing.' -%}
+      {%- if title_low contains '165' or title_low contains '55' -%}
+        {%- assign why_step_up = 'Entry GPS Running Tier' -%}
+        {%- assign why_step_down = 'Forerunner 265 / Forerunner 570' -%}
+      {%- elsif title_low contains '255' or title_low contains '265' -%}
+        {%- assign why_step_up = 'Forerunner 165' -%}
+        {%- assign why_step_down = 'Forerunner 965 / Forerunner 970' -%}
+      {%- elsif title_low contains '570' -%}
+        {%- assign why_step_up = 'Forerunner 265' -%}
+        {%- assign why_step_down = 'Forerunner 970' -%}
+      {%- else -%}
+        {%- assign why_step_up = 'Forerunner 570' -%}
+        {%- assign why_step_down = 'Fēnix 8' -%}
+      {%- endif -%}
+    {%- elsif title_low contains 'fenix' or title_low contains 'fēnix' or title_low contains 'epix' -%}
+      {%- assign why_heading = 'Why this multisport watch' -%}
+      {%- assign why_highlights = 'Six highlights, tested by Athelin — rugged titanium & sapphire architecture, onboard full-colour TopoActive maps, multi-week expedition battery stamina, integrated LED safety flashlight, dive-rated buttons, and 24/7 endurance & hill score analytics.' -%}
+      {%- assign why_best_for = 'ultra-trail marathons, triathlon, alpine mountaineering, and multi-day adventure racing.' -%}
+      {%- assign why_step_up = 'Forerunner 965' -%}
+      {%- assign why_step_down = 'Enduro 3 / MARQ Gen 2' -%}
+    {%- elsif title_low contains 'instinct' -%}
+      {%- assign why_heading = 'Why this rugged watch' -%}
+      {%- assign why_highlights = 'Six highlights, tested by Athelin — MIL-STD-810 thermal & shock protection, solar-charged battery longevity, multi-GNSS outdoor satellite lock, TracBack® breadcrumb routing, built-in tactical LED torch, and continuous heart rate & stress recovery.' -%}
+      {%- assign why_best_for = 'trail ultramarathons, obstacle course racing, rucking, and backcountry trekking.' -%}
+      {%- assign why_step_up = 'Forerunner 165' -%}
+      {%- assign why_step_down = 'Fēnix 8 Solar' -%}
+    {%- elsif title_low contains 'venu' or title_low contains 'vivo' or title_low contains 'vívo' or title_low contains 'lily' -%}
+      {%- assign why_heading = 'Why this fitness smartwatch' -%}
+      {%- assign why_highlights = 'Six highlights, tested by Athelin — vibrant AMOLED touchscreen display, Body Battery™ energy monitoring, personalized sleep coaching & nap detection, 30+ indoor & GPS workout profiles, on-wrist voice/call support, and rapid USB-C charging.' -%}
+      {%- assign why_best_for = 'hybrid gym & strength training, daily 5K–10K runs, studio conditioning, and 24/7 wellness tracking.' -%}
+      {%- assign why_step_up = 'Vívoactive 5' -%}
+      {%- assign why_step_down = 'Forerunner 265' -%}
+    {%- elsif title_low contains 'enduro' -%}
+      {%- assign why_heading = 'Why this ultra-endurance watch' -%}
+      {%- assign why_highlights = 'Six highlights, tested by Athelin — class-leading solar battery stamina up to 320 hours in GPS mode, ultra-lightweight titanium bezel, ComfortFit nylon strap, NextFork™ trail map guidance, grade-adjusted pace, and VO2 max trail tracking.' -%}
+      {%- assign why_best_for = '100-mile trail ultras, multi-day stage races, fastpacking, and extreme endurance events.' -%}
+      {%- assign why_step_up = 'Fēnix 8 Solar' -%}
+      {%- assign why_step_down = 'MARQ Adventurer' -%}
+    {%- elsif title_low contains 'approach' -%}
+      {%- assign why_heading = 'Why this golf GPS watch' -%}
+      {%- assign why_highlights = 'Six highlights, tested by Athelin — 43,000+ preloaded full-colour CourseView maps, Virtual Caddie club recommendations, PlaysLike Distance elevation adjustments, PinPointer blind-shot assistance, AMOLED touch display, and multisport fitness tracking.' -%}
+      {%- assign why_best_for = 'tournament golf rounds, driving range swing tempo analysis, and daily fitness conditioning.' -%}
+      {%- assign why_step_up = 'Approach S42' -%}
+      {%- assign why_step_down = 'MARQ Golfer' -%}
+    {%- else -%}
+      {%- assign why_highlights = 'Six highlights, written by Athelin — extended battery stamina, precision multi-band biometric tracking, running economy metrics, rugged casing, smart recovery insights, and instant Garmin Connect™ sync.' -%}
+      {%- assign why_best_for = 'marathon training, triathlon, trail running, and high-intensity interval conditioning.' -%}
+      {%- assign why_step_up = 'Forerunner 265' -%}
+      {%- assign why_step_down = 'Fēnix 8' -%}
+    {%- endif -%}
+
+  {%- when 'cycling_tech' -%}
+    {%- assign why_heading = 'Why this cycling computer' -%}
+    {%- assign why_highlights = 'Six highlights, tested by Athelin — aerodynamic out-front mount integration, multi-band GNSS cycling navigation, ClimbPro™ gradient ascent planner, real-time stamina & power guide insights, Varia™ radar compatibility, and long-ride battery life.' -%}
+    {%- assign why_best_for = 'road centuries, gravel racing, structured FTP power workouts, and peloton navigation.' -%}
+    {%- assign why_step_up = 'Edge 540' -%}
+    {%- assign why_step_down = 'Edge 1050' -%}
+
+  {%- when 'shoe' -%}
+    {%- if meta_all contains 'trail' or title_low contains 'speedgoat' or title_low contains 'mafate' or title_low contains 'challenger' or title_low contains 'peregrine' or title_low contains 'cascadia' or title_low contains 'caldera' -%}
+      {%- assign why_heading = 'Why this trail running shoe' -%}
+      {%- assign why_highlights = 'Six highlights, fitted by Athelin — high-traction Vibram® Megagrip / trail lug geometry, protective rock-shield midsole cushioning, gusseted debris-blocking tongue, reinforced toe bumper, breathable quick-drain mesh, and locked-in downhill midfoot stability.' -%}
+      {%- assign why_best_for = 'technical singletrack trails, mountain ultra-marathons, wet rock/mud grip, and mixed gravel runs.' -%}
+      {%- assign why_step_up = 'Challenger ATR 7 / Divide' -%}
+      {%- assign why_step_down = 'Mafate Speed 4 / Tecton X' -%}
+    {%- elsif title_low contains 'mach' or title_low contains 'hyperion' or title_low contains 'endorphin' or title_low contains 'rocket' or title_low contains 'cielo' or title_low contains 'adizero' or title_low contains 'boston' or title_low contains 'takumi' -%}
+      {%- assign why_heading = 'Why this speed & race shoe' -%}
+      {%- assign why_highlights = 'Six highlights, fitted by Athelin — high-rebound supercritical foam midsole, propulsive rocker geometry for rapid cadence turnover, featherweight race-mesh upper, responsive toe-off snap, locked-in heel collar, and race-day energy economy.' -%}
+      {%- assign why_best_for = 'marathon & half-marathon personal bests, threshold tempo workouts, track intervals, and fast road racing.' -%}
+      {%- assign why_step_up = 'Clifton 9 / Ghost 16' -%}
+      {%- assign why_step_down = 'Cielo X1 / Endorphin Elite' -%}
+    {%- elsif vendor_low contains 'vibram' or vendor_low contains 'luna' or title_low contains 'fivefingers' -%}
+      {%- assign why_heading = 'Why this minimalist footwear' -%}
+      {%- assign why_highlights = 'Six highlights, fitted by Athelin — zero-drop natural biomechanics, articulated ground-feel sole, intrinsic foot & arch muscle strengthening, ultra-flexible Vibram® rubber compound, lightweight packable profile, and wide anatomical toe splay.' -%}
+      {%- assign why_best_for = 'natural running form drills, gym & functional strength training, barefoot trail running, and foot mobility.' -%}
+      {%- assign why_step_up = 'KSO EVO' -%}
+      {%- assign why_step_down = 'V-Trail 2.0 / V-Alpha' -%}
+    {%- else -%}
+      {%- assign why_heading = 'Why this running shoe' -%}
+      {%- assign why_highlights = 'Six highlights, fitted by Athelin — plush nitrogen-infused / compression-molded midsole cushioning, smooth heel-to-toe rocker transition, breathable engineered jacquard mesh upper, high-abrasion road outsole, padded Achilles collar, and joint-saving impact absorption.' -%}
+      {%- assign why_best_for = 'daily road mileage, marathon long runs, recovery days, and all-day walking comfort.' -%}
+      {%- if vendor_low contains 'hoka' -%}
+        {%- assign why_step_up = 'Rincon 4' -%}
+        {%- assign why_step_down = 'Bondi 8 / Skyward X' -%}
+      {%- elsif vendor_low contains 'brooks' -%}
+        {%- assign why_step_up = 'Revel 7 / Trace' -%}
+        {%- assign why_step_down = 'Glycerin 21 / Ghost Max 2' -%}
+      {%- elsif vendor_low contains 'saucony' -%}
+        {%- assign why_step_up = 'Kinvara 15 / Ride 17' -%}
+        {%- assign why_step_down = 'Triumph 22 / Endorphin Speed 4' -%}
+      {%- else -%}
+        {%- assign why_step_up = 'Daily Neutral Trainer' -%}
+        {%- assign why_step_down = 'Max-Cushion / Carbon Race Tier' -%}
+      {%- endif -%}
+    {%- endif -%}
+
+  {%- when 'eyewear' -%}
+    {%- assign why_heading = 'Why these sports sunglasses' -%}
+    {%- assign why_highlights = 'Six highlights, curated by Athelin — Prizm™ contrast-enhancing lens optics, ultra-lightweight O-Matter™ stress-resistant frame, Unobtainium® no-bounce nosepads & earlocks that grip tighter with sweat, Plutonite® 100% UV filtering, and panoramic wind-shield coverage.' -%}
+    {%- assign why_best_for = 'bright road running, peloton & gravel cycling, triathlon, and high-glare endurance training.' -%}
+    {%- assign why_step_up = 'Holbrook / Corridor' -%}
+    {%- assign why_step_down = 'Sutro Lite Sweep / Sphaera' -%}
+
+  {%- when 'audio' -%}
+    {%- assign why_heading = 'Why these open-ear headphones' -%}
+    {%- assign why_highlights = 'Six highlights, tested by Athelin — patented bone-conduction open-ear situational awareness, featherweight wraparound titanium frame, IP67/IP68 sweat & waterproof protection, DualPitch™ acoustic clarity, secure no-slip bounce-free fit, and rapid quick-charge battery.' -%}
+    {%- assign why_best_for = 'traffic-aware road running, outdoor cycling, marathon racing, and swim/ sweat training.' -%}
+    {%- assign why_step_up = 'OpenMove' -%}
+    {%- assign why_step_down = 'OpenRun Pro 2 / OpenSwim Pro' -%}
+
+  {%- when 'recovery' -%}
+    {%- assign why_heading = 'Why this recovery system' -%}
+    {%- assign why_highlights = 'Six highlights, tested by Athelin — high-torque QuietGlide™ percussion / dynamic compression therapy, accelerated lactic acid flush, targeted myofascial knot release, ergonomic multi-speed control, TSA-approved cordless portability, and Bluetooth® guided recovery routines.' -%}
+    {%- assign why_best_for = 'pre-run muscle activation, post-marathon DOMS recovery, mobility work, and travel stiffness relief.' -%}
+    {%- assign why_step_up = 'Hypersphere / Hypervolt Go 2' -%}
+    {%- assign why_step_down = 'Hypervolt 2 Pro / Normatec 3' -%}
+
+  {%- when 'cycling' -%}
+    {%- assign why_heading = 'Why this cycling gear' -%}
+    {%- assign why_highlights = 'Six highlights, curated by Athelin — wind-tunnel validated aerodynamics, high-velocity cooling airflow channels, race-cut ergonomic articulation, moisture-wicking technical fabrics, lightweight impact/endurance construction, and peloton-grade durability.' -%}
+    {%- assign why_best_for = 'long road centuries, criterium racing, hot-weather climbs, and gravel endurance rides.' -%}
+    {%- assign why_step_up = 'Endurance Club Spec' -%}
+    {%- assign why_step_down = 'Pro Team Race Spec' -%}
+
+  {%- when 'socks', 'apparel' -%}
+    {%- assign why_heading = 'Why this performance apparel' -%}
+    {%- if prod_category == 'socks' -%}
+      {%- assign why_heading = 'Why these running socks' -%}
+    {%- endif -%}
+    {%- assign why_highlights = 'Six highlights, fitted by Athelin — medical-grade graduated compression profile, blister-free seamless toe box, anatomical left/right foot mapping, targeted Achilles & arch stabilization, silver-ion odour control, and rapid moisture-transfer ventilation zones.' -%}
+    {%- assign why_best_for = 'marathon racing, long-run blister prevention, lower-leg circulation, and active post-race recovery.' -%}
+    {%- assign why_step_up = 'Ultralight No-Show' -%}
+    {%- assign why_step_down = 'Full Calf Compression Sleeve' -%}
+
+  {%- when 'watch_accessory' -%}
+    {%- assign why_heading = 'Why this watch accessory' -%}
+    {%- assign why_highlights = 'Six highlights, verified by Athelin — genuine Garmin ecosystem compatibility, sweat & UV-resistant endurance materials, tool-free QuickFit™ / Quick Release installation, secure high-impact locking mechanism, chafe-free wrist comfort, and race-day reliability.' -%}
+    {%- assign why_best_for = 'customizing your Garmin GPS watch, triathlon transitions, and replacing worn training straps/sensors.' -%}
+    {%- assign why_step_up = 'Standard Silicone Band' -%}
+    {%- assign why_step_down = 'UltraFit Nylon / Titanium Band' -%}
+
+  {%- else -%}
+    {%- assign clean_type = product.type | default: 'performance gear' | downcase -%}
+    {%- if clean_type == vendor_low or clean_type == 'default' or clean_type == '' -%}
+      {%- assign clean_type = 'endurance gear' -%}
+    {%- endif -%}
+    {%- assign why_heading = 'Why this ' | append: clean_type -%}
+    {%- assign why_highlights = 'Six highlights, curated by Athelin — athlete-tested durability, lightweight ergonomic construction, sweat & weather resistance, competition-grade materials, zero-compromise fit, and authorised manufacturer warranty support.' -%}
+    {%- assign why_best_for = 'endurance training, race-day preparation, outdoor conditioning, and daily athletic performance.' -%}
+    {%- assign why_step_up = 'Core Training Tier' -%}
+    {%- assign why_step_down = 'Pro Competition Tier' -%}
+{%- endcase -%}
+
+{%- comment -%}
+  3. Build Dynamic Related Products ("Pair it with / Complete your setup")
+  Matches real in-stock products from the Shopify catalog tailored to prod_category:
+  - Watch -> Straps / Bands, Heart Rate Monitors / Audio, Running/Cycling Accessories
+  - Shoe -> Running Socks, Compression Sleeves, Hydration / Caps / Care
+  - Eyewear -> Caps/Helmets, Watches, Running/Cycling Apparel
+  - Cycling -> Bottles, Eyewear, Cycling Computers / Socks
+  - Recovery / Audio / Apparel -> Complementary Shoes, Watches, Compression & Hydration
+{%- endcomment -%}
+
+{%- case prod_category -%}
+  {%- when 'watch' -%}
+    {%- assign setup_title = 'Pair it with — Watch setup' -%}
+    {%- assign setup_subtitle = 'Recommended watch accessories:' -%}
+    {%- assign setup_category_tags = 'Straps & Bands, HRM Sensors, Open-Ear Audio' -%}
+    {%- assign match_keywords_1 = 'strap|band|quickfit|nylon|silicone|cable|charger' -%}
+    {%- assign match_keywords_2 = 'hrm|heart|sensor|varia|radar|shokz|openrun|openswim' -%}
+    {%- assign match_keywords_3 = 'oakley|cap|visor|bottle|flask|bag|cep|sock' -%}
+
+  {%- when 'cycling_tech' -%}
+    {%- assign setup_title = 'Pair it with — Ride setup' -%}
+    {%- assign setup_subtitle = 'Recommended cycling essentials:' -%}
+    {%- assign setup_category_tags = 'Mounts & Sensors, Helmets, Prizm™ Eyewear' -%}
+    {%- assign match_keywords_1 = 'mount|sensor|varia|radar|hrm|strap' -%}
+    {%- assign match_keywords_2 = 'helmet|giro|oakley|sutro|radar' -%}
+    {%- assign match_keywords_3 = 'camelbak|bottle|castelli|jersey|glove|sock' -%}
+
+  {%- when 'shoe' -%}
+    {%- assign setup_title = 'Pair it with — Runner’s kit' -%}
+    {%- assign setup_subtitle = 'Recommended running essentials:' -%}
+    {%- assign setup_category_tags = 'Running Socks, Compression, Hydration & Care' -%}
+    {%- assign match_keywords_1 = 'sock|cep|compression|calf|sleeve|2xu' -%}
+    {%- assign match_keywords_2 = 'cleaner|care|insole|lace|bottle|flask|camelbak|vest|belt|bag' -%}
+    {%- assign match_keywords_3 = 'shokz|openrun|oakley|cap|visor|garmin|forerunner|hyperice' -%}
+
+  {%- when 'eyewear' -%}
+    {%- assign setup_title = 'Pair it with — Race kit' -%}
+    {%- assign setup_subtitle = 'Recommended endurance gear:' -%}
+    {%- assign setup_category_tags = 'GPS Watches, Bone-Conduction Audio, Technical Socks' -%}
+    {%- assign match_keywords_1 = 'garmin|forerunner|fenix|edge|watch' -%}
+    {%- assign match_keywords_2 = 'shokz|openrun|helmet|giro|cap|visor' -%}
+    {%- assign match_keywords_3 = 'sock|cep|camelbak|bottle|castelli|hoka|brooks' -%}
+
+  {%- when 'cycling' -%}
+    {%- assign setup_title = 'Pair it with — Peloton kit' -%}
+    {%- assign setup_subtitle = 'Recommended cycling gear:' -%}
+    {%- assign setup_category_tags = 'Insulated Bottles, Cycling Eyewear, GPS Computers' -%}
+    {%- assign match_keywords_1 = 'camelbak|bottle|podium|flask' -%}
+    {%- assign match_keywords_2 = 'oakley|sutro|radar|sunglass|eyewear' -%}
+    {%- assign match_keywords_3 = 'edge|garmin|giro|castelli|sock|cep' -%}
+
+  {%- when 'recovery' -%}
+    {%- assign setup_title = 'Pair it with — Recovery kit' -%}
+    {%- assign setup_subtitle = 'Recommended mobility & recovery gear:' -%}
+    {%- assign setup_category_tags = 'Compression Socks, Mobility Tools, Cushioned Footwear' -%}
+    {%- assign match_keywords_1 = 'cep|2xu|sock|compression|sleeve' -%}
+    {%- assign match_keywords_2 = 'hyperice|hypersphere|vyper|venom|normatec|roller' -%}
+    {%- assign match_keywords_3 = 'hoka|bondi|clifton|brooks|garmin|recovery' -%}
+
+  {%- when 'audio' -%}
+    {%- assign setup_title = 'Pair it with — Training kit' -%}
+    {%- assign setup_subtitle = 'Recommended training partners:' -%}
+    {%- assign setup_category_tags = 'GPS Watches, Running Eyewear, Performance Socks' -%}
+    {%- assign match_keywords_1 = 'garmin|forerunner|fenix|venu|watch' -%}
+    {%- assign match_keywords_2 = 'oakley|sunglass|corridor|sutro|radar' -%}
+    {%- assign match_keywords_3 = 'sock|cep|hoka|brooks|saucony|bottle' -%}
+
+  {%- when 'watch_accessory' -%}
+    {%- assign setup_title = 'Pair it with — Compatible watches' -%}
+    {%- assign setup_subtitle = 'Compatible Garmin devices & gear:' -%}
+    {%- assign setup_category_tags = 'Forerunner Series, Fēnix Series, HRM & Audio' -%}
+    {%- assign match_keywords_1 = 'forerunner|fenix|fēnix|epix|instinct|venu|enduro' -%}
+    {%- assign match_keywords_2 = 'hrm|strap|band|sensor|shokz' -%}
+    {%- assign match_keywords_3 = 'oakley|cep|sock|bottle' -%}
+
+  {%- else -%}
+    {%- assign setup_title = 'Pair it with — Complete your kit' -%}
+    {%- assign setup_subtitle = 'Recommended in-stock gear:' -%}
+    {%- assign setup_category_tags = 'Running Shoes, GPS Watches, Performance Accessories' -%}
+    {%- assign match_keywords_1 = 'hoka|brooks|saucony|shoe|clifton|ghost' -%}
+    {%- assign match_keywords_2 = 'garmin|forerunner|shokz|oakley' -%}
+    {%- assign match_keywords_3 = 'sock|cep|camelbak|bottle|hyperice' -%}
+{%- endcase -%}
+
+{%- assign kw_list_1 = match_keywords_1 | split: '|' -%}
+{%- assign kw_list_2 = match_keywords_2 | split: '|' -%}
+{%- assign kw_list_3 = match_keywords_3 | split: '|' -%}
+
+{%- assign pair_id_1 = 0 -%}
+{%- assign pair_id_2 = 0 -%}
+{%- assign pair_id_3 = 0 -%}
+{%- assign pair_prod_1 = nil -%}
+{%- assign pair_prod_2 = nil -%}
+{%- assign pair_prod_3 = nil -%}
+
+{%- comment -%} Check collections in priority order to find matching in-stock products {%- endcomment -%}
+{%- assign search_collections = 'accessories,fitness,running,cycling,oakley,garmin,hoka,brooks,saucony,all' | split: ',' -%}
+
+{%- for c_handle in search_collections -%}
+  {%- assign c_obj = collections[c_handle] -%}
+  {%- if c_obj != blank and c_obj.products.size > 0 -%}
+    {%- for cand in c_obj.products -%}
+      {%- if cand.available and cand.id != product.id and cand.id != pair_id_1 and cand.id != pair_id_2 and cand.id != pair_id_3 -%}
+        {%- assign cand_text = cand.title | append: ' ' | append: cand.type | append: ' ' | append: cand.vendor | append: ' ' | append: cand.tags | downcase -%}
+
+        {%- if pair_prod_1 == nil -%}
+          {%- for kw in kw_list_1 -%}
+            {%- if cand_text contains kw -%}
+              {%- assign pair_prod_1 = cand -%}
+              {%- assign pair_id_1 = cand.id -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- if pair_prod_2 == nil and cand.id != pair_id_1 -%}
+          {%- for kw in kw_list_2 -%}
+            {%- if cand_text contains kw -%}
+              {%- assign pair_prod_2 = cand -%}
+              {%- assign pair_id_2 = cand.id -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- if pair_prod_3 == nil and cand.id != pair_id_1 and cand.id != pair_id_2 -%}
+          {%- for kw in kw_list_3 -%}
+            {%- if cand_text contains kw -%}
+              {%- assign pair_prod_3 = cand -%}
+              {%- assign pair_id_3 = cand.id -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if pair_prod_1 != nil and pair_prod_2 != nil and pair_prod_3 != nil -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if pair_prod_1 != nil and pair_prod_2 != nil and pair_prod_3 != nil -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} Fill any remaining empty slots with other available products from complementary collections {%- endcomment -%}
+{%- if pair_prod_1 == nil or pair_prod_2 == nil or pair_prod_3 == nil -%}
+  {%- for c_handle in search_collections -%}
+    {%- assign c_obj = collections[c_handle] -%}
+    {%- if c_obj != blank and c_obj.products.size > 0 -%}
+      {%- for cand in c_obj.products -%}
+        {%- if cand.available and cand.id != product.id and cand.id != pair_id_1 and cand.id != pair_id_2 and cand.id != pair_id_3 -%}
+          {%- if pair_prod_1 == nil -%}
+            {%- assign pair_prod_1 = cand -%}
+            {%- assign pair_id_1 = cand.id -%}
+          {%- elsif pair_prod_2 == nil -%}
+            {%- assign pair_prod_2 = cand -%}
+            {%- assign pair_id_2 = cand.id -%}
+          {%- elsif pair_prod_3 == nil -%}
+            {%- assign pair_prod_3 = cand -%}
+            {%- assign pair_id_3 = cand.id -%}
+          {%- endif -%}
+        {%- endif -%}
+        {%- if pair_prod_1 != nil and pair_prod_2 != nil and pair_prod_3 != nil -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+    {%- if pair_prod_1 != nil and pair_prod_2 != nil and pair_prod_3 != nil -%}
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+<div class="product-overview-cards" data-product-category="{{ prod_category }}">
+  <!-- Card 1: Dynamic "Why this [category]" -->
   <div class="product-overview-card">
     <div>
-      <h2 class="product-overview-card__title">Why this {{ type_label }}</h2>
+      <div class="product-overview-card__header-row">
+        <h2 class="product-overview-card__title">{{ why_heading }}</h2>
+        <span class="product-overview-card__badge">{{ product.vendor | default: 'Athelin Verified' }}</span>
+      </div>
       <div class="product-overview-card__body">
         <p class="product-overview-card__p">
-          Six highlights, written by Athelin — battery stamina, precision biometric tracking, running economy, ECG sensor, titanium casing, and rapid recovery sync.
+          {{ why_highlights }}
         </p>
         <p class="product-overview-card__p">
-          <strong>Best for:</strong> marathon training, triathlon, trail running, and high-intensity interval conditioning.
+          <strong>Best for:</strong> {{ why_best_for }}
         </p>
         <p class="product-overview-card__p">
-          <strong>Step up from:</strong> Forerunner 570 · <strong>Step down from:</strong> Fenix 8
+          <strong>Step up from:</strong> {{ why_step_up }} · <strong>Step down from:</strong> {{ why_step_down }}
         </p>
       </div>
     </div>
   </div>
 
-  <!-- Card 2: Complete your setup -->
-  <div class="product-overview-card">
+  <!-- Card 2: Dynamic "Pair it with / Complete your setup" -->
+  <div class="product-overview-card" data-setup-bundle-card>
     <div>
-      <h2 class="product-overview-card__title">Complete your setup</h2>
+      <div class="product-overview-card__header-row">
+        <h2 class="product-overview-card__title">{{ setup_title }}</h2>
+        <span class="product-overview-card__sub-pill">In-stock pairings</span>
+      </div>
+
       <div class="product-setup-bundle">
-        <div class="product-setup-bundle__items">
-          <!-- Item 1: Performance Socks -->
-          <div class="product-setup-bundle__thumb" title="Compression Socks">
-            <img src="{{ 'category-accessories.png' | asset_url }}" alt="Compression Socks" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
-          </div>
-          <!-- Item 2: Cleaner / Care Foam -->
-          <div class="product-setup-bundle__thumb" title="Shoe Cleaner Foam">
-            <img src="{{ 'product-shoe-2.png' | asset_url }}" alt="Cleaner Care" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
-          </div>
-          <!-- Item 3: Storage Bag / Strap -->
-          <div class="product-setup-bundle__thumb" title="Ventilated Shoe Bag">
-            <img src="{{ 'category-apparel.png' | asset_url }}" alt="Accessory Bag" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
-          </div>
+        <div class="product-setup-bundle__items" data-bundle-items-list>
+          {%- assign bundle_total_price = 0 -%}
+          {%- assign rendered_names = '' -%}
+
+          {%- comment -%} Render up to 3 real paired products {%- endcomment -%}
+          {%- for i in (1..3) -%}
+            {%- assign cur_pair = nil -%}
+            {%- if i == 1 -%}{%- assign cur_pair = pair_prod_1 -%}{%- endif -%}
+            {%- if i == 2 -%}{%- assign cur_pair = pair_prod_2 -%}{%- endif -%}
+            {%- if i == 3 -%}{%- assign cur_pair = pair_prod_3 -%}{%- endif -%}
+
+            {%- if cur_pair != nil -%}
+              {%- assign pair_var = cur_pair.selected_or_first_available_variant -%}
+              {%- assign bundle_total_price = bundle_total_price | plus: pair_var.price -%}
+              {%- assign short_title = cur_pair.title | truncate: 28 -%}
+              {%- if rendered_names == '' -%}
+                {%- assign rendered_names = short_title -%}
+              {%- else -%}
+                {%- assign rendered_names = rendered_names | append: ', ' | append: short_title -%}
+              {%- endif -%}
+
+              <div
+                class="product-setup-bundle__item is-selected"
+                data-bundle-item
+                data-variant-id="{{ pair_var.id }}"
+                data-item-price="{{ pair_var.price }}"
+                data-item-title="{{ cur_pair.title | escape }}"
+                title="{{ cur_pair.title | escape }} — {{ pair_var.price | money | strip_html }}"
+              >
+                <button
+                  type="button"
+                  class="product-setup-bundle__toggle"
+                  data-bundle-item-toggle
+                  aria-pressed="true"
+                  aria-label="Toggle {{ cur_pair.title | escape }} in bundle"
+                >
+                  <span class="product-setup-bundle__check" aria-hidden="true">✓</span>
+                  <div class="product-setup-bundle__thumb">
+                    {%- if cur_pair.featured_image -%}
+                      <img
+                        src="{{ cur_pair.featured_image | image_url: width: 160 }}"
+                        alt="{{ cur_pair.title | escape }}"
+                        class="product-setup-bundle__img"
+                        width="64"
+                        height="64"
+                        loading="lazy"
+                      >
+                    {%- else -%}
+                      <img
+                        src="{{ 'product-garmin-1.png' | asset_url }}"
+                        alt="{{ cur_pair.title | escape }}"
+                        class="product-setup-bundle__img"
+                        width="64"
+                        height="64"
+                        loading="lazy"
+                      >
+                    {%- endif -%}
+                  </div>
+                </button>
+                <a href="{{ cur_pair.url }}" class="product-setup-bundle__item-label" title="View {{ cur_pair.title | escape }}">
+                  <span class="product-setup-bundle__item-name">{{ cur_pair.title | truncate: 20 }}</span>
+                  <span class="product-setup-bundle__item-price">{{ pair_var.price | money }}</span>
+                </a>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- comment -%} Category-specific fallback cards if store catalog has no other products loaded {%- endcomment -%}
+          {%- if pair_prod_1 == nil and pair_prod_2 == nil and pair_prod_3 == nil -%}
+            {%- if prod_category == 'watch' or prod_category == 'cycling_tech' -%}
+              <div class="product-setup-bundle__item is-selected">
+                <div class="product-setup-bundle__thumb" title="QuickFit™ Silicone Watch Strap">
+                  <img src="{{ 'product-garmin-3.png' | asset_url }}" alt="QuickFit Watch Strap" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+                </div>
+                <span class="product-setup-bundle__item-label">
+                  <span class="product-setup-bundle__item-name">QuickFit™ Strap</span>
+                  <span class="product-setup-bundle__item-price">₹4,490</span>
+                </span>
+              </div>
+              <div class="product-setup-bundle__item is-selected">
+                <div class="product-setup-bundle__thumb" title="Garmin HRM-Pro Plus Chest Strap">
+                  <img src="{{ 'product-garmin-2.png' | asset_url }}" alt="HRM-Pro Plus" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+                </div>
+                <span class="product-setup-bundle__item-label">
+                  <span class="product-setup-bundle__item-name">HRM-Pro™ Plus</span>
+                  <span class="product-setup-bundle__item-price">₹13,490</span>
+                </span>
+              </div>
+              <div class="product-setup-bundle__item is-selected">
+                <div class="product-setup-bundle__thumb" title="Shokz OpenRun Bone Conduction">
+                  <img src="{{ 'category-watches.png' | asset_url }}" alt="Shokz OpenRun" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+                </div>
+                <span class="product-setup-bundle__item-label">
+                  <span class="product-setup-bundle__item-name">Shokz OpenRun</span>
+                  <span class="product-setup-bundle__item-price">₹13,999</span>
+                </span>
+              </div>
+            {%- else -%}
+              <div class="product-setup-bundle__item is-selected">
+                <div class="product-setup-bundle__thumb" title="CEP Graduated Compression Run Socks">
+                  <img src="{{ 'category-accessories.png' | asset_url }}" alt="CEP Running Socks" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+                </div>
+                <span class="product-setup-bundle__item-label">
+                  <span class="product-setup-bundle__item-name">CEP Run Socks</span>
+                  <span class="product-setup-bundle__item-price">₹2,499</span>
+                </span>
+              </div>
+              <div class="product-setup-bundle__item is-selected">
+                <div class="product-setup-bundle__thumb" title="CamelBak Podium Insulated Bottle">
+                  <img src="{{ 'product-shoe-2.png' | asset_url }}" alt="Hydration & Care" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+                </div>
+                <span class="product-setup-bundle__item-label">
+                  <span class="product-setup-bundle__item-name">Shoe Care &amp; Flask</span>
+                  <span class="product-setup-bundle__item-price">₹1,899</span>
+                </span>
+              </div>
+              <div class="product-setup-bundle__item is-selected">
+                <div class="product-setup-bundle__thumb" title="Oakley Endurance Running Eyewear">
+                  <img src="{{ 'category-sunglasses.png' | asset_url }}" alt="Oakley Running Eyewear" class="product-setup-bundle__img" width="64" height="64" loading="lazy">
+                </div>
+                <span class="product-setup-bundle__item-label">
+                  <span class="product-setup-bundle__item-name">Race Cap &amp; Bag</span>
+                  <span class="product-setup-bundle__item-price">₹1,999</span>
+                </span>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
         </div>
 
         <div class="product-setup-bundle__meta">
-          <div class="product-setup-bundle__meta-title">In-stock accessories only:</div>
-          <div class="product-setup-bundle__meta-items"><strong>Socks, Shoe Cleaner, Bags</strong></div>
+          <div class="product-setup-bundle__meta-title">{{ setup_subtitle }}</div>
+          <div class="product-setup-bundle__meta-items" data-bundle-summary-names>
+            <strong>{{ setup_category_tags }}</strong>
+          </div>
+          {%- if rendered_names != '' -%}
+            <div class="product-setup-bundle__meta-sub" data-bundle-picked-list>
+              Selected: {{ rendered_names }}
+            </div>
+          {%- endif -%}
         </div>
       </div>
     </div>
 
     <!-- Bundle Add to Cart CTA -->
-    <button type="button" class="product-setup-bundle__btn" data-bundle-add-btn>
-      Add to cart
-    </button>
+    <div class="product-setup-bundle__footer">
+      <button
+        type="button"
+        class="product-setup-bundle__btn"
+        data-bundle-add-btn
+        {% if bundle_total_price > 0 %}data-bundle-total="{{ bundle_total_price }}"{% endif %}
+      >
+        {%- if bundle_total_price > 0 -%}
+          Add selected to cart · {{ bundle_total_price | money }}
+        {%- else -%}
+          Add setup to cart
+        {%- endif -%}
+      </button>
+    </div>
   </div>
 </div>

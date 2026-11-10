@@ -1,6 +1,7 @@
 {% doc %}
   Renders the storefront header: top announcement bar, Athelin brand logo,
-  primary sports navigation menu, search pill input, and account/wishlist/cart actions.
+  primary sports navigation menu, search pill input, account/wishlist/cart actions,
+  mobile top-right hamburger category drawer, and mobile bottom navigation bar.
 {% enddoc %}
 
 <header class="athelin-header-wrapper full-width" {{ block.shopify_attributes }}>
@@ -50,7 +51,7 @@
             <a href="{{ routes.collections_url }}/running" class="athelin-header__nav-link">Run</a>
             <a href="{{ routes.collections_url }}/cycling" class="athelin-header__nav-link">Ride</a>
             <a href="{{ routes.all_products_collection_url }}" class="athelin-header__nav-link">Tri</a>
-            <a href="{{ routes.collections_url }}/fitness" class="athelin-header__nav-link">Train & Recover</a>
+            <a href="{{ routes.collections_url }}/fitness" class="athelin-header__nav-link">Train &amp; Recover</a>
             <a href="{{ routes.collections_url }}/garmin" class="athelin-header__nav-link">Watches</a>
             <a href="/blogs/guides" class="athelin-header__nav-link">Guides</a>
             <a href="/pages/contact" class="athelin-header__nav-link">Our store</a>
@@ -72,34 +73,298 @@
         </div>
 
         <div class="athelin-header__actions">
-          <!-- Wishlist -->
-          <a href="/pages/wishlist" class="athelin-header__action-btn" aria-label="Wishlist">
+          <!-- Wishlist (Desktop Header) -->
+          <a href="/pages/wishlist" class="athelin-header__action-btn athelin-header__action-btn--desktop" aria-label="Wishlist" data-header-wishlist>
             <img src="{{ 'icon-heart.svg' | asset_url }}" alt="Wishlist" width="18" height="18">
+            <span class="athelin-header__cart-badge athelin-header__wishlist-badge" data-wishlist-count style="display: none;">0</span>
           </a>
 
-          <!-- Cart -->
-          <a href="{{ routes.cart_url }}" class="athelin-header__action-btn" aria-label="Shopping Cart">
+          <!-- Cart (Desktop Header - Triggers Quick Cart Slide Drawer) -->
+          <a
+            href="{{ routes.cart_url }}"
+            class="athelin-header__action-btn athelin-header__action-btn--desktop"
+            aria-label="Shopping Cart"
+            data-quick-cart-trigger
+          >
             <img src="{{ 'icon-bag.svg' | asset_url }}" alt="Cart" width="18" height="18">
-            {%- if cart.item_count > 0 -%}
-              <span class="athelin-header__cart-badge">{{ cart.item_count }}</span>
-            {%- endif -%}
+            <span
+              class="athelin-header__cart-badge"
+              data-cart-count
+              {% if cart.item_count == 0 %}style="display: none;"{% endif %}
+            >
+              {{ cart.item_count }}
+            </span>
           </a>
 
-          <!-- Account -->
+          <!-- Account (Desktop Header) -->
           {%- if shop.customer_accounts_enabled -%}
-            <a href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" class="athelin-header__action-btn" aria-label="Account">
+            <a href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" class="athelin-header__action-btn athelin-header__action-btn--desktop" aria-label="Account">
               <img src="{{ 'icon-user.svg' | asset_url }}" alt="Account" width="18" height="18">
             </a>
           {%- else -%}
-            <a href="{{ routes.account_login_url }}" class="athelin-header__action-btn" aria-label="Account">
+            <a href="{{ routes.account_login_url }}" class="athelin-header__action-btn athelin-header__action-btn--desktop" aria-label="Account">
               <img src="{{ 'icon-user.svg' | asset_url }}" alt="Account" width="18" height="18">
             </a>
           {%- endif -%}
+
+          <!-- Mobile Hamburger Menu Button (Top Right on Mobile) -->
+          <button
+            type="button"
+            class="athelin-header__hamburger"
+            data-mobile-menu-toggle
+            aria-label="Open category menu"
+            aria-expanded="false"
+            aria-controls="athelin-mobile-menu"
+          >
+            <span class="athelin-header__hamburger-bar"></span>
+            <span class="athelin-header__hamburger-bar"></span>
+            <span class="athelin-header__hamburger-bar"></span>
+          </button>
         </div>
       </div>
     </div>
   </div>
 </header>
+
+<!-- Mobile Slide-Over Category Menu Drawer -->
+<div
+  id="athelin-mobile-menu"
+  class="athelin-mobile-menu"
+  data-mobile-menu-drawer
+  role="dialog"
+  aria-modal="true"
+  aria-label="Menu Categories"
+  aria-hidden="true"
+>
+  <div class="athelin-mobile-menu__backdrop" data-mobile-menu-close></div>
+
+  <div class="athelin-mobile-menu__panel">
+    <div class="athelin-mobile-menu__header">
+      <a href="{{ routes.root_url }}" class="athelin-mobile-menu__logo" aria-label="Athelin Home">
+        <img
+          src="{{ 'athelin-logo.png' | asset_url }}"
+          alt="Athelin"
+          width="95"
+          height="20"
+        >
+      </a>
+      <button
+        type="button"
+        class="athelin-mobile-menu__close"
+        data-mobile-menu-close
+        aria-label="Close category menu"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Drawer Search Input -->
+    <div class="athelin-mobile-menu__search">
+      <form action="{{ routes.search_url }}" method="get" role="search" class="athelin-mobile-menu__search-form">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="search"
+          name="q"
+          class="athelin-mobile-menu__search-input"
+          placeholder="Search Garmin, Hoka, Brooks, Oakley…"
+          aria-label="Search store"
+        >
+      </form>
+    </div>
+
+    <!-- Menu Categories List -->
+    <div class="athelin-mobile-menu__body">
+      <div class="athelin-mobile-menu__section-label">Shop by Category</div>
+      <nav class="athelin-mobile-menu__nav" aria-label="Mobile Category Navigation">
+        {%- if block.settings.menu != blank and block.settings.menu.links.size > 0 -%}
+          {%- for link in block.settings.menu.links -%}
+            <a href="{{ link.url }}" class="athelin-mobile-menu__link">
+              <div class="athelin-mobile-menu__link-text">
+                <span class="athelin-mobile-menu__link-title">{{ link.title }}</span>
+              </div>
+              <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+            </a>
+          {%- endfor -%}
+        {%- else -%}
+          <a href="{{ routes.collections_url }}/running" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Run</span>
+              <span class="athelin-mobile-menu__link-sub">Brooks, Hoka, Saucony &amp; road/trail shoes</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="{{ routes.collections_url }}/cycling" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Ride</span>
+              <span class="athelin-mobile-menu__link-sub">Castelli, Giro helmets &amp; cycling gear</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="{{ routes.all_products_collection_url }}" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Tri</span>
+              <span class="athelin-mobile-menu__link-sub">Race-day triathlon suits, wetsuits &amp; multisport</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="{{ routes.collections_url }}/fitness" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Train &amp; Recover</span>
+              <span class="athelin-mobile-menu__link-sub">Hyperice percussion, CEP compression &amp; mobility</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="{{ routes.collections_url }}/garmin" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Watches</span>
+              <span class="athelin-mobile-menu__link-sub">Authorised Garmin Forerunner, Fēnix &amp; Epix</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="{{ routes.collections_url }}/oakley" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Sunglasses</span>
+              <span class="athelin-mobile-menu__link-sub">Oakley Prizm™ performance sports eyewear</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="{{ routes.collections_url }}/accessories" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Accessories</span>
+              <span class="athelin-mobile-menu__link-sub">Watch straps, Shokz audio, bottles &amp; socks</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="/blogs/guides" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Guides</span>
+              <span class="athelin-mobile-menu__link-sub">Shoe &amp; GPS watch comparison guides</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="/pages/contact" class="athelin-mobile-menu__link">
+            <div class="athelin-mobile-menu__link-text">
+              <span class="athelin-mobile-menu__link-title">Our store</span>
+              <span class="athelin-mobile-menu__link-sub">Book an in-store gait &amp; gear fitting</span>
+            </div>
+            <span class="athelin-mobile-menu__link-arrow" aria-hidden="true">→</span>
+          </a>
+        {%- endif -%}
+      </nav>
+    </div>
+
+    <div class="athelin-mobile-menu__footer">
+      <div class="athelin-mobile-menu__quick-actions">
+        <a href="{{ routes.root_url }}" class="athelin-mobile-menu__quick-btn">Home</a>
+        <a href="/pages/wishlist" class="athelin-mobile-menu__quick-btn">Wishlist</a>
+        <a href="{{ routes.cart_url }}" class="athelin-mobile-menu__quick-btn" data-quick-cart-trigger>Cart</a>
+        <a href="{% if shop.customer_accounts_enabled and customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" class="athelin-mobile-menu__quick-btn">Profile</a>
+      </div>
+      <div class="athelin-mobile-menu__trust">
+        <span>✓ Authorised Dealer</span>
+        <span>·</span>
+        <span>✓ No Cost EMI</span>
+        <span>·</span>
+        <span>✓ 10-Day Returns</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%}
+  Mobile Bottom Navigation Bar (4 icons: Home, Wishlist, Cart, Profile)
+  - Hidden on Product Detail Pages (request.page_type == 'product')
+  - Automatically hides/disables on scroll via JS
+{%- endcomment -%}
+{%- unless request.page_type == 'product' or template.name == 'product' -%}
+  {%- assign current_path = request.path | default: '' -%}
+  {%- assign profile_url = routes.account_login_url -%}
+  {%- if shop.customer_accounts_enabled and customer -%}
+    {%- assign profile_url = routes.account_url -%}
+  {%- endif -%}
+
+  <nav
+    class="athelin-mobile-bottom-nav"
+    data-mobile-bottom-nav
+    aria-label="Mobile Quick Navigation"
+  >
+    <!-- 1. Home -->
+    <a
+      href="{{ routes.root_url }}"
+      class="athelin-mobile-bottom-nav__item{% if request.page_type == 'index' %} is-active{% endif %}"
+      aria-label="Home"
+    >
+      <span class="athelin-mobile-bottom-nav__icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z"></path>
+        </svg>
+      </span>
+      <span class="athelin-mobile-bottom-nav__label">Home</span>
+    </a>
+
+    <!-- 2. Wishlist -->
+    <a
+      href="/pages/wishlist"
+      class="athelin-mobile-bottom-nav__item{% if current_path contains 'wishlist' %} is-active{% endif %}"
+      aria-label="Wishlist"
+    >
+      <span class="athelin-mobile-bottom-nav__icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span
+          class="athelin-mobile-bottom-nav__badge athelin-mobile-bottom-nav__badge--wishlist"
+          data-wishlist-count
+          style="display: none;"
+        >0</span>
+      </span>
+      <span class="athelin-mobile-bottom-nav__label">Wishlist</span>
+    </a>
+
+    <!-- 3. Cart -->
+    <a
+      href="{{ routes.cart_url }}"
+      class="athelin-mobile-bottom-nav__item{% if request.page_type == 'cart' %} is-active{% endif %}"
+      aria-label="Cart"
+      data-quick-cart-trigger
+    >
+      <span class="athelin-mobile-bottom-nav__icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span
+          class="athelin-mobile-bottom-nav__badge athelin-mobile-bottom-nav__badge--cart"
+          data-cart-count
+          {% if cart.item_count == 0 %}style="display: none;"{% endif %}
+        >{{ cart.item_count }}</span>
+      </span>
+      <span class="athelin-mobile-bottom-nav__label">Cart</span>
+    </a>
+
+    <!-- 4. Profile -->
+    <a
+      href="{{ profile_url }}"
+      class="athelin-mobile-bottom-nav__item{% if request.page_type contains 'customers' %} is-active{% endif %}"
+      aria-label="Profile"
+    >
+      <span class="athelin-mobile-bottom-nav__icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </span>
+      <span class="athelin-mobile-bottom-nav__label">Profile</span>
+    </a>
+  </nav>
+{%- endunless -%}
 
 {% schema %}
 {

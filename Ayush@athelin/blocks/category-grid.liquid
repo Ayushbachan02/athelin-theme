@@ -10,14 +10,25 @@
   <div class="category-grid">
     <!-- Category 1: Watches -->
     <a href="{{ block.settings.cat_1_url | default: '/collections/garmin' }}" class="category-card">
-      <img
-        src="{{ 'category-watches.png' | asset_url }}"
-        alt="Watches"
-        class="category-card__image"
-        loading="lazy"
-        width="278"
-        height="168"
-      >
+      {%- if block.settings.cat_1_image != blank -%}
+        <img
+          src="{{ block.settings.cat_1_image | image_url: width: 600 }}"
+          alt="{{ block.settings.cat_1_title | default: 'Watches' | escape }}"
+          class="category-card__image"
+          loading="lazy"
+          width="278"
+          height="168"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'category-watches.png' | asset_url }}"
+          alt="Watches"
+          class="category-card__image"
+          loading="lazy"
+          width="278"
+          height="168"
+        >
+      {%- endif -%}
       <div class="category-card__overlay">
         <span class="category-card__title">{{ block.settings.cat_1_title | default: 'Watches' }}</span>
       </div>
@@ -25,14 +36,25 @@
 
     <!-- Category 2: Apparel -->
     <a href="{{ block.settings.cat_2_url | default: '/collections/fitness-wear' }}" class="category-card">
-      <img
-        src="{{ 'category-apparel.png' | asset_url }}"
-        alt="Apparel"
-        class="category-card__image"
-        loading="lazy"
-        width="278"
-        height="168"
-      >
+      {%- if block.settings.cat_2_image != blank -%}
+        <img
+          src="{{ block.settings.cat_2_image | image_url: width: 600 }}"
+          alt="{{ block.settings.cat_2_title | default: 'Apparel' | escape }}"
+          class="category-card__image"
+          loading="lazy"
+          width="278"
+          height="168"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'category-apparel.png' | asset_url }}"
+          alt="Apparel"
+          class="category-card__image"
+          loading="lazy"
+          width="278"
+          height="168"
+        >
+      {%- endif -%}
       <div class="category-card__overlay">
         <span class="category-card__title">{{ block.settings.cat_2_title | default: 'Apparel' }}</span>
       </div>
@@ -40,14 +62,25 @@
 
     <!-- Category 3: Accessories -->
     <a href="{{ block.settings.cat_3_url | default: '/collections/accessories' }}" class="category-card">
-      <img
-        src="{{ 'category-accessories.png' | asset_url }}"
-        alt="Accessories"
-        class="category-card__image"
-        loading="lazy"
-        width="278"
-        height="168"
-      >
+      {%- if block.settings.cat_3_image != blank -%}
+        <img
+          src="{{ block.settings.cat_3_image | image_url: width: 600 }}"
+          alt="{{ block.settings.cat_3_title | default: 'Accessories' | escape }}"
+          class="category-card__image"
+          loading="lazy"
+          width="278"
+          height="168"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'category-accessories.png' | asset_url }}"
+          alt="Accessories"
+          class="category-card__image"
+          loading="lazy"
+          width="278"
+          height="168"
+        >
+      {%- endif -%}
       <div class="category-card__overlay">
         <span class="category-card__title">{{ block.settings.cat_3_title | default: 'Accessories' }}</span>
       </div>
@@ -55,14 +88,25 @@
 
     <!-- Category 4: Sunglasses -->
     <a href="{{ block.settings.cat_4_url | default: '/collections/oakley' }}" class="category-card">
-      <img
-        src="{{ 'category-sunglasses.png' | asset_url }}"
-        alt="Sunglasses"
-        class="category-card__image"
-        loading="lazy"
-        width="274"
-        height="168"
-      >
+      {%- if block.settings.cat_4_image != blank -%}
+        <img
+          src="{{ block.settings.cat_4_image | image_url: width: 600 }}"
+          alt="{{ block.settings.cat_4_title | default: 'Sunglasses' | escape }}"
+          class="category-card__image"
+          loading="lazy"
+          width="274"
+          height="168"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'category-sunglasses.png' | asset_url }}"
+          alt="Sunglasses"
+          class="category-card__image"
+          loading="lazy"
+          width="274"
+          height="168"
+        >
+      {%- endif -%}
       <div class="category-card__overlay">
         <span class="category-card__title">{{ block.settings.cat_4_title | default: 'Sunglasses' }}</span>
       </div>
@@ -81,15 +125,28 @@
       "default": "Shop by Product"
     },
     {
+      "type": "header",
+      "content": "Category 1"
+    },
+    {
       "type": "text",
       "id": "cat_1_title",
       "label": "Category 1 Title",
       "default": "Watches"
     },
     {
+      "type": "image_picker",
+      "id": "cat_1_image",
+      "label": "Category 1 Image"
+    },
+    {
       "type": "url",
       "id": "cat_1_url",
       "label": "Category 1 Link"
+    },
+    {
+      "type": "header",
+      "content": "Category 2"
     },
     {
       "type": "text",
@@ -98,9 +155,18 @@
       "default": "Apparel"
     },
     {
+      "type": "image_picker",
+      "id": "cat_2_image",
+      "label": "Category 2 Image"
+    },
+    {
       "type": "url",
       "id": "cat_2_url",
       "label": "Category 2 Link"
+    },
+    {
+      "type": "header",
+      "content": "Category 3"
     },
     {
       "type": "text",
@@ -109,9 +175,18 @@
       "default": "Accessories"
     },
     {
+      "type": "image_picker",
+      "id": "cat_3_image",
+      "label": "Category 3 Image"
+    },
+    {
       "type": "url",
       "id": "cat_3_url",
       "label": "Category 3 Link"
+    },
+    {
+      "type": "header",
+      "content": "Category 4"
     },
     {
       "type": "text",
@@ -120,9 +195,19 @@
       "default": "Sunglasses"
     },
     {
+      "type": "image_picker",
+      "id": "cat_4_image",
+      "label": "Category 4 Image"
+    },
+    {
       "type": "url",
       "id": "cat_4_url",
       "label": "Category 4 Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Grid"
     }
   ]
 }

@@ -1,5 +1,22 @@
-{% block 'container' %}
-  <h1>{{ page.title }}</h1>
+{%- assign page_handle_low = page.handle | default: '' | downcase -%}
+{%- assign page_title_low = page.title | default: '' | downcase -%}
 
-  {{ page.content }}
-{% endblock %}
+{%- if page_handle_low == 'wishlist' or page_title_low contains 'wishlist' -%}
+  {% block 'container', tag: 'div' %}
+    {% section 'main-wishlist' %}
+  {% endblock %}
+  {% block 'trust-pillars' %}{% endblock %}
+{%- elsif page_handle_low == 'compare' or page_title_low contains 'compare' -%}
+  {% block 'container', tag: 'div' %}
+    {% section 'main-compare' %}
+  {% endblock %}
+  {% block 'trust-pillars' %}{% endblock %}
+{%- elsif page_handle_low == 'contact' or page_handle_low contains 'contact' or page_title_low contains 'contact' -%}
+  {% section 'contact-store' %}
+  {% block 'trust-pillars' %}{% endblock %}
+{%- else -%}
+  {% block 'container', tag: 'div' %}
+    {% section 'main-page' %}
+  {% endblock %}
+  {% block 'trust-pillars' %}{% endblock %}
+{%- endif -%}

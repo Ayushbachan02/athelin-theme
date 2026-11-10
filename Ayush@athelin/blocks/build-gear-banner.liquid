@@ -4,14 +4,26 @@
 
 <section class="build-gear" {{ block.shopify_attributes }}>
   <div class="build-gear__card">
-    <img
-      src="{{ 'build-gear-banner.png' | asset_url }}"
-      alt="Build Your Gear"
-      class="build-gear__bg"
-      loading="lazy"
-      width="1200"
-      height="242"
-    >
+    {%- if block.settings.background_image != blank -%}
+      <img
+        src="{{ block.settings.background_image | image_url: width: 1400 }}"
+        alt="{{ block.settings.title | default: 'Build Your Gear' | escape }}"
+        class="build-gear__bg"
+        loading="lazy"
+        width="1200"
+        height="242"
+      >
+    {%- else -%}
+      <img
+        src="{{ 'build-gear-banner.png' | asset_url }}"
+        alt="Build Your Gear"
+        class="build-gear__bg"
+        loading="lazy"
+        width="1200"
+        height="242"
+      >
+    {%- endif -%}
+
     <div class="build-gear__content">
       <h2 class="build-gear__title">{{ block.settings.title | default: 'Build Your Gear' }}</h2>
       <p class="build-gear__subtitle">
@@ -41,6 +53,11 @@
       "default": "Lets us know your requirement and we will get you the best product the suites you."
     },
     {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
       "type": "text",
       "id": "btn_text",
       "label": "Button Text",
@@ -50,6 +67,11 @@
       "type": "url",
       "id": "btn_link",
       "label": "Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Build Your Gear Banner"
     }
   ]
 }

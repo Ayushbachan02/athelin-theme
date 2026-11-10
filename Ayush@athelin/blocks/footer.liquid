@@ -1,24 +1,30 @@
 {% doc %}
   Renders the Athelin storefront footer: brand information, navigation links,
-  payment methods, and copyright notice.
+  Shopify store policies, verified store location & contact, payment methods,
+  and copyright notice.
 {% enddoc %}
 
 <footer class="athelin-footer full-width" {{ block.shopify_attributes }}>
   <div class="athelin-footer__inner">
     <div class="athelin-footer__top">
+      <!-- 1. Brand & Tagline -->
       <div class="athelin-footer__brand">
-        <img
-          src="{{ 'athelin-logo.png' | asset_url }}"
-          alt="Athelin"
-          width="110"
-          height="26"
-          class="athelin-footer__logo"
-        >
+        <a href="{{ routes.root_url }}" class="athelin-footer__logo-link" aria-label="Athelin Home">
+          <img
+            src="{{ 'athelin-logo.png' | asset_url }}"
+            alt="Athelin"
+            width="110"
+            height="26"
+            class="athelin-footer__logo"
+            loading="lazy"
+          >
+        </a>
         <p class="athelin-footer__about">
-          India's premier endurance sports specialist. Garmin, Brooks, Hoka, Oakley, and expert sports gear.
+          {{ block.settings.about_text | default: "India's premier endurance sports specialist. Garmin, Brooks, Hoka, Oakley, and expert athlete gear — fitted properly." }}
         </p>
       </div>
 
+      <!-- 2. Explore Navigation -->
       <div class="athelin-footer__menu">
         <h4 class="athelin-footer__heading">Explore</h4>
         <div class="athelin-footer__links">
@@ -27,21 +33,89 @@
               <a href="{{ link.url }}">{{ link.title }}</a>
             {%- endfor -%}
           {%- else -%}
-            <a href="{{ routes.collections_url }}/garmin">Garmin Watches</a>
-            <a href="{{ routes.collections_url }}/running">Running Gear</a>
+            <a href="{{ routes.collections_url }}/garmin">Garmin Smartwatches</a>
+            <a href="{{ routes.collections_url }}/running">Running Shoes &amp; Gear</a>
             <a href="{{ routes.collections_url }}/cycling">Cycling Tech</a>
-            <a href="/pages/contact">Contact &amp; Fittings</a>
+            <a href="/pages/contact">Our Store &amp; Fittings</a>
           {%- endif -%}
         </div>
       </div>
 
+      <!-- 3. Policies Tab -->
+      <div class="athelin-footer__menu athelin-footer__policies">
+        <h4 class="athelin-footer__heading">Policies</h4>
+        <div class="athelin-footer__links">
+          {%- if block.settings.policies_menu != blank and block.settings.policies_menu.links.size > 0 -%}
+            {%- for link in block.settings.policies_menu.links -%}
+              <a href="{{ link.url }}">{{ link.title }}</a>
+            {%- endfor -%}
+          {%- elsif shop.policies.size > 0 -%}
+            {%- for policy in shop.policies -%}
+              <a href="{{ policy.url }}">{{ policy.title }}</a>
+            {%- endfor -%}
+          {%- else -%}
+            {%- if shop.privacy_policy -%}
+              <a href="{{ shop.privacy_policy.url }}">{{ shop.privacy_policy.title }}</a>
+            {%- else -%}
+              <a href="/policies/privacy-policy">Privacy Policy</a>
+            {%- endif -%}
+
+            {%- if shop.refund_policy -%}
+              <a href="{{ shop.refund_policy.url }}">{{ shop.refund_policy.title }}</a>
+            {%- else -%}
+              <a href="/policies/refund-policy">Refund &amp; Return Policy</a>
+            {%- endif -%}
+
+            {%- if shop.terms_of_service -%}
+              <a href="{{ shop.terms_of_service.url }}">{{ shop.terms_of_service.title }}</a>
+            {%- else -%}
+              <a href="/policies/terms-of-service">Terms of Service</a>
+            {%- endif -%}
+
+            {%- if shop.shipping_policy -%}
+              <a href="{{ shop.shipping_policy.url }}">{{ shop.shipping_policy.title }}</a>
+            {%- else -%}
+              <a href="/policies/shipping-policy">Shipping Policy</a>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      </div>
+
+      <!-- 4. Verified Experience Center & Shop Location -->
       <div class="athelin-footer__contact">
-        <h4 class="athelin-footer__heading">Experience Center</h4>
-        <p>Delhi NCR, India</p>
-        <p>Expert fitting & consultations available by appointment.</p>
+        <h4 class="athelin-footer__heading">{{ block.settings.location_heading | default: 'Experience Center' }}</h4>
+        <div class="athelin-footer__location-details">
+          <p class="athelin-footer__store-title">
+            <strong>{{ block.settings.store_name | default: 'Athelin Gurugram' }}</strong>
+          </p>
+          <p class="athelin-footer__address">
+            Shop 6A, 1st Floor Concourse<br>
+            Sector 42-43 Rapid Metro Station<br>
+            Golf Course Road, Gurugram 122002
+          </p>
+          <div class="athelin-footer__meta">
+            <span class="athelin-footer__hours">🕒 {{ block.settings.store_hours | default: 'Daily: 10:30 AM – 8:30 PM' }}</span>
+            <span class="athelin-footer__phone">📞 <a href="tel:{{ block.settings.store_phone | default: '+919811981110' }}">{{ block.settings.store_phone | default: '+91 98119 81110' }}</a></span>
+          </div>
+          <div class="athelin-footer__location-actions">
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=Athelin+Garmin+Brand+Store+Sector+42-43+Rapid+Metro+Station+Golf+Course+Road+Gurgaon+122002"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="athelin-footer__action-link"
+            >
+              Get Directions ↗
+            </a>
+            <span class="athelin-footer__action-sep" aria-hidden="true">·</span>
+            <a href="/pages/contact" class="athelin-footer__action-link">
+              Store Page →
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- Bottom Bar: Copyright & Payment Types -->
     <div class="athelin-footer__bottom">
       <div class="athelin-footer__copyright">
         &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.
@@ -84,53 +158,117 @@
 
 .athelin-footer__top {
   display: grid;
-  grid-template-columns: minmax(280px, 2fr) minmax(180px, 1fr) minmax(240px, 1.5fr);
-  gap: 3rem;
+  grid-template-columns: minmax(260px, 1.8fr) minmax(130px, 0.9fr) minmax(150px, 1fr) minmax(240px, 1.4fr);
+  gap: 2.5rem;
   padding-bottom: 40px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   width: 100%;
   box-sizing: border-box;
 }
 
-.athelin-footer__logo {
-  filter: brightness(0) invert(1);
+.athelin-footer__logo-link {
+  display: inline-block;
   margin-bottom: 14px;
 }
 
+.athelin-footer__logo {
+  filter: brightness(0) invert(1);
+  display: block;
+}
+
 .athelin-footer__about {
-  max-width: 420px;
+  max-width: 380px;
   line-height: 1.6;
   font-size: 11.5px;
   color: #718096;
+  margin: 0;
 }
 
 .athelin-footer__heading {
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
-  margin-bottom: 14px;
+  margin: 0 0 14px 0;
+  letter-spacing: 0.02em;
 }
 
 .athelin-footer__links {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .athelin-footer__links a {
   color: #a0aec0;
   transition: color 0.2s ease;
   text-decoration: none;
+  font-size: 12px;
 }
 
 .athelin-footer__links a:hover {
   color: #ffffff;
 }
 
-.athelin-footer__contact p {
+.athelin-footer__location-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.athelin-footer__store-title {
+  color: #ffffff;
+  font-size: 12px;
+  margin: 0;
+}
+
+.athelin-footer__address {
   color: #718096;
-  line-height: 1.6;
-  margin-bottom: 6px;
+  line-height: 1.5;
+  margin: 0;
+  font-size: 11.5px;
+}
+
+.athelin-footer__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #cbd5e1;
+}
+
+.athelin-footer__phone a {
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.athelin-footer__phone a:hover {
+  color: #ffffff;
+}
+
+.athelin-footer__location-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11.5px;
+}
+
+.athelin-footer__action-link {
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.athelin-footer__action-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.athelin-footer__action-sep {
+  color: #64748b;
 }
 
 .athelin-footer__bottom {
@@ -141,9 +279,18 @@
   font-size: 11px;
   width: 100%;
   box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+  .athelin-footer__top {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
   .athelin-footer__top {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -161,9 +308,53 @@
   "name": "Footer",
   "settings": [
     {
+      "type": "textarea",
+      "id": "about_text",
+      "label": "About Brand Text",
+      "default": "India's premier endurance sports specialist. Garmin, Brooks, Hoka, Oakley, and expert athlete gear — fitted properly."
+    },
+    {
       "type": "link_list",
       "id": "menu",
-      "label": "Footer Menu"
+      "label": "Explore Navigation Menu"
+    },
+    {
+      "type": "link_list",
+      "id": "policies_menu",
+      "label": "Policies Navigation Menu",
+      "info": "Optional. If not set, automatically links to Shopify store policy pages."
+    },
+    {
+      "type": "header",
+      "content": "Store Location & Experience Center"
+    },
+    {
+      "type": "text",
+      "id": "location_heading",
+      "label": "Location Column Heading",
+      "default": "Experience Center"
+    },
+    {
+      "type": "text",
+      "id": "store_name",
+      "label": "Store Name",
+      "default": "Athelin Gurugram"
+    },
+    {
+      "type": "text",
+      "id": "store_hours",
+      "label": "Store Hours",
+      "default": "Daily: 10:30 AM – 8:30 PM"
+    },
+    {
+      "type": "text",
+      "id": "store_phone",
+      "label": "Store Phone Number",
+      "default": "+91 98119 81110"
+    },
+    {
+      "type": "header",
+      "content": "Payment Icons"
     },
     {
       "type": "checkbox",

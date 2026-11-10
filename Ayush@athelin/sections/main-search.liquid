@@ -1,0 +1,180 @@
+{% comment %}
+  Athelin Main Search Section
+  Controllable via Shopify Theme Editor schema
+{% endcomment %}
+
+{%- assign default_title = section.settings.default_hero_title | default: 'Explore All Gear' -%}
+{%- assign default_sub = section.settings.default_hero_subtitle | default: 'Search across Garmin GPS watches, Brooks & Hoka running shoes, Oakley eyewear, and recovery gear' -%}
+
+{%- assign search_hero_title = default_title -%}
+{%- assign search_hero_subtitle = default_sub -%}
+
+{%- if search.performed and search.terms != blank -%}
+  {%- assign search_hero_title = 'Search: “' | append: search.terms | append: '”' -%}
+  {%- assign search_hero_subtitle = search.results_count | append: ' results found for “' | append: search.terms | append: '” across our endurance sports catalog' -%}
+{%- endif -%}
+
+<div class="section-main-search" {{ section.shopify_attributes }}>
+  <div class="collection-page" data-collection-page data-search-page>
+    <!-- 1. Breadcrumbs & Collection Hero Banner (with Inline Search Bar) -->
+    {% render 'collection-hero',
+      title: search_hero_title,
+      subtitle: search_hero_subtitle,
+      parent_title: 'Search',
+      parent_url: routes.search_url,
+      show_search_bar: true,
+      search_terms: search.terms
+    %}
+
+    <!-- 2. Filter Toolbar (Active Filter Badges & Sort Dropdown) -->
+    {% render 'collection-active-pills' %}
+
+    <!-- 3. Dual-Column Full-Width Layout: Sidebar Filters + Products Grid -->
+    <div class="collection-layout">
+      <!-- Desktop Left Sidebar (240px) -->
+      {%- if section.settings.show_sidebar -%}
+        {% render 'collection-sidebar', is_mobile: false %}
+      {%- endif -%}
+
+      <!-- Products Grid -->
+      <div class="collection-products-wrap" style="width: 100%;">
+        {%- assign page_size = section.settings.products_per_page | default: 48 -%}
+        {%- if search.performed -%}
+          {% paginate search.results by page_size %}
+            {%- assign product_count = 0 -%}
+            {%- assign content_count = 0 -%}
+            {%- for item in search.results -%}
+              {%- if item.object_type == 'product' -%}
+                {%- assign product_count = product_count | plus: 1 -%}
+              {%- else -%}
+                {%- assign content_count = content_count | plus: 1 -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if product_count == 0 -%}
+              <div class="collection-search-notice">
+                <div class="collection-search-notice__text">
+                  <strong>No exact product matches for “{{ search.terms | escape }}”.</strong>
+                  <span>Showing popular in-stock endurance gear below — or try searching for Garmin, Hoka, Brooks, or Oakley.</span>
+                </div>
+                <a href="{{ routes.all_products_collection_url }}" class="collection-search-notice__reset">View All Products →</a>
+              </div>
+            {%- endif -%}
+
+            <div class="collection-grid" data-collection-grid>
+              {%- if product_count > 0 -%}
+                {%- for result in search.results -%}
+                  {%- if result.object_type == 'product' -%}
+                    {% render 'product-card', product: result %}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- elsif collections['all'].products.size > 0 -%}
+                {%- for product in collections['all'].products limit: 16 -%}
+                  {% render 'product-card', product: product %}
+                {%- endfor -%}
+              {%- else -%}
+                {% render 'product-card', fallback_title: 'Forerunner 970', fallback_brand: 'GARMIN', fallback_price: '₹92,990', fallback_emi: '₹30,997/mo', fallback_image: 'product-garmin-1.png', specs: 'AMOLED · Titanium · Triathlon GPS', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 9299000 %}
+                {% render 'product-card', fallback_title: 'Ghost Max 2', fallback_brand: 'BROOKS', fallback_price: '₹14,999', fallback_emi: '₹5,000/mo', fallback_image: 'collection-hero-runner.jpg', specs: 'Road · Plush · 6mm drop', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 1499900 %}
+                {% render 'product-card', fallback_title: 'Fenix 8 51mm AMOLED', fallback_brand: 'GARMIN', fallback_price: '₹1,19,990', fallback_emi: '₹39,997/mo', fallback_image: 'product-garmin-2.png', specs: 'Sapphire · Dive-Rated · Speaker/Mic', surface: 'trail', cushioning: 'firm', size: '10', fallback_price_raw: 11999000 %}
+                {% render 'product-card', fallback_title: 'Enduro 3 Solar', fallback_brand: 'GARMIN', fallback_price: '₹99,990', fallback_emi: '₹33,330/mo', fallback_image: 'product-garmin-3.png', specs: 'Ultra-Endurance · 320h GPS · 51mm', surface: 'trail', cushioning: 'balanced', size: '9', fallback_price_raw: 9999000 %}
+              {%- endif -%}
+            </div>
+
+            {%- if content_count > 0 -%}
+              <div class="search-section search-section--content" style="margin-top: 32px;">
+                <div class="search-section__header">
+                  <h2 class="search-section__title">Matching Guides &amp; Pages</h2>
+                  <span class="search-section__count">{{ content_count }} {% if content_count == 1 %}result{% else %}results{% endif %}</span>
+                </div>
+                <div class="search-content-grid">
+                  {%- for result in search.results -%}
+                    {%- unless result.object_type == 'product' -%}
+                      <a href="{{ result.url }}" class="search-content-card">
+                        <div class="search-content-card__body">
+                          <div class="search-content-card__meta">
+                            <span class="search-content-card__badge">{{ result.object_type | capitalize }}</span>
+                          </div>
+                          <h3 class="search-content-card__title">{{ result.title }}</h3>
+                          {%- if result.content != blank -%}
+                            <p class="search-content-card__excerpt">{{ result.content | strip_html | truncatewords: 20 }}</p>
+                          {%- endif -%}
+                          <span class="search-content-card__cta">Read more →</span>
+                        </div>
+                      </a>
+                    {%- endunless -%}
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endif -%}
+
+            {%- if paginate.pages > 1 -%}
+              <nav class="collection-pagination" aria-label="Pagination">
+                {{ paginate | default_pagination: next: 'Next →', previous: '← Previous' }}
+              </nav>
+            {%- endif -%}
+          {% endpaginate %}
+        {%- else -%}
+          <div class="collection-grid" data-collection-grid>
+            {%- if collections['all'].products.size > 0 -%}
+              {%- for product in collections['all'].products limit: 24 -%}
+                {% render 'product-card', product: product %}
+              {%- endfor -%}
+            {%- else -%}
+              {% render 'product-card', fallback_title: 'Forerunner 970', fallback_brand: 'GARMIN', fallback_price: '₹92,990', fallback_emi: '₹30,997/mo', fallback_image: 'product-garmin-1.png', specs: 'AMOLED · Titanium · Triathlon GPS', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 9299000 %}
+              {% render 'product-card', fallback_title: 'Ghost Max 2', fallback_brand: 'BROOKS', fallback_price: '₹14,999', fallback_emi: '₹5,000/mo', fallback_image: 'collection-hero-runner.jpg', specs: 'Road · Plush · 6mm drop', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 1499900 %}
+              {% render 'product-card', fallback_title: 'Fenix 8 51mm AMOLED', fallback_brand: 'GARMIN', fallback_price: '₹1,19,990', fallback_emi: '₹39,997/mo', fallback_image: 'product-garmin-2.png', specs: 'Sapphire · Dive-Rated · Speaker/Mic', surface: 'trail', cushioning: 'firm', size: '10', fallback_price_raw: 11999000 %}
+              {% render 'product-card', fallback_title: 'Enduro 3 Solar', fallback_brand: 'GARMIN', fallback_price: '₹99,990', fallback_emi: '₹33,330/mo', fallback_image: 'product-garmin-3.png', specs: 'Ultra-Endurance · 320h GPS · 51mm', surface: 'trail', cushioning: 'balanced', size: '9', fallback_price_raw: 9999000 %}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- 4. Mobile Bottom Sheet Filter Drawer -->
+    {% render 'collection-sidebar', is_mobile: true %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Search Results Page",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero Banner Defaults"
+    },
+    {
+      "type": "text",
+      "id": "default_hero_title",
+      "label": "Default Hero Title (When No Query)",
+      "default": "Explore All Gear"
+    },
+    {
+      "type": "textarea",
+      "id": "default_hero_subtitle",
+      "label": "Default Hero Subtitle",
+      "default": "Search across Garmin GPS watches, Brooks & Hoka running shoes, Oakley eyewear, and recovery gear"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Results"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "Show Filter Sidebar on Desktop",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products Per Page",
+      "min": 12,
+      "max": 48,
+      "step": 6,
+      "default": 48
+    }
+  ]
+}
+{% endschema %}
+

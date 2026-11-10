@@ -1,6 +1,8 @@
 {% doc %}
   Renders the collection filter bar containing active filter pill badges,
   mobile filter trigger, and custom sort dropdown.
+
+  @param {boolean} [is_wishlist] - Optional flag to show wishlist action pills in toolbar
 {% enddoc %}
 
 <div class="collection-toolbar" data-collection-toolbar>
@@ -30,6 +32,18 @@
 
     <!-- Active Pills Container (Dynamically populated by JS when filters are active) -->
     <div class="collection-active-pills" data-active-pills></div>
+
+    {%- if is_wishlist -%}
+      <div class="collection-active-pills" data-wishlist-toolbar style="display: none;">
+        <button type="button" class="collection-active-pill" data-wishlist-add-all>
+          <span>+ Move All to Bag</span>
+        </button>
+        <button type="button" class="collection-active-pill collection-active-pill--outline" data-wishlist-clear-all>
+          <span>Clear All</span>
+          <span class="collection-active-pill__close" aria-hidden="true">✕</span>
+        </button>
+      </div>
+    {%- endif -%}
   </div>
 
   <!-- Right Side: Sort Select Pill -->

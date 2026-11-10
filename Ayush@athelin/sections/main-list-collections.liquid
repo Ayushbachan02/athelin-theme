@@ -1,0 +1,110 @@
+{% comment %}
+  Athelin All Collections / Catalog Main Section
+  Controllable via Shopify Theme Editor schema
+{% endcomment %}
+
+<div class="section-main-list-collections" {{ section.shopify_attributes }}>
+  <div class="collection-page" data-collection-page>
+    <!-- 1. Breadcrumbs & Collection Hero Header -->
+    {% render 'collection-hero',
+      title: section.settings.title | default: 'All Collections & Gear',
+      subtitle: section.settings.subtitle | default: 'Authorised Garmin GPS watches, Brooks & Hoka running shoes, Oakley eyewear, and endurance equipment',
+      parent_title: 'Store',
+      parent_url: routes.root_url
+    %}
+
+    <!-- 2. Filter Toolbar (Active Filter Badges & Sort Dropdown) -->
+    {% render 'collection-active-pills' %}
+
+    <!-- 3. Dual-Column Full-Width Layout: Sidebar Filters + Products Grid -->
+    <div class="collection-layout">
+      <!-- Desktop Left Sidebar (240px) -->
+      {%- if section.settings.show_sidebar -%}
+        {% render 'collection-sidebar', is_mobile: false %}
+      {%- endif -%}
+
+      <!-- Products Grid -->
+      <div class="collection-products-wrap" style="width: 100%;">
+        {%- assign page_size = section.settings.products_per_page | default: 48 -%}
+        {% paginate collections['all'].products by 250 %}
+          <div
+            class="collection-grid"
+            data-collection-grid
+            data-total-pages="{{ paginate.pages }}"
+            data-current-page="{{ paginate.current_page }}"
+            data-page-size="{{ page_size }}"
+            data-fetch-base-url="{{ routes.all_products_collection_url }}"
+          >
+            {%- if collections['all'].products.size > 0 -%}
+              {%- for product in collections['all'].products -%}
+                {% render 'product-card', product: product %}
+              {%- endfor -%}
+            {%- else -%}
+              {% render 'product-card', fallback_title: 'Forerunner 970', fallback_brand: 'GARMIN', fallback_price: '₹92,990', fallback_emi: '₹30,997/mo', fallback_image: 'product-garmin-1.png', specs: 'AMOLED · Titanium · Triathlon GPS', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 9299000 %}
+              {% render 'product-card', fallback_title: 'Ghost Max 2', fallback_brand: 'BROOKS', fallback_price: '₹14,999', fallback_emi: '₹5,000/mo', fallback_image: 'collection-hero-runner.jpg', specs: 'Road · Plush · 6mm drop', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 1499900 %}
+              {% render 'product-card', fallback_title: 'Fenix 8 51mm AMOLED', fallback_brand: 'GARMIN', fallback_price: '₹1,19,990', fallback_emi: '₹39,997/mo', fallback_image: 'product-garmin-2.png', specs: 'Sapphire · Dive-Rated · Speaker/Mic', surface: 'trail', cushioning: 'firm', size: '10', fallback_price_raw: 11999000 %}
+              {% render 'product-card', fallback_title: 'Enduro 3 Solar', fallback_brand: 'GARMIN', fallback_price: '₹99,990', fallback_emi: '₹33,330/mo', fallback_image: 'product-garmin-3.png', specs: 'Ultra-Endurance · 320h GPS · 51mm', surface: 'trail', cushioning: 'balanced', size: '9', fallback_price_raw: 9999000 %}
+            {%- endif -%}
+
+            <div class="collection-empty" data-filter-empty style="display: none;">
+              <h3 class="collection-empty__title">No products match your selected filters</h3>
+              <p class="collection-empty__text">Try adjusting your price range or clearing one or more filters to see more gear.</p>
+              <button type="button" class="collection-empty__btn" data-filters-clear style="border: none; cursor: pointer;">
+                Reset All Filters
+              </button>
+            </div>
+          </div>
+
+          <nav class="collection-pagination" data-client-pagination aria-label="Pagination" style="display: none;"></nav>
+        {% endpaginate %}
+      </div>
+    </div>
+
+    <!-- 4. Mobile Bottom Sheet Filter Drawer -->
+    {% render 'collection-sidebar', is_mobile: true %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "All Collections Catalog",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero Banner"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Hero Title",
+      "default": "All Collections & Gear"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Hero Subtitle",
+      "default": "Authorised Garmin GPS watches, Brooks & Hoka running shoes, Oakley eyewear, and endurance equipment"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Filtering"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "Show Filter Sidebar on Desktop",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products Per Page",
+      "min": 12,
+      "max": 48,
+      "step": 6,
+      "default": 48
+    }
+  ]
+}
+{% endschema %}
+

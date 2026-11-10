@@ -1,0 +1,58 @@
+{% doc %}
+  Renders the Athelin Wishlist Page experience using the unified Collection Page layout:
+  1. Breadcrumbs & Collection Hero Banner (with dynamic saved count)
+  2. Filter Toolbar (Mobile Filter Button, Active Filter Pills, Move All / Clear All, & Sort Dropdown)
+  3. Dual-Column Layout: 240px Left Filter Sidebar + 4-Column/2-Column Responsive Product Grid
+  4. Mobile Bottom Sheet Filter Drawer
+{% enddoc %}
+
+<div class="collection-page" data-collection-page data-wishlist-page>
+  <!-- 1. Breadcrumbs & Collection Hero Banner -->
+  {% render 'collection-hero',
+    title: 'Saved Wishlist',
+    parent_title: 'Collections',
+    parent_url: routes.all_products_collection_url,
+    is_wishlist: true
+  %}
+
+  <!-- 2. Filter Toolbar (Active Filter Badges, Wishlist Actions & Sort Dropdown) -->
+  {% render 'collection-active-pills', is_wishlist: true %}
+
+  <!-- 3. Dual-Column Full-Width Layout: Sidebar Filters + Products Grid -->
+  <div class="collection-layout">
+    <!-- Desktop Left Sidebar (240px) -->
+    {% render 'collection-sidebar', is_mobile: false %}
+
+    <!-- Products Grid Area -->
+    <div class="collection-products-wrap" style="width: 100%;">
+      <!-- Empty Wishlist Notice Banner (Shown only when 0 items saved) -->
+      <div class="collection-search-notice" data-wishlist-empty style="display: none;">
+        <div class="collection-search-notice__text">
+          <strong>Your wishlist locker is currently empty.</strong>
+          <span>Tap the heart icon on any watch, shoe, or piece of gear below to save it here for instant comparison and checkout.</span>
+        </div>
+        <a href="{{ routes.all_products_collection_url }}" class="collection-search-notice__reset">Explore Full Catalog →</a>
+      </div>
+
+      <!-- Saved Wishlist Product Cards Grid (Populated dynamically by JS when items > 0) -->
+      <div class="collection-grid" data-collection-grid data-wishlist-grid style="display: none;"></div>
+
+      <!-- Recommended Catalog Grid (Shown when wishlist is empty so layout remains identical to Collection Page) -->
+      <div class="collection-grid" data-wishlist-fallback-grid style="display: none;">
+        {%- if collections['all'].products.size > 0 -%}
+          {%- for product in collections['all'].products limit: 12 -%}
+            {% render 'product-card', product: product %}
+          {%- endfor -%}
+        {%- else -%}
+          {% render 'product-card', fallback_title: 'Forerunner 970', fallback_brand: 'GARMIN', fallback_price: '₹92,990', fallback_emi: '₹30,997/mo', fallback_image: 'product-garmin-1.png', specs: 'AMOLED · Titanium · Triathlon GPS', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 9299000 %}
+          {% render 'product-card', fallback_title: 'Ghost Max 2', fallback_brand: 'BROOKS', fallback_price: '₹14,999', fallback_emi: '₹5,000/mo', fallback_image: 'collection-hero-runner.jpg', specs: 'Road · Plush · 6mm drop', surface: 'road', cushioning: 'plush', size: '9', fallback_price_raw: 1499900 %}
+          {% render 'product-card', fallback_title: 'Fenix 8 51mm AMOLED', fallback_brand: 'GARMIN', fallback_price: '₹1,19,990', fallback_emi: '₹39,997/mo', fallback_image: 'product-garmin-2.png', specs: 'Sapphire · Dive-Rated · Speaker/Mic', surface: 'trail', cushioning: 'firm', size: '10', fallback_price_raw: 11999000 %}
+          {% render 'product-card', fallback_title: 'Enduro 3 Solar', fallback_brand: 'GARMIN', fallback_price: '₹99,990', fallback_emi: '₹33,330/mo', fallback_image: 'product-garmin-3.png', specs: 'Ultra-Endurance · 320h GPS · 51mm', surface: 'trail', cushioning: 'balanced', size: '9', fallback_price_raw: 9999000 %}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Mobile Bottom Sheet Filter Drawer -->
+  {% render 'collection-sidebar', is_mobile: true %}
+</div>

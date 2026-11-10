@@ -49,7 +49,9 @@
     <p>{{ 'hello_world.best_practices_link' | t | link_to: 'https://shopify.dev/docs/storefronts/themes/best-practices' }}</p>
   </div>
 
+  {% # theme-check-disable UndefinedObject %}
   {{ content }}
+  {% # theme-check-enable UndefinedObject %}
 </div>
 
 {% schema %}

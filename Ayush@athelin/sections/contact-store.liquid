@@ -1,0 +1,463 @@
+{% comment %}
+  Renders the Athelin Our Store & Experience Center section with Google Shop image carousel,
+  route simulation engine, interactive map, in-store labs, and appointment booking form.
+  Exposes comprehensive Theme Editor schema controls.
+{% endcomment %}
+
+<section class="section-contact-store" {{ section.shopify_attributes }}>
+  {% render 'contact-content', settings: section.settings %}
+</section>
+
+{% schema %}
+{
+  "name": "Our Store & Contact Us",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero & Header"
+    },
+    {
+      "type": "text",
+      "id": "breadcrumb_title",
+      "label": "Breadcrumb Title",
+      "default": "Our Store"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_status_badge",
+      "label": "Show Live Open Status Badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "status_badge_text",
+      "label": "Status Badge Text",
+      "default": "Open Today · 10:30 AM – 8:30 PM"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow Subheading",
+      "default": "EXCLUSIVE GARMIN STORE & ENDURANCE RUNNING HUB"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Main Heading",
+      "default": "Visit the Athelin Experience Center"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Shop No. 6A, 1st Floor Concourse, Sector 42-43 Rapid Metro Station, Golf Course Road, Gurugram."
+    },
+    {
+      "type": "text",
+      "id": "directions_btn_text",
+      "label": "Directions Button Text",
+      "default": "Directions ↗"
+    },
+    {
+      "type": "url",
+      "id": "directions_url",
+      "label": "Directions Link URL"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_btn_text",
+      "label": "WhatsApp Button Text",
+      "default": "WhatsApp"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_phone",
+      "label": "WhatsApp Phone Number (with country code)",
+      "default": "919811981110"
+    },
+    {
+      "type": "header",
+      "content": "Store Image Carousel Gallery"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_carousel",
+      "label": "Show Store Image Carousel",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_1_image",
+      "label": "Slide 1 Image (Leave empty for default storefront)"
+    },
+    {
+      "type": "text",
+      "id": "slide_1_tag",
+      "label": "Slide 1 Tag",
+      "default": "STOREFRONT"
+    },
+    {
+      "type": "text",
+      "id": "slide_1_title",
+      "label": "Slide 1 Title",
+      "default": "Sector 42-43 Rapid Metro Concourse"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_1_caption",
+      "label": "Slide 1 Caption",
+      "default": "Shop 6A, 1st Floor · Accessible directly from Metro fare gates without street traffic."
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_2_image",
+      "label": "Slide 2 Image (Leave empty for default Garmin lounge)"
+    },
+    {
+      "type": "text",
+      "id": "slide_2_tag",
+      "label": "Slide 2 Tag",
+      "default": "GARMIN LOUNGE"
+    },
+    {
+      "type": "text",
+      "id": "slide_2_title",
+      "label": "Slide 2 Title",
+      "default": "Garmin GPS Ecosystem Live Demos"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_2_caption",
+      "label": "Slide 2 Caption",
+      "default": "Hands-on testing for Fēnix 8, Forerunner 965/265, Enduro 3 & Edge cycling units."
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_3_image",
+      "label": "Slide 3 Image (Leave empty for default shoe & gait lab)"
+    },
+    {
+      "type": "text",
+      "id": "slide_3_tag",
+      "label": "Slide 3 Tag",
+      "default": "GAIT ANALYSIS LAB"
+    },
+    {
+      "type": "text",
+      "id": "slide_3_title",
+      "label": "Slide 3 Title",
+      "default": "Curated Performance Footwear & 3D Treadmill"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_3_caption",
+      "label": "Slide 3 Caption",
+      "default": "Scientific pronation & strike fitting for Brooks, Hoka, Saucony and On Running."
+    },
+    {
+      "type": "image_picker",
+      "id": "slide_4_image",
+      "label": "Slide 4 Image (Leave empty for default optics studio)"
+    },
+    {
+      "type": "text",
+      "id": "slide_4_tag",
+      "label": "Slide 4 Tag",
+      "default": "PERFORMANCE LAB"
+    },
+    {
+      "type": "text",
+      "id": "slide_4_title",
+      "label": "Slide 4 Title",
+      "default": "Oakley Sports Optics & Marathon Nutrition"
+    },
+    {
+      "type": "textarea",
+      "id": "slide_4_caption",
+      "label": "Slide 4 Caption",
+      "default": "Prizm™ lens road tests, Maurten hydrogel fueling, and SaltStick electrolyte fitting."
+    },
+    {
+      "type": "header",
+      "content": "Store Quick Info Cards"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_info_cards",
+      "label": "Show Info Cards",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "card_1_tag",
+      "label": "Card 1 Tag",
+      "default": "EXPERIENCE STORE"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Card 1 Title",
+      "default": "Athelin Gurugram"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_desc",
+      "label": "Card 1 Address",
+      "default": "Shop 6A, 1st Floor Concourse, Sector 42-43 Rapid Metro Station, Golf Course Road, Gurugram 122002"
+    },
+    {
+      "type": "text",
+      "id": "card_1_link_text",
+      "label": "Card 1 Link Text",
+      "default": "Open Google Maps →"
+    },
+    {
+      "type": "url",
+      "id": "card_1_link_url",
+      "label": "Card 1 Link URL"
+    },
+    {
+      "type": "text",
+      "id": "card_2_tag",
+      "label": "Card 2 Tag",
+      "default": "STORE TIMINGS"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Card 2 Title",
+      "default": "10:30 AM – 8:30 PM"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_desc",
+      "label": "Card 2 Timings Details",
+      "default": "Open all 7 days a week. Gait lab testing available daily till 7:30 PM."
+    },
+    {
+      "type": "text",
+      "id": "card_2_link_text",
+      "label": "Card 2 Link Text",
+      "default": "Book Personal Fitting Slot →"
+    },
+    {
+      "type": "url",
+      "id": "card_2_link_url",
+      "label": "Card 2 Link URL"
+    },
+    {
+      "type": "text",
+      "id": "card_3_tag",
+      "label": "Card 3 Tag",
+      "default": "DIRECT HELPLINE"
+    },
+    {
+      "type": "text",
+      "id": "card_3_phone",
+      "label": "Card 3 Phone",
+      "default": "+91 98119 81110"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_desc",
+      "label": "Card 3 Description",
+      "default": "Call or WhatsApp our coaches for shoe sizing, Garmin setups, and orders."
+    },
+    {
+      "type": "text",
+      "id": "card_3_email",
+      "label": "Card 3 Email",
+      "default": "connect@athelin.com"
+    },
+    {
+      "type": "header",
+      "content": "Transit Simulator"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_route_simulator",
+      "label": "Show Transit Route Simulator",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "simulator_badge",
+      "label": "Simulator Tag",
+      "default": "TRANSIT SIMULATION"
+    },
+    {
+      "type": "text",
+      "id": "simulator_title",
+      "label": "Simulator Title",
+      "default": "How to Get to Athelin"
+    },
+    {
+      "type": "textarea",
+      "id": "simulator_subtitle",
+      "label": "Simulator Subtitle",
+      "default": "Select your starting point or use GPS to view live travel time and direct directions to our station concourse."
+    },
+    {
+      "type": "header",
+      "content": "Location Map"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_map",
+      "label": "Show Location Map",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "map_title",
+      "label": "Map Title",
+      "default": "Location Map"
+    },
+    {
+      "type": "textarea",
+      "id": "map_desc",
+      "label": "Map Address Description",
+      "default": "Sector 42-43 Rapid Metro Station, Golf Course Road, Gurugram, Haryana 122002"
+    },
+    {
+      "type": "text",
+      "id": "map_embed_url",
+      "label": "Google Maps Embed Iframe URL",
+      "default": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3508.361517409264!2d77.0962!3d28.4623!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d18d09819dc73%3A0x6b24bb88b0a99c9c!2sSector%2042-43%20Rapid%20Metro%20Station!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+    },
+    {
+      "type": "header",
+      "content": "In-Store Services"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_services",
+      "label": "Show In-Store Services",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "services_tag",
+      "label": "Services Tag",
+      "default": "IN-STORE EXPERIENCES"
+    },
+    {
+      "type": "text",
+      "id": "services_title",
+      "label": "Services Title",
+      "default": "What You Can Experience"
+    },
+    {
+      "type": "text",
+      "id": "service_1_icon",
+      "label": "Service 1 Icon",
+      "default": "🏃‍♂️"
+    },
+    {
+      "type": "text",
+      "id": "service_1_title",
+      "label": "Service 1 Title",
+      "default": "3D Video Gait Lab"
+    },
+    {
+      "type": "textarea",
+      "id": "service_1_desc",
+      "label": "Service 1 Description",
+      "default": "Indoor treadmill & high-speed camera analysis for Brooks, Hoka & Saucony."
+    },
+    {
+      "type": "text",
+      "id": "service_2_icon",
+      "label": "Service 2 Icon",
+      "default": "⌚"
+    },
+    {
+      "type": "text",
+      "id": "service_2_title",
+      "label": "Service 2 Title",
+      "default": "Garmin Demo Lounge"
+    },
+    {
+      "type": "textarea",
+      "id": "service_2_desc",
+      "label": "Service 2 Description",
+      "default": "Live sync & trial for Fēnix 8, Forerunner 965/265 & Edge bike computers."
+    },
+    {
+      "type": "text",
+      "id": "service_3_icon",
+      "label": "Service 3 Icon",
+      "default": "👓"
+    },
+    {
+      "type": "text",
+      "id": "service_3_title",
+      "label": "Service 3 Title",
+      "default": "Oakley Prizm™ Fitting"
+    },
+    {
+      "type": "textarea",
+      "id": "service_3_desc",
+      "label": "Service 3 Description",
+      "default": "Road and trail sports optics fitting with zero-slip earstem retention."
+    },
+    {
+      "type": "text",
+      "id": "service_4_icon",
+      "label": "Service 4 Icon",
+      "default": "⚡"
+    },
+    {
+      "type": "text",
+      "id": "service_4_title",
+      "label": "Service 4 Title",
+      "default": "Endurance Nutrition Bar"
+    },
+    {
+      "type": "textarea",
+      "id": "service_4_desc",
+      "label": "Service 4 Description",
+      "default": "Marathon fueling strategy with freshly stocked Maurten & SaltStick."
+    },
+    {
+      "type": "header",
+      "content": "Appointment & Contact Form"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_contact_form",
+      "label": "Show Contact Form",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "form_tag",
+      "label": "Form Tag",
+      "default": "REACH OUT"
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Form Title",
+      "default": "Book a Fitting or Leave a Message"
+    },
+    {
+      "type": "textarea",
+      "id": "form_desc",
+      "label": "Form Description",
+      "default": "Schedule a gait analysis, consult on Garmin watches, or ask a question."
+    },
+    {
+      "type": "text",
+      "id": "form_button_text",
+      "label": "Form Submit Button Text",
+      "default": "Send Message & Book Appointment →"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Store & Contact Us"
+    }
+  ]
+}
+{% endschema %}

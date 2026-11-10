@@ -24,14 +24,25 @@
     </div>
 
     <div class="hero-banner__media">
-      <img
-        src="{{ 'athelin-hero-watches.png' | asset_url }}"
-        alt="Garmin Endurance Watches"
-        width="555"
-        height="277"
-        class="hero-banner__image"
-        loading="eager"
-      >
+      {%- if block.settings.hero_image != blank -%}
+        <img
+          src="{{ block.settings.hero_image | image_url: width: 1100 }}"
+          alt="{{ block.settings.title_line_1 | default: 'Garmin Endurance Watches' | escape }}"
+          width="555"
+          height="277"
+          class="hero-banner__image"
+          loading="eager"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'athelin-hero-watches.png' | asset_url }}"
+          alt="Garmin Endurance Watches"
+          width="555"
+          height="277"
+          class="hero-banner__image"
+          loading="eager"
+        >
+      {%- endif -%}
     </div>
   </div>
 </section>
@@ -59,6 +70,11 @@
       "default": "India's endurance specialist. Garmin, Brooks, Hoka, Castelli — fitted properly."
     },
     {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero Image (Leave empty for default watches mockup)"
+    },
+    {
       "type": "text",
       "id": "primary_cta_text",
       "label": "Primary Button Text",
@@ -79,6 +95,11 @@
       "type": "url",
       "id": "secondary_cta_link",
       "label": "Secondary Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner"
     }
   ]
 }

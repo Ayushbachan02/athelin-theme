@@ -17,14 +17,17 @@
       {{ settings.type_primary_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
     {% endunless %}
 
+    {% # theme-check-disable RemoteAsset %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,100..125,300..800;1,100..125,300..800&display=swap" rel="stylesheet">
+    {% # theme-check-enable RemoteAsset %}
 
     {% # Load and preload the critical CSS %}
     {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
     {{ 'base.css' | asset_url | stylesheet_tag }}
     {{ 'athelin-theme.css' | asset_url | stylesheet_tag }}
+    {{ 'athelin-collection.css' | asset_url | stylesheet_tag }}
 
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
@@ -47,6 +50,9 @@
       {% block 'footer' -%}{%- endblock %}
     {% endblock %}
 
+    {% render 'quick-cart-drawer' %}
+
     <script src="{{ 'athelin-theme.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'athelin-collection.js' | asset_url }}" defer="defer"></script>
   </body>
 </html>

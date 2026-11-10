@@ -1,0 +1,649 @@
+{% doc %}
+  Renders the Athelin Contact Us & Experience Center Experience.
+  Accepts an optional `settings` object (from block.settings or section.settings)
+  for theme editor control. Falls back to default values when settings are omitted.
+
+  @param {object} [settings] - Theme editor settings object
+{% enddoc %}
+
+{%- assign cfg = settings -%}
+
+{%- assign show_status = true -%}
+{%- if cfg.show_status_badge == false -%}
+  {%- assign show_status = false -%}
+{%- endif -%}
+
+{%- assign show_carousel = true -%}
+{%- if cfg.show_carousel == false -%}
+  {%- assign show_carousel = false -%}
+{%- endif -%}
+
+{%- assign show_info_cards = true -%}
+{%- if cfg.show_info_cards == false -%}
+  {%- assign show_info_cards = false -%}
+{%- endif -%}
+
+{%- assign show_route_simulator = true -%}
+{%- if cfg.show_route_simulator == false -%}
+  {%- assign show_route_simulator = false -%}
+{%- endif -%}
+
+{%- assign show_map = true -%}
+{%- if cfg.show_map == false -%}
+  {%- assign show_map = false -%}
+{%- endif -%}
+
+{%- assign show_services = true -%}
+{%- if cfg.show_services == false -%}
+  {%- assign show_services = false -%}
+{%- endif -%}
+
+{%- assign show_form = true -%}
+{%- if cfg.show_contact_form == false -%}
+  {%- assign show_form = false -%}
+{%- endif -%}
+
+<div class="contact-page" data-contact-page>
+  <!-- 1. Breadcrumbs & Hero Header -->
+  <div class="contact-hero">
+    <nav class="collection-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="collection-breadcrumbs__list">
+        <li class="collection-breadcrumbs__item">
+          <a href="{{ routes.root_url }}" class="collection-breadcrumbs__link">Home</a>
+        </li>
+        <li class="collection-breadcrumbs__separator" aria-hidden="true">/</li>
+        <li class="collection-breadcrumbs__item">
+          <a href="{{ routes.all_products_collection_url }}" class="collection-breadcrumbs__link">Store</a>
+        </li>
+        <li class="collection-breadcrumbs__separator" aria-hidden="true">/</li>
+        <li class="collection-breadcrumbs__item collection-breadcrumbs__item--current" aria-current="page">
+          {{ cfg.breadcrumb_title | default: 'Our Store' }}
+        </li>
+      </ol>
+    </nav>
+
+    <div class="contact-hero__banner">
+      <div class="contact-hero__text">
+        <div class="contact-hero__badge-row">
+          {%- if show_status -%}
+            <span class="contact-hero__status-badge">
+              <span class="contact-hero__status-dot"></span> {{ cfg.status_badge_text | default: 'Open Today · 10:30 AM – 8:30 PM' }}
+            </span>
+          {%- endif -%}
+          <span class="contact-hero__eyebrow">{{ cfg.eyebrow | default: 'EXCLUSIVE GARMIN STORE & ENDURANCE RUNNING HUB' }}</span>
+        </div>
+        <h1 class="contact-hero__title">{{ cfg.heading | default: 'Visit the Athelin Experience Center' }}</h1>
+        <p class="contact-hero__subtitle">
+          {{ cfg.subtitle | default: 'Shop No. 6A, 1st Floor Concourse, Sector 42-43 Rapid Metro Station, Golf Course Road, Gurugram.' }}
+        </p>
+      </div>
+
+      <div class="contact-hero__actions">
+        <a
+          href="{{ cfg.directions_url | default: 'https://www.google.com/maps/dir/?api=1&destination=Athelin+Garmin+Brand+Store+Sector+42-43+Rapid+Metro+Station+Golf+Course+Road+Gurgaon+122002' }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-btn contact-btn--primary"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+          </svg>
+          {{ cfg.directions_btn_text | default: 'Directions ↗' }}
+        </a>
+        <a
+          href="https://wa.me/{{ cfg.whatsapp_phone | default: '919811981110' }}?text=Hi%20Athelin%20team,%20I%20would%20like%20to%20inquire%20about%20store%20timings%20and%20products."
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-btn contact-btn--whatsapp"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.05 20.16C10.57 20.16 9.12 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.8 7.37 7.5 3.67 12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.16 12.05 20.16ZM16.57 14.41C16.32 14.28 15.11 13.69 14.88 13.61C14.66 13.52 14.5 13.48 14.33 13.73C14.17 13.98 13.7 14.53 13.56 14.69C13.42 14.85 13.27 14.88 13.03 14.75C12.78 14.63 11.99 14.37 11.05 13.53C10.32 12.87 9.82 12.06 9.68 11.82C9.54 11.57 9.67 11.43 9.79 11.31C9.9 11.2 10.04 11.02 10.16 10.88C10.29 10.74 10.33 10.63 10.41 10.47C10.49 10.3 10.45 10.16 10.39 10.04C10.33 9.91 9.83 8.69 9.63 8.19C9.42 7.7 9.22 7.77 9.07 7.76C8.92 7.76 8.76 7.75 8.59 7.75C8.43 7.75 8.16 7.81 7.94 8.05C7.71 8.3 7.07 8.9 7.07 10.12C7.07 11.34 7.96 12.52 8.08 12.68C8.21 12.85 9.83 15.34 12.3 16.41C12.89 16.66 13.35 16.82 13.71 16.93C14.3 17.12 14.84 17.09 15.26 17.03C15.74 16.96 16.73 16.43 16.94 15.85C17.14 15.28 17.14 14.79 17.08 14.69C17.02 14.59 16.82 14.53 16.57 14.41Z"/>
+          </svg>
+          {{ cfg.whatsapp_btn_text | default: 'WhatsApp' }}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Google Shop Gallery Carousel (Visual Centerpiece) -->
+  {%- if show_carousel -%}
+    <div class="store-gallery-section" data-store-carousel>
+      <div class="store-gallery-carousel__wrap">
+        <div class="store-gallery-carousel__track" data-carousel-track>
+          <!-- Slide 1: Official Storefront -->
+          <div class="store-gallery-slide is-active" data-carousel-slide="0">
+            {%- assign slide_1_src = 'https://cmsprod.garmin-india.com/media/Athelin.webp' -%}
+            {%- if cfg.slide_1_image != blank -%}
+              {%- assign slide_1_src = cfg.slide_1_image | image_url: width: 1200 -%}
+            {%- endif -%}
+            <img
+              src="{{ slide_1_src }}"
+              alt="{{ cfg.slide_1_title | default: 'Athelin Exclusive Garmin Storefront' | escape }}"
+              class="store-gallery-slide__img"
+              width="1200"
+              height="600"
+              loading="eager"
+              onerror="this.onerror=null; this.src='{{ 'collection-hero-runner.jpg' | asset_url }}';"
+            >
+            <div class="store-gallery-slide__overlay">
+              <span class="store-gallery-slide__tag">{{ cfg.slide_1_tag | default: 'STOREFRONT' }}</span>
+              <h3 class="store-gallery-slide__title">{{ cfg.slide_1_title | default: 'Sector 42-43 Rapid Metro Concourse' }}</h3>
+              <p class="store-gallery-slide__caption">{{ cfg.slide_1_caption | default: 'Shop 6A, 1st Floor · Accessible directly from Metro fare gates without street traffic.' }}</p>
+            </div>
+          </div>
+
+          <!-- Slide 2: Garmin Smartwatch Lounge -->
+          <div class="store-gallery-slide" data-carousel-slide="1">
+            {%- assign slide_2_src = 'https://lh3.googleusercontent.com/FH6pycOHSX9eNc5fQzbI00KWSl4K7a6YjVNxyrRFz2evokxf33A5AG7NZzfwzCHYYM5AkyCDsz2xhIhePKtbKlNFZD2NvOTKI5l8tF8R=w1000-rw' -%}
+            {%- if cfg.slide_2_image != blank -%}
+              {%- assign slide_2_src = cfg.slide_2_image | image_url: width: 1200 -%}
+            {%- endif -%}
+            <img
+              src="{{ slide_2_src }}"
+              alt="{{ cfg.slide_2_title | default: 'Garmin Smartwatch Lounge and Testing Studio' | escape }}"
+              class="store-gallery-slide__img"
+              width="1200"
+              height="600"
+              loading="lazy"
+              onerror="this.onerror=null; this.src='{{ 'garmin-banner-bg.png' | asset_url }}';"
+            >
+            <div class="store-gallery-slide__overlay">
+              <span class="store-gallery-slide__tag">{{ cfg.slide_2_tag | default: 'GARMIN LOUNGE' }}</span>
+              <h3 class="store-gallery-slide__title">{{ cfg.slide_2_title | default: 'Garmin GPS Ecosystem Live Demos' }}</h3>
+              <p class="store-gallery-slide__caption">{{ cfg.slide_2_caption | default: 'Hands-on testing for Fēnix 8, Forerunner 965/265, Enduro 3 & Edge cycling units.' }}</p>
+            </div>
+          </div>
+
+          <!-- Slide 3: Running Shoe Wall & Gait Lab -->
+          <div class="store-gallery-slide" data-carousel-slide="2">
+            {%- assign slide_3_src = 'https://lh3.googleusercontent.com/153L3NPoADaBIC3e9-fuz2cXYf4JK0zGOQVV0EO6dxOWq_Bve2P7wuYWw44coVZ3Zbdx7OwCUJ35oJJekj011OQCHQR0atrZcrKk8b_tSw=w1000-rw' -%}
+            {%- if cfg.slide_3_image != blank -%}
+              {%- assign slide_3_src = cfg.slide_3_image | image_url: width: 1200 -%}
+            {%- endif -%}
+            <img
+              src="{{ slide_3_src }}"
+              alt="{{ cfg.slide_3_title | default: 'Running Shoe Wall and Treadmill Gait Analysis Studio' | escape }}"
+              class="store-gallery-slide__img"
+              width="1200"
+              height="600"
+              loading="lazy"
+              onerror="this.onerror=null; this.src='{{ 'shoe-finder-graphic.jpg' | asset_url }}';"
+            >
+            <div class="store-gallery-slide__overlay">
+              <span class="store-gallery-slide__tag">{{ cfg.slide_3_tag | default: 'GAIT ANALYSIS LAB' }}</span>
+              <h3 class="store-gallery-slide__title">{{ cfg.slide_3_title | default: 'Curated Performance Footwear & 3D Treadmill' }}</h3>
+              <p class="store-gallery-slide__caption">{{ cfg.slide_3_caption | default: 'Scientific pronation & strike fitting for Brooks, Hoka, Saucony and On Running.' }}</p>
+            </div>
+          </div>
+
+          <!-- Slide 4: Oakley Eyewear & Endurance Hub -->
+          <div class="store-gallery-slide" data-carousel-slide="3">
+            {%- assign slide_4_src = 'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=1200&q=80' -%}
+            {%- if cfg.slide_4_image != blank -%}
+              {%- assign slide_4_src = cfg.slide_4_image | image_url: width: 1200 -%}
+            {%- endif -%}
+            <img
+              src="{{ slide_4_src }}"
+              alt="{{ cfg.slide_4_title | default: 'Sports Eyewear and Endurance Athlete Nutrition Hub' | escape }}"
+              class="store-gallery-slide__img"
+              width="1200"
+              height="600"
+              loading="lazy"
+              onerror="this.onerror=null; this.src='{{ 'athelin-hero-watches.png' | asset_url }}';"
+            >
+            <div class="store-gallery-slide__overlay">
+              <span class="store-gallery-slide__tag">{{ cfg.slide_4_tag | default: 'PERFORMANCE LAB' }}</span>
+              <h3 class="store-gallery-slide__title">{{ cfg.slide_4_title | default: 'Oakley Sports Optics & Marathon Nutrition' }}</h3>
+              <p class="store-gallery-slide__caption">{{ cfg.slide_4_caption | default: 'Prizm™ lens road tests, Maurten hydrogel fueling, and SaltStick electrolyte fitting.' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carousel Navigation Arrows -->
+        <button
+          type="button"
+          class="store-carousel-nav store-carousel-nav--prev"
+          data-carousel-prev
+          aria-label="Previous store photo"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          class="store-carousel-nav store-carousel-nav--next"
+          data-carousel-next
+          aria-label="Next store photo"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
+        <!-- Carousel Progress Dots & Counter -->
+        <div class="store-carousel-footer">
+          <div class="store-carousel-dots" data-carousel-dots>
+            <button type="button" class="store-carousel-dot is-active" data-carousel-dot="0" aria-label="Go to slide 1"></button>
+            <button type="button" class="store-carousel-dot" data-carousel-dot="1" aria-label="Go to slide 2"></button>
+            <button type="button" class="store-carousel-dot" data-carousel-dot="2" aria-label="Go to slide 3"></button>
+            <button type="button" class="store-carousel-dot" data-carousel-dot="3" aria-label="Go to slide 4"></button>
+          </div>
+          <span class="store-carousel-counter" data-carousel-counter>01 / 04</span>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- 3. Minimal Store Info Quick Bar (3 Clean Cards) -->
+  {%- if show_info_cards -%}
+    <div class="contact-grid">
+      <!-- Card 1: Official Store Address -->
+      <div class="contact-info-card">
+        <div class="contact-info-card__icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div class="contact-info-card__content">
+          <span class="contact-info-card__tag">{{ cfg.card_1_tag | default: 'EXPERIENCE STORE' }}</span>
+          <h3 class="contact-info-card__title">{{ cfg.card_1_title | default: 'Athelin Gurugram' }}</h3>
+          <p class="contact-info-card__desc">
+            {{ cfg.card_1_desc | default: 'Shop 6A, 1st Floor Concourse, Sector 42-43 Rapid Metro Station, Golf Course Road, Gurugram 122002' }}
+          </p>
+          <a
+            href="{{ cfg.card_1_link_url | default: 'https://www.google.com/maps/dir/?api=1&destination=Athelin+Garmin+Brand+Store+Sector+42-43+Rapid+Metro+Station+Golf+Course+Road+Gurgaon+122002' }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-info-card__link"
+          >
+            {{ cfg.card_1_link_text | default: 'Open Google Maps →' }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2: Operating Hours -->
+      <div class="contact-info-card">
+        <div class="contact-info-card__icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="contact-info-card__content">
+          <span class="contact-info-card__tag">{{ cfg.card_2_tag | default: 'STORE TIMINGS' }}</span>
+          <h3 class="contact-info-card__title">{{ cfg.card_2_title | default: '10:30 AM – 8:30 PM' }}</h3>
+          <p class="contact-info-card__desc">
+            {{ cfg.card_2_desc | default: 'Open all 7 days a week. Gait lab testing available daily till 7:30 PM.' }}
+          </p>
+          <a href="{{ cfg.card_2_link_url | default: '#contact-appointment' }}" class="contact-info-card__link">
+            {{ cfg.card_2_link_text | default: 'Book Personal Fitting Slot →' }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 3: Phone & Direct Reach Out -->
+      <div class="contact-info-card">
+        <div class="contact-info-card__icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+        </div>
+        <div class="contact-info-card__content">
+          <span class="contact-info-card__tag">{{ cfg.card_3_tag | default: 'DIRECT HELPLINE' }}</span>
+          <h3 class="contact-info-card__title">{{ cfg.card_3_phone | default: '+91 98119 81110' }}</h3>
+          <p class="contact-info-card__desc">
+            {{ cfg.card_3_desc | default: 'Call or WhatsApp our coaches for shoe sizing, Garmin setups, and orders.' }}
+          </p>
+          <a href="mailto:{{ cfg.card_3_email | default: 'connect@athelin.com' }}" class="contact-info-card__link">
+            Email: {{ cfg.card_3_email | default: 'connect@athelin.com' }} →
+          </a>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- 4. Interactive Route Simulation Engine ("How to Reach Athelin") -->
+  {%- if show_route_simulator -%}
+    <div class="route-simulator" data-route-simulator>
+      <div class="route-simulator__header">
+        <div class="route-simulator__header-badge">{{ cfg.simulator_badge | default: 'TRANSIT SIMULATION' }}</div>
+        <h2 class="route-simulator__title">{{ cfg.simulator_title | default: 'How to Get to Athelin' }}</h2>
+        <p class="route-simulator__subtitle">
+          {{ cfg.simulator_subtitle | default: 'Select your starting point or use GPS to view live travel time and direct directions to our station concourse.' }}
+        </p>
+      </div>
+
+      <!-- Simulator Input Controls -->
+      <div class="route-simulator__controls">
+        <div class="route-simulator__input-wrap">
+          <svg class="route-simulator__input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+          </svg>
+          <input
+            type="text"
+            class="route-simulator__input"
+            data-route-origin-input
+            placeholder="Enter location (e.g. South Delhi, IGI Airport, Cyber Hub, Noida)..."
+            aria-label="Enter starting location"
+          >
+          <button type="button" class="route-simulator__gps-btn" data-route-gps-btn title="Use current GPS location">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="7"></circle>
+              <polyline points="12 9 12 12 13.5 13.5"></polyline>
+              <path d="M12 2v2"></path>
+              <path d="M12 20v2"></path>
+              <path d="M2 12h2"></path>
+              <path d="M20 12h2"></path>
+            </svg>
+            <span>Use GPS</span>
+          </button>
+        </div>
+
+        <!-- Quick Origin Preset Chips -->
+        <div class="route-simulator__presets">
+          <span class="route-simulator__presets-label">Popular Hubs:</span>
+          <button type="button" class="route-preset-chip is-active" data-route-preset="cyber-hub">
+            Cyber Hub
+          </button>
+          <button type="button" class="route-preset-chip" data-route-preset="igi-airport">
+            Airport (DEL)
+          </button>
+          <button type="button" class="route-preset-chip" data-route-preset="south-delhi">
+            South Delhi
+          </button>
+          <button type="button" class="route-preset-chip" data-route-preset="cp-delhi">
+            Connaught Place
+          </button>
+          <button type="button" class="route-preset-chip" data-route-preset="noida">
+            Noida / East NCR
+          </button>
+        </div>
+
+        <!-- Mode Selector Pills -->
+        <div class="route-mode-selector">
+          <button type="button" class="route-mode-btn is-active" data-route-mode="metro">
+            <span>🚇 Metro (Direct Concourse)</span>
+          </button>
+          <button type="button" class="route-mode-btn" data-route-mode="driving">
+            <span>🚗 Car / Cab</span>
+          </button>
+          <button type="button" class="route-mode-btn" data-route-mode="cycling">
+            <span>🚴 Cycle / Run Corridor</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Simulation Output Display Card -->
+      <div class="route-simulation-card" data-route-output-card>
+        <div class="route-simulation-card__summary">
+          <div class="route-simulation-card__stats">
+            <div class="route-stat-item">
+              <span class="route-stat-item__label">Estimated Time</span>
+              <strong class="route-stat-item__value" data-route-time>~10 - 12 mins</strong>
+            </div>
+            <div class="route-stat-item">
+              <span class="route-stat-item__label">Distance</span>
+              <strong class="route-stat-item__value" data-route-dist>4.8 km</strong>
+            </div>
+            <div class="route-stat-item">
+              <span class="route-stat-item__label">Route Highlight</span>
+              <strong class="route-stat-item__value" data-route-highlight>Rapid Metro Direct (3 Stops)</strong>
+            </div>
+          </div>
+
+          <div class="route-simulation-card__actions">
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=Athelin+Garmin+Brand+Store+Sector+42-43+Rapid+Metro+Station+Golf+Course+Road+Gurgaon+122002"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="route-live-nav-btn"
+              data-route-live-maps-link
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+              </svg>
+              <span>Open in Google Maps ↗</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Turn-by-Turn Simulation Milestones -->
+        <div class="route-milestones" data-route-milestones>
+          <div class="route-milestone-step">
+            <div class="route-milestone-step__marker">1</div>
+            <div class="route-milestone-step__body">
+              <strong class="route-milestone-step__title" data-step-1-title>Board Rapid Metro</strong>
+              <p class="route-milestone-step__desc" data-step-1-desc>
+                Board towards Sector 55-56 on the elevated Rapid Metro corridor.
+              </p>
+            </div>
+          </div>
+
+          <div class="route-milestone-step">
+            <div class="route-milestone-step__marker">2</div>
+            <div class="route-milestone-step__body">
+              <strong class="route-milestone-step__title" data-step-2-title>Alight at Sector 42-43</strong>
+              <p class="route-milestone-step__desc" data-step-2-desc>
+                Direct exit at Sector 42-43 Rapid Metro Station without street traffic.
+              </p>
+            </div>
+          </div>
+
+          <div class="route-milestone-step">
+            <div class="route-milestone-step__marker">3</div>
+            <div class="route-milestone-step__body">
+              <strong class="route-milestone-step__title" data-step-3-title>1st Floor Concourse</strong>
+              <p class="route-milestone-step__desc" data-step-3-desc>
+                Take the escalator up. Athelin is at Shop 6A opposite fare gates.
+              </p>
+            </div>
+          </div>
+
+          <div class="route-milestone-step is-final">
+            <div class="route-milestone-step__marker">★</div>
+            <div class="route-milestone-step__body">
+              <strong class="route-milestone-step__title">Arrive at Athelin</strong>
+              <p class="route-milestone-step__desc">
+                Walk-in for gait analysis, Garmin demos, or athlete hydration.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- 5. Google Maps Embed -->
+  {%- if show_map -%}
+    <div class="contact-map-card">
+      <div class="contact-map-card__header">
+        <div>
+          <h3 class="contact-map-card__title">{{ cfg.map_title | default: 'Location Map' }}</h3>
+          <p class="contact-map-card__desc">
+            {{ cfg.map_desc | default: 'Sector 42-43 Rapid Metro Station, Golf Course Road, Gurugram, Haryana 122002' }}
+          </p>
+        </div>
+        <a
+          href="https://www.google.com/maps/place/Athelin/@28.4623,77.0984,17z"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-map-card__badge-link"
+        >
+          Verified on Google Maps ↗
+        </a>
+      </div>
+
+      <div class="contact-map-card__iframe-wrap">
+        <iframe
+          title="Athelin Garmin Experience Center Location Map"
+          src="{{ cfg.map_embed_url | default: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3508.361517409264!2d77.0962!3d28.4623!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d18d09819dc73%3A0x6b24bb88b0a99c9c!2sSector%2042-43%20Rapid%20Metro%20Station!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin' }}"
+          width="100%"
+          height="360"
+          style="border:0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- 6. In-Store Specialty Services (Streamlined) -->
+  {%- if show_services -%}
+    <div class="contact-services">
+      <div class="contact-services__header">
+        <span class="contact-services__tag">{{ cfg.services_tag | default: 'IN-STORE EXPERIENCES' }}</span>
+        <h2 class="contact-services__title">{{ cfg.services_title | default: 'What You Can Experience' }}</h2>
+      </div>
+
+      <div class="contact-services__grid">
+        <div class="contact-service-card">
+          <div class="contact-service-card__icon">{{ cfg.service_1_icon | default: '🏃‍♂️' }}</div>
+          <h3 class="contact-service-card__title">{{ cfg.service_1_title | default: '3D Video Gait Lab' }}</h3>
+          <p class="contact-service-card__desc">
+            {{ cfg.service_1_desc | default: 'Indoor treadmill & high-speed camera analysis for Brooks, Hoka & Saucony.' }}
+          </p>
+        </div>
+
+        <div class="contact-service-card">
+          <div class="contact-service-card__icon">{{ cfg.service_2_icon | default: '⌚' }}</div>
+          <h3 class="contact-service-card__title">{{ cfg.service_2_title | default: 'Garmin Demo Lounge' }}</h3>
+          <p class="contact-service-card__desc">
+            {{ cfg.service_2_desc | default: 'Live sync & trial for Fēnix 8, Forerunner 965/265 & Edge bike computers.' }}
+          </p>
+        </div>
+
+        <div class="contact-service-card">
+          <div class="contact-service-card__icon">{{ cfg.service_3_icon | default: '👓' }}</div>
+          <h3 class="contact-service-card__title">{{ cfg.service_3_title | default: 'Oakley Prizm™ Fitting' }}</h3>
+          <p class="contact-service-card__desc">
+            {{ cfg.service_3_desc | default: 'Road and trail sports optics fitting with zero-slip earstem retention.' }}
+          </p>
+        </div>
+
+        <div class="contact-service-card">
+          <div class="contact-service-card__icon">{{ cfg.service_4_icon | default: '⚡' }}</div>
+          <h3 class="contact-service-card__title">{{ cfg.service_4_title | default: 'Endurance Nutrition Bar' }}</h3>
+          <p class="contact-service-card__desc">
+            {{ cfg.service_4_desc | default: 'Marathon fueling strategy with freshly stocked Maurten & SaltStick.' }}
+          </p>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <!-- 7. Contact Form & Fitting Appointment Booking -->
+  {%- if show_form -%}
+    <div class="contact-form-section" id="contact-appointment">
+      <div class="contact-form-section__header">
+        <span class="contact-form-section__tag">{{ cfg.form_tag | default: 'REACH OUT' }}</span>
+        <h2 class="contact-form-section__title">{{ cfg.form_title | default: 'Book a Fitting or Leave a Message' }}</h2>
+        <p class="contact-form-section__desc">
+          {{ cfg.form_desc | default: 'Schedule a gait analysis, consult on Garmin watches, or ask a question.' }}
+        </p>
+      </div>
+
+      <div class="contact-form-card">
+        {% form 'contact' %}
+          {%- if form.posted_successfully? -%}
+            <div class="contact-form-success" role="alert">
+              <span class="contact-form-success__icon">✓</span>
+              <div>
+                <strong>Thank you for reaching out!</strong>
+                <p>Your message has been received. Our team will contact you shortly.</p>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if form.errors -%}
+            <div class="contact-form-error" role="alert">
+              <strong>Please check the following errors:</strong>
+              <ul>
+                {%- for field in form.errors -%}
+                  <li>{{ form.errors.messages[field] }}</li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+
+          <div class="contact-form-fields">
+            <div class="contact-form-row">
+              <div class="contact-form-group">
+                <label for="contact-name" class="contact-form-label">Full Name *</label>
+                <input
+                  type="text"
+                  id="contact-name"
+                  name="contact[name]"
+                  class="contact-form-input"
+                  placeholder="e.g. Vikram Sharma"
+                  value="{{ form.name }}"
+                  required
+                >
+              </div>
+
+              <div class="contact-form-group">
+                <label for="contact-email" class="contact-form-label">Email Address *</label>
+                <input
+                  type="email"
+                  id="contact-email"
+                  name="contact[email]"
+                  class="contact-form-input"
+                  placeholder="e.g. vikram@example.com"
+                  value="{{ form.email }}"
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="contact-form-row">
+              <div class="contact-form-group">
+                <label for="contact-phone" class="contact-form-label">Phone Number *</label>
+                <input
+                  type="tel"
+                  id="contact-phone"
+                  name="contact[phone]"
+                  class="contact-form-input"
+                  placeholder="e.g. +91 98119 81110"
+                  value="{{ form.phone }}"
+                  required
+                >
+              </div>
+
+              <div class="contact-form-group">
+                <label for="contact-purpose" class="contact-form-label">Purpose of Visit</label>
+                <select id="contact-purpose" name="contact[purpose]" class="contact-form-select">
+                  <option value="Running Shoe Fitting & Gait Analysis">Running Shoe Fitting &amp; Gait Analysis</option>
+                  <option value="Garmin GPS Watch Consultation">Garmin GPS Watch Consultation</option>
+                  <option value="Oakley Sports Eyewear Prescription">Oakley Sports Eyewear Prescription</option>
+                  <option value="Triathlon / Cycling Setup">Triathlon / Cycling Setup</option>
+                  <option value="Order & Warranty Support">Order &amp; Warranty Support</option>
+                  <option value="General Question">General Question</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="contact-form-group">
+              <label for="contact-message" class="contact-form-label">Message / Preferred Time Slot *</label>
+              <textarea
+                id="contact-message"
+                name="contact[body]"
+                rows="3"
+                class="contact-form-textarea"
+                placeholder="Tell us about your upcoming race or questions..."
+                required
+              >{{ form.body }}</textarea>
+            </div>
+
+            <button type="submit" class="contact-form-submit-btn">
+              {{ cfg.form_button_text | default: 'Send Message & Book Appointment →' }}
+            </button>
+          </div>
+        {% endform %}
+      </div>
+    </div>
+  {%- endif -%}
+</div>

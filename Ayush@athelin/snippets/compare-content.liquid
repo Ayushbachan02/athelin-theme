@@ -1,0 +1,185 @@
+{% doc %}
+  Renders the Athelin Compare Models Page (/pages/compare):
+  1. Breadcrumbs & Hero Header with dynamic count and Clear All button
+  2. Live Search & Add Product bar (instant search across catalog + Shopify Predictive Search API)
+  3. Side-by-Side Comparison Matrix Table with Add to Cart, Remove, and Add Slot actions
+{% enddoc %}
+
+<div class="compare-page" data-compare-page>
+  <!-- 1. Breadcrumbs & Compare Hero Header -->
+  <div class="compare-hero">
+    <nav class="collection-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="collection-breadcrumbs__list">
+        <li class="collection-breadcrumbs__item">
+          <a href="{{ routes.root_url }}" class="collection-breadcrumbs__link">Home</a>
+        </li>
+        <li class="collection-breadcrumbs__separator" aria-hidden="true">/</li>
+        <li class="collection-breadcrumbs__item">
+          <a href="{{ routes.all_products_collection_url }}" class="collection-breadcrumbs__link">Store</a>
+        </li>
+        <li class="collection-breadcrumbs__separator" aria-hidden="true">/</li>
+        <li class="collection-breadcrumbs__item collection-breadcrumbs__item--current" aria-current="page">
+          Compare Models
+        </li>
+      </ol>
+    </nav>
+
+    <div class="compare-hero__banner">
+      <div class="compare-hero__text">
+        <div class="compare-hero__badge-row">
+          <span class="compare-hero__eyebrow">SIDE-BY-SIDE SPEC ENGINE</span>
+          <span class="compare-hero__count-pill" data-compare-page-count>0 models selected</span>
+        </div>
+        <h1 class="compare-hero__title">Compare Endurance Gear &amp; Models</h1>
+        <p class="compare-hero__subtitle">
+          Search and add up to 4 GPS watches, running shoes, or performance gear items below to compare technical specifications, pricing, and features side-by-side.
+        </p>
+      </div>
+
+      <div class="compare-hero__actions">
+        <button type="button" class="compare-btn compare-btn--outline" data-compare-clear-all style="display: none;">
+          Clear All
+        </button>
+        <a href="{{ routes.all_products_collection_url }}" class="compare-btn compare-btn--ghost">
+          ← Browse All Gear
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Search & Add Product Bar -->
+  <div class="compare-search-card" data-compare-search-section>
+    <div class="compare-search-card__header">
+      <label for="compare-search-input" class="compare-search-card__label">
+        Search &amp; Add Products to Compare
+      </label>
+      <span class="compare-search-card__hint">Compare up to 4 products at a time</span>
+    </div>
+
+    <div class="compare-search-bar">
+      <svg class="compare-search-bar__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="search"
+        id="compare-search-input"
+        class="compare-search-bar__input"
+        data-compare-search-input
+        placeholder="Search by product name, brand, or series (e.g. Forerunner 970, Fenix 8, Brooks Glycerin, Hoka)..."
+        autocomplete="off"
+      >
+      <button type="button" class="compare-search-bar__clear" data-compare-search-clear style="display: none;" aria-label="Clear search">
+        ✕
+      </button>
+    </div>
+
+    <!-- Live Search Results Dropdown / Grid -->
+    <div class="compare-search-results" data-compare-search-results style="display: none;"></div>
+
+    <!-- Quick Suggested Products to Add -->
+    <div class="compare-quick-picks">
+      <span class="compare-quick-picks__label">Popular models to compare:</span>
+      <div class="compare-quick-picks__list" data-compare-quick-picks></div>
+    </div>
+  </div>
+
+  <!-- 3. Side-by-Side Comparison Matrix Table -->
+  <div class="compare-matrix-wrap" data-compare-matrix-wrap>
+    <!-- Empty State when 0 products in compare -->
+    <div class="compare-empty" data-compare-empty style="display: none;">
+      <div class="compare-empty__icon" aria-hidden="true">⇄</div>
+      <h2 class="compare-empty__title">No models added to comparison yet</h2>
+      <p class="compare-empty__text">
+        Use the search bar above to find and add products, or click <strong>Add to Compare</strong> on any product page.
+      </p>
+    </div>
+
+    <!-- Responsive Comparison Table Container -->
+    <div class="compare-table-scroll" data-compare-table-container style="display: none;">
+      <table class="compare-table" data-compare-table>
+        <thead data-compare-thead></thead>
+        <tbody data-compare-tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Embedded Full Store Catalog JSON for Instant Search & Spec Extraction -->
+  <script type="application/json" data-compare-catalog-json>
+    [
+      {%- paginate collections['all'].products by 250 -%}
+        {%- for p in collections['all'].products -%}
+          {%- assign p_var = p.selected_or_first_available_variant -%}
+          {%- assign p_emi = p.price | divided_by: 3 -%}
+          {%- assign p_title_low = p.title | downcase -%}
+          {%- assign p_type_low = p.type | downcase -%}
+          {%- assign p_tags_low = p.tags | join: ' ' | downcase -%}
+          {%- assign p_meta = p_title_low | append: ' ' | append: p_type_low | append: ' ' | append: p_tags_low -%}
+
+          {%- assign p_series = 'Core Lineup' -%}
+          {%- if p_title_low contains 'forerunner' -%}{%- assign p_series = 'Forerunner® Running' -%}
+          {%- elsif p_title_low contains 'fenix' or p_title_low contains 'fēnix' -%}{%- assign p_series = 'Fēnix® Flagship Multisport' -%}
+          {%- elsif p_title_low contains 'epix' -%}{%- assign p_series = 'Epix™ Pro AMOLED' -%}
+          {%- elsif p_title_low contains 'instinct' -%}{%- assign p_series = 'Instinct® Rugged Outdoor' -%}
+          {%- elsif p_title_low contains 'enduro' -%}{%- assign p_series = 'Enduro™ Ultra-Endurance' -%}
+          {%- elsif p_title_low contains 'venu' or p_title_low contains 'vivo' or p_title_low contains 'vívo' -%}{%- assign p_series = 'Venu® / Fitness' -%}
+          {%- elsif p_title_low contains 'edge' -%}{%- assign p_series = 'Edge® Cycling Computers' -%}
+          {%- elsif p_title_low contains 'glycerin' or p_title_low contains 'bondi' -%}{%- assign p_series = 'Max Cushion Road' -%}
+          {%- elsif p_title_low contains 'ghost' or p_title_low contains 'clifton' or p_title_low contains 'ride' -%}{%- assign p_series = 'Daily Neutral Trainer' -%}
+          {%- elsif p_title_low contains 'adrenaline' or p_title_low contains 'arahi' or p_title_low contains 'gaviota' -%}{%- assign p_series = 'Stability Support' -%}
+          {%- elsif p_title_low contains 'speedgoat' or p_title_low contains 'cascadia' or p_title_low contains 'caldera' or p_title_low contains 'challenger' -%}{%- assign p_series = 'Trail Terrain' -%}
+          {%- elsif p_title_low contains 'hyperion' or p_title_low contains 'mach' or p_title_low contains 'cielo' or p_title_low contains 'rocket' -%}{%- assign p_series = 'Speed & Race Day' -%}
+          {%- elsif p.type != blank -%}{%- assign p_series = p.type -%}
+          {%- endif -%}
+
+          {%- assign p_activity = 'Endurance Training' -%}
+          {%- if p_meta contains 'triathlon' or p_title_low contains '965' or p_title_low contains '970' or p_title_low contains 'fenix' or p_title_low contains 'enduro' -%}
+            {%- assign p_activity = 'Marathon, Triathlon & Ultra' -%}
+          {%- elsif p_meta contains 'trail' or p_title_low contains 'speedgoat' or p_title_low contains 'cascadia' or p_title_low contains 'instinct' -%}
+            {%- assign p_activity = 'Trail Running & Outdoor' -%}
+          {%- elsif p_meta contains 'cycl' or p_meta contains 'bike' or p_title_low contains 'edge' -%}
+            {%- assign p_activity = 'Road & Gravel Cycling' -%}
+          {%- elsif p_meta contains 'run' or p_meta contains 'shoe' or p_title_low contains 'forerunner' or p_title_low contains 'ghost' or p_title_low contains 'glycerin' or p_title_low contains 'clifton' or p_title_low contains 'bondi' -%}
+            {%- assign p_activity = 'Road Running & Marathon' -%}
+          {%- endif -%}
+
+          {%- assign p_tech = 'Competition Grade' -%}
+          {%- if p_meta contains 'amoled' or p_title_low contains '165' or p_title_low contains '265' or p_title_low contains '570' or p_title_low contains '965' or p_title_low contains '970' or p_title_low contains 'venu' or p_title_low contains 'epix' -%}
+            {%- assign p_tech = 'AMOLED Touchscreen Display' -%}
+          {%- elsif p_meta contains 'solar' or p_title_low contains 'instinct' or p_title_low contains 'enduro' -%}
+            {%- assign p_tech = 'Solar Charging MIP Display' -%}
+          {%- elsif p_title_low contains 'glycerin' or p_title_low contains 'bondi' or p_meta contains 'plush' -%}
+            {%- assign p_tech = 'Plush Max-Cushion Midsole' -%}
+          {%- elsif p_title_low contains 'ghost' or p_title_low contains 'clifton' or p_title_low contains 'adrenaline' or p_title_low contains 'arahi' -%}
+            {%- assign p_tech = 'Balanced Responsive Cushioning' -%}
+          {%- elsif p_title_low contains 'hyperion' or p_title_low contains 'mach' or p_title_low contains 'vibram' or p_title_low contains 'fivefingers' -%}
+            {%- assign p_tech = 'Firm / Direct Ground Feel' -%}
+          {%- elsif p_meta contains 'prizm' or p_meta contains 'oakley' -%}
+            {%- assign p_tech = 'Prizm™ High-Contrast Optics' -%}
+          {%- endif -%}
+
+          {
+            "id": {{ p.id | append: '' | json }},
+            "handle": {{ p.handle | json }},
+            "title": {{ p.title | json }},
+            "vendor": {{ p.vendor | default: 'ATHELIN' | json }},
+            "type": {{ p.type | default: 'Endurance Gear' | json }},
+            "url": {{ p.url | json }},
+            "image": {% if p.featured_image %}{{ p.featured_image | image_url: width: 500 | json }}{% else %}{{ 'product-garmin-1.png' | asset_url | json }}{% endif %},
+            "price": {{ p.price | money | strip_html | json }},
+            "priceRaw": {{ p.price | json }},
+            "emi": {{ p_emi | money | strip_html | append: '/mo' | json }},
+            "available": {{ p.available | json }},
+            "variantId": {{ p_var.id | append: '' | json }},
+            "sku": {{ p_var.sku | default: p.handle | upcase | json }},
+            "series": {{ p_series | json }},
+            "activity": {{ p_activity | json }},
+            "tech": {{ p_tech | json }},
+            "summary": {{ p.description | strip_html | strip_newlines | truncate: 140 | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      {%- endpaginate -%}
+    ]
+  </script>
+</div>
+

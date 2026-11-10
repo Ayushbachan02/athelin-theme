@@ -1,0 +1,134 @@
+{% comment %}
+  Athelin Main Collection Section
+  Controllable via Shopify Theme Editor schema
+{% endcomment %}
+
+{{ 'athelin-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'athelin-collection.js' | asset_url }}" defer="defer"></script>
+
+{%- assign coll_handle = collection.handle | default: '' | downcase -%}
+{%- assign coll_title = collection.title | default: '' | downcase -%}
+
+{%- assign is_shoe_category = false -%}
+{%- if coll_handle contains 'running' or coll_handle contains 'shoe' or coll_handle contains 'hoka' or coll_handle contains 'brooks' or coll_handle contains 'saucony' or coll_title contains 'shoe' or coll_title contains 'running' -%}
+  {%- assign is_shoe_category = true -%}
+{%- endif -%}
+
+{%- assign is_watch_category = false -%}
+{%- if coll_handle contains 'garmin' or coll_handle contains 'watch' or coll_title contains 'watch' -%}
+  {%- assign is_watch_category = true -%}
+{%- endif -%}
+
+<div class="section-main-collection" {{ section.shopify_attributes }}>
+  <div class="collection-page" data-collection-page>
+    <!-- 1. Breadcrumbs & Dynamic Category Hero Header -->
+    {% render 'collection-hero', collection: collection %}
+
+    <!-- 2. Filter Toolbar (Active Filter Badges & Sort Dropdown) -->
+    {% render 'collection-active-pills' %}
+
+    <!-- 3. Dual-Column Full-Width Layout: Sidebar Filters + Products Grid -->
+    <div class="collection-layout">
+      <!-- Desktop Left Sidebar (240px) -->
+      {%- if section.settings.show_sidebar -%}
+        {% render 'collection-sidebar', collection: collection, is_mobile: false %}
+      {%- endif -%}
+
+      <!-- Products Grid (Full-collection filtering + Client-side pagination) -->
+      <div class="collection-products-wrap" style="width: 100%;">
+        {%- assign page_size = section.settings.products_per_page | default: 48 -%}
+        {% paginate collection.products by 250 %}
+          <div
+            class="collection-grid"
+            data-collection-grid
+            data-total-pages="{{ paginate.pages }}"
+            data-current-page="{{ paginate.current_page }}"
+            data-page-size="{{ page_size }}"
+          >
+            {%- if collection.products.size > 0 -%}
+              {%- for product in collection.products -%}
+                {% render 'product-card', product: product %}
+
+                {%- if section.settings.enable_advisor_cards and forloop.index == 4 -%}
+                  {%- if is_shoe_category -%}
+                    {% render 'shoe-finder-card' %}
+                  {%- elsif is_watch_category -%}
+                    {% render 'watch-finder-card' %}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- else -%}
+              <div class="collection-empty">
+                <h3 class="collection-empty__title">No products found in {{ collection.title }}</h3>
+                <p class="collection-empty__text">Check back soon or explore our other endurance sports collections.</p>
+                <a href="{{ routes.all_products_collection_url }}" class="collection-empty__btn">
+                  Explore All Products →
+                </a>
+              </div>
+            {%- endif -%}
+
+            <div class="collection-empty" data-filter-empty style="display: none;">
+              <h3 class="collection-empty__title">No products match your selected filters</h3>
+              <p class="collection-empty__text">Try adjusting your price range or clearing one or more filters to see more gear.</p>
+              <button type="button" class="collection-empty__btn" data-filters-clear style="border: none; cursor: pointer;">
+                Reset All Filters
+              </button>
+            </div>
+          </div>
+
+          <nav class="collection-pagination" data-client-pagination aria-label="Pagination" style="display: none;"></nav>
+        {% endpaginate %}
+      </div>
+    </div>
+
+    <!-- 4. Mobile Bottom Sheet Filter Drawer -->
+    {% render 'collection-sidebar', collection: collection, is_mobile: true %}
+
+    <!-- 5. Advisor Modals -->
+    {%- if section.settings.enable_advisor_cards -%}
+      {%- if is_shoe_category -%}
+        {% render 'shoe-finder-modal' %}
+      {%- elsif is_watch_category -%}
+        {% render 'watch-finder-modal' %}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collection Page Grid",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout & Pagination"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products Per Page",
+      "min": 12,
+      "max": 48,
+      "step": 6,
+      "default": 48
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "Show Desktop Filter Sidebar",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Advisor & Interactive Cards"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_advisor_cards",
+      "label": "Enable In-Grid Shoe / Watch Finder Cards",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
+

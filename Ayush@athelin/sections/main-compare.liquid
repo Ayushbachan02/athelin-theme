@@ -1,0 +1,32 @@
+{% comment %}
+  Athelin Compare Models Page Section
+  Controllable via Shopify Theme Editor schema
+{% endcomment %}
+
+<div class="section-main-compare" {{ section.shopify_attributes }}>
+  {% render 'compare-content',
+    custom_title: section.settings.title,
+    custom_subtitle: section.settings.subtitle
+  %}
+</div>
+
+{% schema %}
+{
+  "name": "Compare Models Page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Page Title",
+      "default": "Compare Running Shoes & Garmin Watches"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Page Subtitle",
+      "default": "Side-by-side technical specs, GPS battery life, cushioning, pronation, and real-time sizing."
+    }
+  ]
+}
+{% endschema %}
+

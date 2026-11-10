@@ -33,58 +33,121 @@
       });
     });
 
-    // 2. Variant Swatch Selector
-    const swatches = productContainer.querySelectorAll('[data-swatch-variant]');
+    // 2. Structured Multi-Option Variant Picker
     const variantIdInput = productContainer.querySelector('[data-variant-id-input]');
-    const activeValLabel = productContainer.querySelector('[data-variant-active-val]');
     const priceDisplay = productContainer.querySelector('[data-product-price]');
+    const comparePriceDisplay = productContainer.querySelector('.product-buy-box__compare-price');
     const emiDisplay = productContainer.querySelector('[data-product-emi]');
     const stockDot = productContainer.querySelector('[data-stock-dot]');
     const stockText = productContainer.querySelector('[data-stock-text]');
     const addToCartBtn = productContainer.querySelector('[data-add-to-cart-btn]');
-    const stickyBarTitle = document.querySelector('[data-sticky-title]');
+    const pdpCardMeta = productContainer.querySelector('[data-product-card]');
     const stickyBarPrice = document.querySelector('[data-sticky-price]');
     const stickyBarThumb = document.querySelector('[data-sticky-thumb]');
 
-    swatches.forEach((swatch) => {
-      swatch.addEventListener('click', function () {
-        const variantId = this.getAttribute('data-variant-id');
-        const variantTitle = this.getAttribute('data-variant-title');
-        const variantPrice = this.getAttribute('data-variant-price');
-        const variantAvailable = this.getAttribute('data-variant-available') === 'true';
-        const variantImg = this.getAttribute('data-variant-img');
+    const variantsJsonEl = productContainer.querySelector('[data-pdp-variants-json]');
+    const optionButtons = productContainer.querySelectorAll('[data-pdp-option-btn]');
 
-        // Update active class
-        swatches.forEach((s) => s.classList.remove('is-selected'));
-        this.classList.add('is-selected');
+    if (variantsJsonEl && optionButtons.length > 0) {
+      let variantsList = [];
+      try {
+        variantsList = JSON.parse(variantsJsonEl.textContent || '[]');
+      } catch (e) {
+        variantsList = [];
+      }
 
-        // Update variant title
-        if (activeValLabel) {
-          activeValLabel.textContent = variantTitle;
+      // Build current selected options array from active buttons
+      const optionGroups = Array.from(productContainer.querySelectorAll('[data-option-group]'));
+      const selectedOptions = optionGroups.map((group) => {
+        const activeBtn = group.querySelector('[data-pdp-option-btn].is-selected');
+        return activeBtn ? activeBtn.getAttribute('data-option-value') : '';
+      });
+
+      function findMatchingVariant(opts) {
+        // Exact match on all options
+        let match = variantsList.find((v) => {
+          return opts.every((val, idx) => !val || v.options[idx] === val);
+        });
+        if (!match && opts[0]) {
+          match = variantsList.find((v) => v.options[0] === opts[0]);
         }
+        return match || variantsList[0] || null;
+      }
 
-        // Update form input
+      function syncOptionAvailability() {
+        optionGroups.forEach((group, groupIdx) => {
+          const btns = group.querySelectorAll('[data-pdp-option-btn]');
+          let selectedGroupAvail = false;
+
+          btns.forEach((btn) => {
+            const val = btn.getAttribute('data-option-value');
+            const isSelected = selectedOptions[groupIdx] === val;
+            btn.classList.toggle('is-selected', isSelected);
+            btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+
+            // Check if this option value is available given the other selected options
+            const testOpts = selectedOptions.slice();
+            testOpts[groupIdx] = val;
+            const exactVar = variantsList.find((v) => testOpts.every((ov, i) => !ov || v.options[i] === ov));
+            const anyVarForColor = variantsList.some((v) => v.options[groupIdx] === val && v.available);
+            const isColorCard = btn.classList.contains('pdp-color-option');
+            const isAvailable = isColorCard ? anyVarForColor : (exactVar ? exactVar.available : anyVarForColor);
+
+            btn.classList.toggle('is-soldout', !isAvailable);
+            btn.setAttribute('data-option-available', isAvailable ? 'true' : 'false');
+            if (isSelected) {
+              selectedGroupAvail = isAvailable;
+            }
+          });
+
+          const headerValEl = productContainer.querySelector('[data-option-selected-val="' + groupIdx + '"]');
+          if (headerValEl && selectedOptions[groupIdx]) {
+            headerValEl.textContent = selectedOptions[groupIdx];
+            headerValEl.setAttribute('data-locked-val', selectedOptions[groupIdx]);
+          }
+
+          const headerStatusEl = productContainer.querySelector('[data-option-header-status="' + groupIdx + '"]');
+          if (headerStatusEl) {
+            headerStatusEl.textContent = selectedGroupAvail ? 'In stock' : 'Sold out';
+            headerStatusEl.classList.toggle('is-soldout', !selectedGroupAvail);
+            headerStatusEl.setAttribute('data-locked-avail', selectedGroupAvail ? 'true' : 'false');
+          }
+        });
+      }
+
+      function applyVariantChange(variant) {
+        if (!variant) return;
+
         if (variantIdInput) {
-          variantIdInput.value = variantId;
+          variantIdInput.value = variant.id;
         }
-
-        // Update price
-        if (priceDisplay && variantPrice) {
-          priceDisplay.textContent = variantPrice;
-        }
-
-        // Calculate and update EMI pill
-        if (emiDisplay && variantPrice) {
-          const rawNum = parseInt(variantPrice.replace(/[^\d]/g, ''), 10);
-          if (!isNaN(rawNum)) {
-            const emiVal = Math.round(rawNum / 3);
-            emiDisplay.textContent = '₹' + emiVal.toLocaleString('en-IN') + '/mo';
+        if (pdpCardMeta) {
+          pdpCardMeta.setAttribute('data-variant-id', variant.id);
+          if (variant.price_formatted) {
+            pdpCardMeta.setAttribute('data-product-price', variant.price_formatted);
+          }
+          if (variant.emi_formatted) {
+            pdpCardMeta.setAttribute('data-product-emi', variant.emi_formatted);
           }
         }
 
-        // Update stock status
+        if (priceDisplay && variant.price_formatted) {
+          priceDisplay.textContent = variant.price_formatted;
+        }
+        if (comparePriceDisplay) {
+          if (variant.compare_at_price > variant.price && variant.compare_price_formatted) {
+            comparePriceDisplay.textContent = variant.compare_price_formatted;
+            comparePriceDisplay.style.display = '';
+          } else {
+            comparePriceDisplay.style.display = 'none';
+          }
+        }
+        if (emiDisplay && variant.emi_formatted) {
+          emiDisplay.textContent = variant.emi_formatted;
+        }
+
         if (stockDot && stockText) {
-          if (variantAvailable) {
+          if (variant.available) {
             stockDot.classList.remove('is-soldout');
             stockText.textContent = 'In stock · dispatched today';
           } else {
@@ -93,9 +156,8 @@
           }
         }
 
-        // Update CTA button
         if (addToCartBtn) {
-          if (variantAvailable) {
+          if (variant.available) {
             addToCartBtn.disabled = false;
             addToCartBtn.textContent = 'Add to cart';
           } else {
@@ -104,12 +166,10 @@
           }
         }
 
-        // Update main image if variant has associated image
-        if (variantImg && mainImg) {
-          mainImg.src = variantImg;
-          // Also highlight matching thumbnail
+        if (variant.featured_image && mainImg) {
+          mainImg.src = variant.featured_image;
           thumbs.forEach((t) => {
-            if (t.getAttribute('data-img-src') === variantImg) {
+            if (t.getAttribute('data-img-src') === variant.featured_image) {
               t.classList.add('is-active');
               t.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
@@ -118,17 +178,69 @@
           });
         }
 
-        // Update sticky bar details
-        if (stickyBarPrice && variantPrice) {
-          const rawNum = parseInt(variantPrice.replace(/[^\d]/g, ''), 10);
-          const emiStr = !isNaN(rawNum) ? ' · ₹' + Math.round(rawNum / 3).toLocaleString('en-IN') + '/mo' : '';
-          stickyBarPrice.textContent = variantPrice + emiStr;
+        if (stickyBarPrice && variant.price_formatted) {
+          const emiPart = variant.emi_formatted ? ' · ' + variant.emi_formatted : '';
+          stickyBarPrice.textContent = variant.price_formatted + emiPart;
         }
-        if (stickyBarThumb && variantImg) {
-          stickyBarThumb.src = variantImg;
+        if (stickyBarThumb && variant.featured_image) {
+          stickyBarThumb.src = variant.featured_image;
         }
+
+        // Update URL ?variant= query parameter without reloading
+        if (window.history && window.history.replaceState && variant.id) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('variant', variant.id);
+          window.history.replaceState({}, '', url.toString());
+        }
+      }
+
+      optionButtons.forEach((btn) => {
+        btn.addEventListener('mouseenter', function () {
+          const optIdx = parseInt(this.getAttribute('data-option-index') || '0', 10);
+          const optVal = this.getAttribute('data-option-value') || '';
+          const isAvail = this.getAttribute('data-option-available') !== 'false';
+          const headerValEl = productContainer.querySelector('[data-option-selected-val="' + optIdx + '"]');
+          if (headerValEl && optVal) {
+            headerValEl.textContent = optVal;
+          }
+          const headerStatusEl = productContainer.querySelector('[data-option-header-status="' + optIdx + '"]');
+          if (headerStatusEl) {
+            headerStatusEl.textContent = isAvail ? 'In stock' : 'Sold out';
+            headerStatusEl.classList.toggle('is-soldout', !isAvail);
+          }
+        });
+
+        btn.addEventListener('mouseleave', function () {
+          const optIdx = parseInt(this.getAttribute('data-option-index') || '0', 10);
+          const headerValEl = productContainer.querySelector('[data-option-selected-val="' + optIdx + '"]');
+          if (headerValEl) {
+            headerValEl.textContent = selectedOptions[optIdx] || headerValEl.getAttribute('data-locked-val') || '';
+          }
+          const headerStatusEl = productContainer.querySelector('[data-option-header-status="' + optIdx + '"]');
+          if (headerStatusEl) {
+            const lockedAvail = headerStatusEl.getAttribute('data-locked-avail') !== 'false';
+            headerStatusEl.textContent = lockedAvail ? 'In stock' : 'Sold out';
+            headerStatusEl.classList.toggle('is-soldout', !lockedAvail);
+          }
+        });
+
+        btn.addEventListener('click', function () {
+          const optIdx = parseInt(this.getAttribute('data-option-index') || '0', 10);
+          const optVal = this.getAttribute('data-option-value') || '';
+          selectedOptions[optIdx] = optVal;
+
+          const matchedVariant = findMatchingVariant(selectedOptions);
+          if (matchedVariant && Array.isArray(matchedVariant.options)) {
+            matchedVariant.options.forEach((vOpt, i) => {
+              selectedOptions[i] = vOpt;
+            });
+          }
+
+          syncOptionAvailability();
+          applyVariantChange(matchedVariant);
+        });
       });
-    });
+    }
 
     // 3. Tab Switching
     const tabButtons = productContainer.querySelectorAll('[data-tab-target]');
@@ -217,17 +329,20 @@
               submitBtn.disabled = false;
               submitBtn.textContent = 'Add to cart';
             }
-            showToast('Added ' + (data.title || 'item') + ' to cart!');
-
-            // Update cart count badge if available
-            fetch('/cart.js')
-              .then((r) => r.json())
-              .then((cart) => {
-                document.querySelectorAll('[data-cart-count]').forEach((el) => {
-                  el.textContent = cart.item_count;
-                });
-              })
-              .catch(() => {});
+            if (window.AthelinCart && typeof window.AthelinCart.refreshAndOpen === 'function') {
+              window.AthelinCart.refreshAndOpen();
+            } else {
+              showToast('Added ' + (data.title || 'item') + ' to cart!');
+              fetch('/cart.js')
+                .then((r) => r.json())
+                .then((cart) => {
+                  document.querySelectorAll('[data-cart-count]').forEach((el) => {
+                    el.textContent = cart.item_count;
+                    el.style.display = cart.item_count > 0 ? 'flex' : 'none';
+                  });
+                })
+                .catch(() => {});
+            }
           })
           .catch((err) => {
             console.error('Error adding to cart:', err);
@@ -240,16 +355,85 @@
       });
     }
 
-    // 7. Bundle Add to Cart Handler
+    // 7. Interactive Setup Bundle & Pairings Handler
+    const bundleCard = productContainer.querySelector('[data-setup-bundle-card]');
     const bundleBtn = productContainer.querySelector('[data-bundle-add-btn]');
+    const bundleItems = productContainer.querySelectorAll('[data-bundle-item]');
+    const pickedListEl = productContainer.querySelector('[data-bundle-picked-list]');
+
+    function formatInrCents(cents) {
+      const rupees = Math.round(Number(cents || 0) / 100);
+      return '₹' + rupees.toLocaleString('en-IN');
+    }
+
+    function syncBundleState() {
+      if (!bundleBtn || bundleItems.length === 0) return;
+      let totalCents = 0;
+      const selectedTitles = [];
+      let selectedCount = 0;
+
+      bundleItems.forEach((item) => {
+        if (item.classList.contains('is-selected')) {
+          selectedCount += 1;
+          totalCents += parseInt(item.getAttribute('data-item-price') || '0', 10);
+          const t = item.getAttribute('data-item-title') || '';
+          if (t) {
+            selectedTitles.push(t.length > 28 ? t.slice(0, 26) + '…' : t);
+          }
+        }
+      });
+
+      if (pickedListEl) {
+        pickedListEl.textContent = selectedTitles.length > 0
+          ? 'Selected: ' + selectedTitles.join(', ')
+          : 'Click any item above to include it in your setup';
+      }
+
+      if (selectedCount === 0) {
+        bundleBtn.disabled = true;
+        bundleBtn.textContent = 'Select an item to add';
+      } else {
+        bundleBtn.disabled = false;
+        bundleBtn.textContent = totalCents > 0
+          ? 'Add selected to cart · ' + formatInrCents(totalCents)
+          : 'Add selected to cart';
+      }
+    }
+
+    bundleItems.forEach((item) => {
+      const toggleBtn = item.querySelector('[data-bundle-item-toggle]');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+          const isNowSelected = !item.classList.contains('is-selected');
+          item.classList.toggle('is-selected', isNowSelected);
+          this.setAttribute('aria-pressed', isNowSelected ? 'true' : 'false');
+          syncBundleState();
+        });
+      }
+    });
+
     if (bundleBtn) {
       bundleBtn.addEventListener('click', function () {
-        this.disabled = true;
-        this.textContent = 'Adding bundle...';
+        const selectedVarIds = [];
+        bundleItems.forEach((item) => {
+          if (item.classList.contains('is-selected')) {
+            const vid = item.getAttribute('data-variant-id');
+            if (vid) {
+              selectedVarIds.push(parseInt(vid, 10) || vid);
+            }
+          }
+        });
 
-        // Add first available variant or accessory
-        const currentVariantId = variantIdInput ? variantIdInput.value : null;
-        if (!currentVariantId) return;
+        const fallbackVarId = variantIdInput ? variantIdInput.value : null;
+        const payload = selectedVarIds.length > 0
+          ? { items: selectedVarIds.map((id) => ({ id: id, quantity: 1 })) }
+          : (fallbackVarId ? { id: fallbackVarId, quantity: 1 } : null);
+
+        if (!payload) return;
+
+        const prevLabel = this.textContent;
+        this.disabled = true;
+        this.textContent = 'Adding to cart...';
 
         fetch('/cart/add.js', {
           method: 'POST',
@@ -257,20 +441,23 @@
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
           },
-          body: JSON.stringify({
-            id: currentVariantId,
-            quantity: 1,
-          }),
+          body: JSON.stringify(payload),
         })
           .then((res) => res.json())
           .then(() => {
             this.disabled = false;
-            this.textContent = 'Add to cart';
-            showToast('Setup accessories added to cart!');
+            this.textContent = prevLabel;
+            syncBundleState();
+            if (window.AthelinCart && typeof window.AthelinCart.refreshAndOpen === 'function') {
+              window.AthelinCart.refreshAndOpen();
+            } else {
+              showToast('Paired setup items added to cart!');
+            }
           })
           .catch(() => {
             this.disabled = false;
-            this.textContent = 'Add to cart';
+            this.textContent = prevLabel;
+            syncBundleState();
           });
       });
     }

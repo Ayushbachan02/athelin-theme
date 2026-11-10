@@ -1,0 +1,307 @@
+{% doc %}
+  Renders the Athelin Quick Cart right-side slide-over drawer.
+  Supports real-time Shopify AJAX cart updates, free shipping progress bar,
+  quantity controls, item removal, EMI breakdown, and recommended gear upsells.
+{% enddoc %}
+
+{%- assign free_shipping_threshold = 200000 -%}
+{%- assign cart_total = cart.total_price | default: 0 -%}
+{%- assign remaining_for_free_shipping = free_shipping_threshold | minus: cart_total -%}
+{%- if remaining_for_free_shipping < 0 -%}
+  {%- assign remaining_for_free_shipping = 0 -%}
+{%- endif -%}
+{%- assign shipping_progress = cart_total | times: 100 | divided_by: free_shipping_threshold -%}
+{%- if shipping_progress > 100 -%}
+  {%- assign shipping_progress = 100 -%}
+{%- endif -%}
+
+<div
+  id="athelin-quick-cart"
+  class="quick-cart"
+  data-quick-cart
+  role="dialog"
+  aria-modal="true"
+  aria-label="Shopping Cart Drawer"
+  aria-hidden="true"
+>
+  <div class="quick-cart__backdrop" data-quick-cart-close></div>
+
+  <div class="quick-cart__panel">
+    <!-- 1. Drawer Header -->
+    <div class="quick-cart__header">
+      <div class="quick-cart__header-title-wrap">
+        <svg class="quick-cart__header-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <h2 class="quick-cart__title">Your Gear Bag</h2>
+        <span class="quick-cart__count-pill" data-quick-cart-count>{{ cart.item_count }}</span>
+      </div>
+      <button type="button" class="quick-cart__close-btn" data-quick-cart-close aria-label="Close cart drawer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 2. Free Shipping Progress Bar -->
+    <div class="quick-cart__shipping-bar" data-quick-cart-shipping>
+      <div class="quick-cart__shipping-msg" data-quick-cart-shipping-text>
+        {%- if cart.item_count == 0 -%}
+          <span>Free express shipping on orders over <strong>₹2,000</strong></span>
+        {%- elsif remaining_for_free_shipping > 0 -%}
+          <span>Add <strong>{{ remaining_for_free_shipping | money }}</strong> more to unlock <strong>FREE Shipping</strong></span>
+        {%- else -%}
+          <span class="quick-cart__shipping-unlocked">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            You've unlocked <strong>FREE Express Shipping</strong> &amp; Priority Dispatch!
+          </span>
+        {%- endif -%}
+      </div>
+      <div class="quick-cart__shipping-track">
+        <div
+          class="quick-cart__shipping-fill{% if remaining_for_free_shipping == 0 and cart.item_count > 0 %} is-complete{% endif %}"
+          data-quick-cart-shipping-fill
+          style="width: {% if cart.item_count == 0 %}0{% else %}{{ shipping_progress }}{% endif %}%;"
+        ></div>
+      </div>
+    </div>
+
+    <!-- 3. Scrollable Items Area -->
+    <div class="quick-cart__body" data-quick-cart-body>
+      <!-- Non-Empty State -->
+      <div
+        class="quick-cart__items-wrap"
+        data-quick-cart-items-wrap
+        {% if cart.item_count == 0 %}style="display: none;"{% endif %}
+      >
+        <div class="quick-cart__items" data-quick-cart-items>
+          {%- for item in cart.items -%}
+            {%- assign item_emi = item.final_line_price | divided_by: 3 -%}
+            <div class="quick-cart__item" data-cart-item-key="{{ item.key }}" data-variant-id="{{ item.variant_id }}">
+              <a href="{{ item.url }}" class="quick-cart__item-img-wrap">
+                {%- if item.image -%}
+                  <img
+                    src="{{ item.image | image_url: width: 200 }}"
+                    alt="{{ item.title | escape }}"
+                    width="72"
+                    height="72"
+                    class="quick-cart__item-img"
+                    loading="lazy"
+                  >
+                {%- else -%}
+                  <img
+                    src="{{ 'product-garmin-1.png' | asset_url }}"
+                    alt="{{ item.title | escape }}"
+                    width="72"
+                    height="72"
+                    class="quick-cart__item-img"
+                    loading="lazy"
+                  >
+                {%- endif -%}
+              </a>
+
+              <div class="quick-cart__item-info">
+                <div class="quick-cart__item-top">
+                  <div>
+                    <span class="quick-cart__item-vendor">{{ item.vendor | default: 'ATHELIN' }}</span>
+                    <h3 class="quick-cart__item-title">
+                      <a href="{{ item.url }}">{{ item.product.title }}</a>
+                    </h3>
+                    {%- unless item.product.has_only_default_variant -%}
+                      <p class="quick-cart__item-variant">{{ item.variant.title }}</p>
+                    {%- endunless -%}
+                  </div>
+                  <button
+                    type="button"
+                    class="quick-cart__item-remove"
+                    data-quick-cart-remove="{{ item.key }}"
+                    aria-label="Remove {{ item.product.title | escape }}"
+                    title="Remove item"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="quick-cart__item-bottom">
+                  <div class="quick-cart__qty">
+                    <button
+                      type="button"
+                      class="quick-cart__qty-btn"
+                      data-quick-cart-qty-minus="{{ item.key }}"
+                      data-current-qty="{{ item.quantity }}"
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+                    <span class="quick-cart__qty-val" data-quick-cart-qty-val>{{ item.quantity }}</span>
+                    <button
+                      type="button"
+                      class="quick-cart__qty-btn"
+                      data-quick-cart-qty-plus="{{ item.key }}"
+                      data-current-qty="{{ item.quantity }}"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <div class="quick-cart__item-pricing">
+                    <span class="quick-cart__item-price">{{ item.final_line_price | money }}</span>
+                    <span class="quick-cart__item-emi">or {{ item_emi | money }}/mo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        <!-- Recommended Add-on Upsell inside Drawer -->
+        <div class="quick-cart__upsell">
+          <div class="quick-cart__upsell-header">
+            <span class="quick-cart__upsell-title">⚡ Complete Your Race Setup</span>
+            <span class="quick-cart__upsell-badge">Athlete Pick</span>
+          </div>
+          {%- assign upsell_product = nil -%}
+          {%- if collections['garmin'].products.size > 0 -%}
+            {%- assign upsell_product = collections['garmin'].products.first -%}
+          {%- elsif collections['hoka'].products.size > 0 -%}
+            {%- assign upsell_product = collections['hoka'].products.first -%}
+          {%- elsif collections['all'].products.size > 0 -%}
+            {%- assign upsell_product = collections['all'].products.first -%}
+          {%- endif -%}
+
+          {%- if upsell_product != nil -%}
+            {%- assign upsell_var = upsell_product.selected_or_first_available_variant -%}
+            <div class="quick-cart__upsell-card">
+              <a href="{{ upsell_product.url }}" class="quick-cart__upsell-img-wrap">
+                {%- if upsell_product.featured_image -%}
+                  <img
+                    src="{{ upsell_product.featured_image | image_url: width: 140 }}"
+                    alt="{{ upsell_product.title | escape }}"
+                    width="52"
+                    height="52"
+                    class="quick-cart__upsell-img"
+                  >
+                {%- else -%}
+                  <img
+                    src="{{ 'product-garmin-1.png' | asset_url }}"
+                    alt="{{ upsell_product.title | escape }}"
+                    width="52"
+                    height="52"
+                    class="quick-cart__upsell-img"
+                  >
+                {%- endif -%}
+              </a>
+              <div class="quick-cart__upsell-info">
+                <a href="{{ upsell_product.url }}" class="quick-cart__upsell-name">{{ upsell_product.title }}</a>
+                <span class="quick-cart__upsell-price">{{ upsell_product.price | money }}</span>
+              </div>
+              <button
+                type="button"
+                class="quick-cart__upsell-btn"
+                data-quick-add-variant="{{ upsell_var.id }}"
+              >
+                + Add
+              </button>
+            </div>
+          {%- else -%}
+            <div class="quick-cart__upsell-card">
+              <a href="{{ routes.all_products_collection_url }}" class="quick-cart__upsell-img-wrap">
+                <img
+                  src="{{ 'product-garmin-1.png' | asset_url }}"
+                  alt="Garmin HRM-Pro Plus"
+                  width="52"
+                  height="52"
+                  class="quick-cart__upsell-img"
+                >
+              </a>
+              <div class="quick-cart__upsell-info">
+                <a href="{{ routes.all_products_collection_url }}" class="quick-cart__upsell-name">Garmin Forerunner 970</a>
+                <span class="quick-cart__upsell-price">₹92,990</span>
+              </div>
+              <a href="{{ routes.all_products_collection_url }}" class="quick-cart__upsell-btn">View</a>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        class="quick-cart__empty"
+        data-quick-cart-empty
+        {% if cart.item_count > 0 %}style="display: none;"{% endif %}
+      >
+        <div class="quick-cart__empty-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <h3 class="quick-cart__empty-title">Your gear bag is empty</h3>
+        <p class="quick-cart__empty-desc">
+          Explore our curated endurance sports collection—Garmin GPS watches, carbon race shoes, and recovery gear.
+        </p>
+        <div class="quick-cart__empty-links">
+          <a href="{{ routes.collections_url }}/garmin" class="btn-pill btn-pill--dark">Shop Garmin Watches</a>
+          <a href="{{ routes.collections_url }}/running" class="btn-pill btn-pill--outline">Explore Running Shoes</a>
+        </div>
+        <a href="/pages/wishlist" class="quick-cart__empty-wishlist-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          View Saved Wishlist Items
+        </a>
+      </div>
+    </div>
+
+    <!-- 4. Sticky Drawer Footer -->
+    <div
+      class="quick-cart__footer"
+      data-quick-cart-footer
+      {% if cart.item_count == 0 %}style="display: none;"{% endif %}
+    >
+      <!-- EMI Highlight Banner -->
+      {%- assign total_emi = cart.total_price | divided_by: 3 -%}
+      <div class="quick-cart__emi-banner">
+        <span class="quick-cart__emi-pill">No Cost EMI</span>
+        <span class="quick-cart__emi-text">
+          Or pay <strong data-quick-cart-emi>{{ total_emi | money }}/mo</strong> for 3 months
+        </span>
+      </div>
+
+      <div class="quick-cart__subtotal-row">
+        <div>
+          <span class="quick-cart__subtotal-label">Subtotal</span>
+          <span class="quick-cart__subtotal-note">Taxes included · Free shipping</span>
+        </div>
+        <span class="quick-cart__subtotal-price" data-quick-cart-subtotal>{{ cart.total_price | money }}</span>
+      </div>
+
+      <div class="quick-cart__actions">
+        <a href="{{ routes.cart_url }}" class="quick-cart__btn-view-cart">
+          View Bag
+        </a>
+        <form action="{{ routes.cart_url }}" method="post" class="quick-cart__checkout-form">
+          <button type="submit" name="checkout" class="quick-cart__btn-checkout">
+            <span>Proceed to Checkout</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="quick-cart__trust-strip">
+        <span>✓ Authorised Dealer</span>
+        <span>·</span>
+        <span>✓ Warranty Registered</span>
+        <span>·</span>
+        <span>✓ 10-Day Returns</span>
+      </div>
+    </div>
+  </div>
+</div>
+

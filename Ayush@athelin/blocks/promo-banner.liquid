@@ -4,22 +4,44 @@
 
 <section class="promo-banner" {{ block.shopify_attributes }}>
   <a href="{{ block.settings.link | default: '/collections/garmin' }}" class="promo-banner__card">
-    <img
-      src="{{ 'garmin-banner-bg.png' | asset_url }}"
-      alt="Garmin Collection"
-      class="promo-banner__bg"
-      loading="lazy"
-      width="1200"
-      height="145"
-    >
-    <div class="promo-banner__content">
+    {%- if block.settings.background_image != blank -%}
       <img
-        src="{{ 'garmin-banner-logo.png' | asset_url }}"
-        alt="Garmin"
-        class="promo-banner__logo-img"
-        width="180"
-        height="50"
+        src="{{ block.settings.background_image | image_url: width: 1400 }}"
+        alt="Garmin Collection"
+        class="promo-banner__bg"
+        loading="lazy"
+        width="1200"
+        height="145"
       >
+    {%- else -%}
+      <img
+        src="{{ 'garmin-banner-bg.png' | asset_url }}"
+        alt="Garmin Collection"
+        class="promo-banner__bg"
+        loading="lazy"
+        width="1200"
+        height="145"
+      >
+    {%- endif -%}
+
+    <div class="promo-banner__content">
+      {%- if block.settings.logo_image != blank -%}
+        <img
+          src="{{ block.settings.logo_image | image_url: width: 360 }}"
+          alt="Garmin"
+          class="promo-banner__logo-img"
+          width="180"
+          height="50"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'garmin-banner-logo.png' | asset_url }}"
+          alt="Garmin"
+          class="promo-banner__logo-img"
+          width="180"
+          height="50"
+        >
+      {%- endif -%}
       <span class="promo-banner__subtext">{{ block.settings.subtext | default: 'latest collection NOW available' }}</span>
     </div>
   </a>
@@ -39,6 +61,21 @@
       "type": "url",
       "id": "link",
       "label": "Banner Link"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Custom Background Banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Custom Brand Logo"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo Banner"
     }
   ]
 }

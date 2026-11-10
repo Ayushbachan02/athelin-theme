@@ -1,13 +1,33 @@
 /**
  * Athelin Collection Page Interactive Engine
- * Handles client-side faceting, price slider, active filter pills,
- * mobile bottom sheet, Shoe Finder quiz, and Watch Finder advisor.
+ * Handles full-collection client-side faceting, background multi-page hydration,
+ * price slider, active filter pills, client-side pagination, mobile bottom sheet,
+ * Shoe Finder quiz, and Watch Finder advisor.
  */
 document.addEventListener('DOMContentLoaded', () => {
-  const collectionGrid = document.querySelector('[data-collection-grid]');
+  function getActiveGrid() {
+    const grids = Array.from(document.querySelectorAll('[data-collection-grid]'));
+    return grids.find(g => g.offsetParent !== null) || grids[0] || null;
+  }
+
+  const collectionGrid = getActiveGrid();
   if (!collectionGrid) return;
 
-  const productCards = Array.from(collectionGrid.querySelectorAll('[data-product-card]'));
+  const PAGE_SIZE = parseInt(collectionGrid.dataset.pageSize || '48', 10) || 48;
+  const paginationNav = document.querySelector('[data-client-pagination]');
+  const filterEmptyNotice = collectionGrid.querySelector('[data-filter-empty]');
+  const promoCard = collectionGrid.querySelector('.shoe-finder-card, .watch-finder-card');
+
+  // Master array of all product cards in the collection
+  let allCollectionCards = Array.from(collectionGrid.querySelectorAll('[data-product-card]'));
+  allCollectionCards.forEach((card, idx) => {
+    card.dataset.initialOrder = String(idx);
+  });
+
+  function getProductCards() {
+    return allCollectionCards;
+  }
+
   const activePillsContainer = document.querySelector('[data-active-pills]');
   const filterCountBadges = document.querySelectorAll('[data-filter-count]');
   const mobileApplyBtn = document.querySelector('.collection-sidebar__drawer-apply');
@@ -16,22 +36,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // Determine collection price bounds (Always starts from ₹0 as requested)
   let minCollectionPrice = 0;
   let maxCollectionPrice = 300000;
-  if (productCards.length > 0) {
-    const prices = productCards
-      .map(c => parseInt(c.dataset.price || '0', 10) / 100)
-      .filter(p => p > 0);
-    if (prices.length > 0) {
-      minCollectionPrice = 0;
-      const maxFound = Math.max(...prices);
-      maxCollectionPrice = Math.max(Math.ceil(maxFound / 10000) * 10000, 30000);
+  function recalculatePriceBounds(preserveUserSelection = false) {
+    const cards = getProductCards();
+    if (cards.length > 0) {
+      const prices = cards
+        .map(c => parseInt(c.dataset.price || '0', 10) / 100)
+        .filter(p => p > 0);
+      if (prices.length > 0) {
+        minCollectionPrice = 0;
+        const maxFound = Math.max(...prices);
+        maxCollectionPrice = Math.max(Math.ceil(maxFound / 10000) * 10000, 30000);
+      }
+    }
+    if (preserveUserSelection && state) {
+      const wasAtMax = state.maxPrice >= state.initialMaxPrice;
+      state.initialMaxPrice = maxCollectionPrice;
+      if (wasAtMax) {
+        state.maxPrice = maxCollectionPrice;
+      }
     }
   }
+  recalculatePriceBounds(false);
 
   // Filter State (Empty by default so all products are visible)
   const state = {
     surface: [],
     cushioning: [],
     size: [],
+    drop: [],
+    width: [],
     series: [],
     display: [],
     watchSize: [],
@@ -42,8 +75,71 @@ document.addEventListener('DOMContentLoaded', () => {
     maxPrice: maxCollectionPrice,
     initialMinPrice: minCollectionPrice,
     initialMaxPrice: maxCollectionPrice,
-    sortBy: 'manual'
+    sortBy: 'manual',
+    currentPage: 1
   };
+
+  /* ------------------------------------------------------------------------
+     0. BACKGROUND HYDRATION FOR LARGE COLLECTIONS (>250 PRODUCTS)
+     ------------------------------------------------------------------------ */
+  async function hydrateRemainingCollectionPages() {
+    const totalPages = parseInt(collectionGrid.dataset.totalPages || '1', 10);
+    if (totalPages <= 1) return;
+
+    const seenIds = new Set(
+      allCollectionCards.map(c => c.dataset.productId || c.dataset.productHandle).filter(Boolean)
+    );
+    const baseUrl = collectionGrid.dataset.fetchBaseUrl || window.location.pathname;
+
+    try {
+      const pageNumbers = [];
+      for (let p = 2; p <= totalPages; p++) {
+        pageNumbers.push(p);
+      }
+
+      const responses = await Promise.all(
+        pageNumbers.map(pageNum => {
+          const url = new URL(baseUrl, window.location.origin);
+          url.searchParams.set('page', String(pageNum));
+          return fetch(url.toString(), { credentials: 'same-origin' })
+            .then(r => (r.ok ? r.text() : ''))
+            .catch(() => '');
+        })
+      );
+
+      const parser = new DOMParser();
+      let addedAny = false;
+
+      responses.forEach(html => {
+        if (!html) return;
+        const doc = parser.parseFromString(html, 'text/html');
+        const fetchedCards = Array.from(doc.querySelectorAll('[data-collection-grid] [data-product-card]'));
+        fetchedCards.forEach(card => {
+          const key = card.dataset.productId || card.dataset.productHandle;
+          if (key && seenIds.has(key)) return;
+          if (key) seenIds.add(key);
+
+          card.dataset.initialOrder = String(allCollectionCards.length);
+          card.style.display = 'none';
+          if (filterEmptyNotice) {
+            collectionGrid.insertBefore(card, filterEmptyNotice);
+          } else {
+            collectionGrid.appendChild(card);
+          }
+          allCollectionCards.push(card);
+          addedAny = true;
+        });
+      });
+
+      if (addedAny) {
+        recalculatePriceBounds(true);
+        syncSidebarInputs();
+        updateCollection(false);
+      }
+    } catch (err) {
+      // Fail gracefully if offline
+    }
+  }
 
   /* ------------------------------------------------------------------------
      1. FORMAT CURRENCY (INR)
@@ -52,17 +148,46 @@ document.addEventListener('DOMContentLoaded', () => {
     return '₹' + Number(val).toLocaleString('en-IN');
   }
 
-  /* ------------------------------------------------------------------------
-     2. APPLY FILTERS & SORT
-     ------------------------------------------------------------------------ */
-  function updateCollection() {
-    let visibleCount = 0;
+  function hasActiveFilters() {
+    return (
+      state.surface.length > 0 ||
+      state.cushioning.length > 0 ||
+      state.size.length > 0 ||
+      state.drop.length > 0 ||
+      state.width.length > 0 ||
+      state.series.length > 0 ||
+      state.display.length > 0 ||
+      state.watchSize.length > 0 ||
+      state.activity.length > 0 ||
+      state.brand.length > 0 ||
+      state.availableOnly ||
+      state.minPrice > state.initialMinPrice ||
+      state.maxPrice < state.initialMaxPrice
+    );
+  }
 
-    productCards.forEach(card => {
+  /* ------------------------------------------------------------------------
+     2. APPLY FILTERS, SORT & CLIENT-SIDE PAGINATION ACROSS FULL COLLECTION
+     ------------------------------------------------------------------------ */
+  function updateCollection(resetPage = true) {
+    if (resetPage) {
+      state.currentPage = 1;
+    }
+
+    const currentCards = getProductCards();
+    const matchingCards = [];
+
+    currentCards.forEach(card => {
       const cardBrand = (card.dataset.brand || '').toLowerCase();
       const cardSurface = (card.dataset.surface || '').toLowerCase();
       const cardCushioning = (card.dataset.cushioning || '').toLowerCase();
-      const cardSize = (card.dataset.size || '').toString();
+      const cardSizes = (card.dataset.size || '')
+        .toString()
+        .toLowerCase()
+        .split(/[\s,]+/)
+        .filter(Boolean);
+      const cardDrop = (card.dataset.drop || '').toLowerCase();
+      const cardWidth = (card.dataset.width || '').toLowerCase();
       const cardPrice = parseInt(card.dataset.price || '0', 10) / 100; // in Rupees
       const cardAvailable = card.dataset.available === 'true';
 
@@ -74,17 +199,27 @@ document.addEventListener('DOMContentLoaded', () => {
       let matches = true;
 
       // Surface (Shoes)
-      if (state.surface.length > 0 && !state.surface.includes(cardSurface)) {
+      if (state.surface.length > 0 && !state.surface.some(s => cardSurface.includes(s))) {
         matches = false;
       }
 
       // Cushioning (Shoes)
-      if (matches && state.cushioning.length > 0 && !state.cushioning.includes(cardCushioning)) {
+      if (matches && state.cushioning.length > 0 && !state.cushioning.some(c => cardCushioning.includes(c))) {
         matches = false;
       }
 
-      // Size (Shoes)
-      if (matches && state.size.length > 0 && !state.size.includes(cardSize)) {
+      // Size (Shoes - match against any available variant size on the product)
+      if (matches && state.size.length > 0 && !state.size.some(sz => cardSizes.includes(sz.toLowerCase()))) {
+        matches = false;
+      }
+
+      // Heel-to-Toe Drop (Shoes)
+      if (matches && state.drop.length > 0 && !state.drop.some(d => cardDrop.includes(d))) {
+        matches = false;
+      }
+
+      // Width (Shoes)
+      if (matches && state.width.length > 0 && !state.width.some(w => cardWidth.includes(w))) {
         matches = false;
       }
 
@@ -124,16 +259,109 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (matches) {
-        card.style.display = '';
-        visibleCount++;
+        matchingCards.push(card);
       } else {
         card.style.display = 'none';
       }
     });
 
-    // Update Pills & Counters
+    // Sort all matching cards across the entire collection
+    if (state.sortBy === 'price-ascending') {
+      matchingCards.sort((a, b) => parseInt(a.dataset.price || '0', 10) - parseInt(b.dataset.price || '0', 10));
+    } else if (state.sortBy === 'price-descending') {
+      matchingCards.sort((a, b) => parseInt(b.dataset.price || '0', 10) - parseInt(a.dataset.price || '0', 10));
+    } else if (state.sortBy === 'created-descending') {
+      matchingCards.sort((a, b) => parseInt(b.dataset.created || '0', 10) - parseInt(a.dataset.created || '0', 10));
+    } else {
+      matchingCards.sort((a, b) => parseInt(a.dataset.initialOrder || '0', 10) - parseInt(b.dataset.initialOrder || '0', 10));
+    }
+
+    // Reorder matching cards in the DOM so sorted order applies across pages
+    matchingCards.forEach((card, idx) => {
+      if (filterEmptyNotice) {
+        collectionGrid.insertBefore(card, filterEmptyNotice);
+      } else {
+        collectionGrid.appendChild(card);
+      }
+      // Keep promo advisor card after the 4th card on page 1
+      if (promoCard && idx === 3) {
+        if (filterEmptyNotice) {
+          collectionGrid.insertBefore(promoCard, filterEmptyNotice);
+        } else {
+          collectionGrid.appendChild(promoCard);
+        }
+      }
+    });
+
+    // Paginate matching cards client-side
+    const totalMatching = matchingCards.length;
+    const totalPages = Math.max(1, Math.ceil(totalMatching / PAGE_SIZE));
+    if (state.currentPage > totalPages) {
+      state.currentPage = totalPages;
+    }
+
+    const startIdx = (state.currentPage - 1) * PAGE_SIZE;
+    const endIdx = startIdx + PAGE_SIZE;
+
+    matchingCards.forEach((card, idx) => {
+      card.style.display = idx >= startIdx && idx < endIdx ? '' : 'none';
+    });
+
+    if (promoCard) {
+      promoCard.style.display = state.currentPage === 1 && totalMatching >= 4 && !hasActiveFilters() ? '' : 'none';
+    }
+
+    if (filterEmptyNotice) {
+      filterEmptyNotice.style.display = totalMatching === 0 && currentCards.length > 0 ? '' : 'none';
+    }
+
+    // Update Pills, Counters & Client Pagination
     renderActivePills();
-    updateCounterBadges(visibleCount);
+    updateCounterBadges(totalMatching);
+    renderClientPagination(totalMatching, totalPages);
+  }
+
+  function renderClientPagination(totalMatching, totalPages) {
+    if (!paginationNav) return;
+    if (totalPages <= 1) {
+      paginationNav.style.display = 'none';
+      paginationNav.innerHTML = '';
+      return;
+    }
+
+    paginationNav.style.display = 'flex';
+    paginationNav.innerHTML = '';
+
+    const createPageBtn = (label, targetPage, className, isCurrent = false) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = className + (isCurrent ? ' current' : '');
+      btn.textContent = label;
+      btn.style.background = isCurrent ? '#000000' : '#ffffff';
+      btn.style.cursor = 'pointer';
+      if (isCurrent) {
+        btn.setAttribute('aria-current', 'page');
+      }
+      btn.addEventListener('click', () => {
+        if (targetPage === state.currentPage) return;
+        state.currentPage = targetPage;
+        updateCollection(false);
+        collectionGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return btn;
+    };
+
+    if (state.currentPage > 1) {
+      paginationNav.appendChild(createPageBtn('← Previous', state.currentPage - 1, 'prev'));
+    }
+
+    for (let p = 1; p <= totalPages; p++) {
+      paginationNav.appendChild(createPageBtn(String(p), p, 'page', p === state.currentPage));
+    }
+
+    if (state.currentPage < totalPages) {
+      paginationNav.appendChild(createPageBtn('Next →', state.currentPage + 1, 'next'));
+    }
   }
 
   /* ------------------------------------------------------------------------
@@ -174,6 +402,29 @@ document.addEventListener('DOMContentLoaded', () => {
     state.size.forEach(sz => {
       addPill(`UK ${sz}`, () => {
         state.size = state.size.filter(x => x !== sz);
+        syncSidebarInputs();
+        updateCollection();
+      });
+    });
+
+    // Drop
+    const dropNames = {
+      '0-4': '0–4mm Drop',
+      '5-8': '5–8mm Drop',
+      '9plus': '9mm+ Drop'
+    };
+    state.drop.forEach(d => {
+      addPill(dropNames[d] || `${d}mm`, () => {
+        state.drop = state.drop.filter(x => x !== d);
+        syncSidebarInputs();
+        updateCollection();
+      });
+    });
+
+    // Width
+    state.width.forEach(w => {
+      addPill(w.charAt(0).toUpperCase() + w.slice(1) + ' Width', () => {
+        state.width = state.width.filter(x => x !== w);
         syncSidebarInputs();
         updateCollection();
       });
@@ -263,6 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
       state.surface.length +
       state.cushioning.length +
       state.size.length +
+      state.drop.length +
+      state.width.length +
       state.series.length +
       state.display.length +
       state.watchSize.length +
@@ -294,6 +547,10 @@ document.addEventListener('DOMContentLoaded', () => {
       input.checked = state.series.includes(input.value.toLowerCase());
     });
 
+    document.querySelectorAll('.filter-checkbox__input[name="brand"]').forEach(input => {
+      input.checked = state.brand.includes(input.value.toLowerCase());
+    });
+
     document.querySelectorAll('.filter-checkbox__input[name="availability"]').forEach(input => {
       input.checked = state.availableOnly;
     });
@@ -320,6 +577,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-filter-watch-size]').forEach(btn => {
       const sz = btn.dataset.filterWatchSize;
       btn.classList.toggle('filter-size-btn--active', state.watchSize.includes(sz));
+    });
+
+    // Drop Links (Shoes)
+    document.querySelectorAll('[data-filter-drop]').forEach(link => {
+      const d = (link.dataset.filterDrop || '').toLowerCase();
+      link.classList.toggle('filter-link--active', state.drop.includes(d));
+    });
+
+    // Width Links (Shoes)
+    document.querySelectorAll('[data-filter-width]').forEach(link => {
+      const w = (link.dataset.filterWidth || '').toLowerCase();
+      link.classList.toggle('filter-link--active', state.width.includes(w));
     });
 
     // Activity Focus Links (Watches)
@@ -498,6 +767,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Drop link clicks (Shoes)
+  document.addEventListener('click', e => {
+    const dropLink = e.target.closest('[data-filter-drop]');
+    if (dropLink) {
+      const d = (dropLink.dataset.filterDrop || '').toLowerCase();
+      if (state.drop.includes(d)) {
+        state.drop = state.drop.filter(x => x !== d);
+      } else {
+        state.drop.push(d);
+      }
+      syncSidebarInputs();
+      updateCollection();
+    }
+  });
+
+  // Width link clicks (Shoes)
+  document.addEventListener('click', e => {
+    const widthLink = e.target.closest('[data-filter-width]');
+    if (widthLink) {
+      const w = (widthLink.dataset.filterWidth || '').toLowerCase();
+      if (state.width.includes(w)) {
+        state.width = state.width.filter(x => x !== w);
+      } else {
+        state.width.push(w);
+      }
+      syncSidebarInputs();
+      updateCollection();
+    }
+  });
+
   // Activity link clicks (Watches)
   document.addEventListener('click', e => {
     const actLink = e.target.closest('[data-filter-activity]');
@@ -534,6 +833,8 @@ document.addEventListener('DOMContentLoaded', () => {
       state.surface = [];
       state.cushioning = [];
       state.size = [];
+      state.drop = [];
+      state.width = [];
       state.series = [];
       state.display = [];
       state.watchSize = [];
@@ -548,21 +849,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ------------------------------------------------------------------------
-     7. SORT HANDLER
+     7. SORT HANDLER (SORTS ACROSS THE FULL COLLECTION)
      ------------------------------------------------------------------------ */
   if (sortSelect) {
     sortSelect.addEventListener('change', e => {
-      const val = e.target.value;
-      state.sortBy = val;
-
-      const visibleCards = productCards.filter(c => c.style.display !== 'none');
-      if (val === 'price-ascending') {
-        visibleCards.sort((a, b) => parseInt(a.dataset.price || '0', 10) - parseInt(b.dataset.price || '0', 10));
-      } else if (val === 'price-descending') {
-        visibleCards.sort((a, b) => parseInt(b.dataset.price || '0', 10) - parseInt(a.dataset.price || '0', 10));
-      }
-
-      visibleCards.forEach(c => collectionGrid.appendChild(c));
+      state.sortBy = e.target.value;
+      updateCollection(true);
     });
   }
 
@@ -718,7 +1010,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial Sync & Render
+  // Initial Sync, Render & Background Full-Collection Hydration
   syncSidebarInputs();
   updateCollection();
+  hydrateRemainingCollectionPages();
 });

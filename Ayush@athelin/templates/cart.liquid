@@ -1,25 +1,11 @@
-{% block 'container' %}
-  <h1>{{ 'cart.title' | t }}</h1>
+{% comment %}
+  Athelin Full Shopping Cart Page Template
+  Managed via sections/main-cart.liquid with Theme Editor schema
+{% endcomment %}
 
-  <form action="{{ routes.cart_url }}" method="post">
-    <table>
-      {% for item in cart.items %}
-        <tr>
-          <td>
-            {% render 'image', image: item.image, url: item.url %}
-          </td>
-          <td>
-            <p>{{ item.product.title }}</p>
-            {{ 'cart.remove' | t | link_to: item.url_to_remove }}
-          </td>
-          <td>
-            <input type="text" name="updates[]" value="{{ item.quantity }}">
-            <input type="submit" value="{{ 'cart.update' | t }}">
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-
-    <input type="submit" name="checkout" value="{{ 'cart.checkout' | t }}">
-  </form>
+{% block 'container', tag: 'div' %}
+  {% section 'main-cart' %}
 {% endblock %}
+
+{% block 'featured-collection', title: 'Recommended Endurance Gear', collection: 'garmin', fallback_type: 'garmin' %}{% endblock %}
+{% block 'trust-pillars' %}{% endblock %}

@@ -20,7 +20,9 @@
 {%- assign tag = tag | default: 'section' -%}
 
 <{{ tag }} class="block-container" style="--text-align: {{ block.settings.alignment }};" {{ block.shopify_attributes }}>
+  {% # theme-check-disable UndefinedObject %}
   {{ content }}
+  {% # theme-check-enable UndefinedObject %}
 </{{ tag }}>
 
 {% schema %}

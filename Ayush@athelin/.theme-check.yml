@@ -1,1 +1,8 @@
 extends: theme-check:recommended
+
+OrphanedSnippet:
+  ignore:
+    - snippets/image.liquid
+    - snippets/product-card-skeleton.liquid
+    - snippets/quick-cart-drawer.liquid
+    - snippets/site-loader.liquid

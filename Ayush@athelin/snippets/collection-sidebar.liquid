@@ -161,19 +161,69 @@
       </div>
 
     {%- else -%}
-      <!-- General Category: Product Type / Brands -->
-      <div class="filter-group" data-filter-group="brand">
-        <h3 class="filter-group__title">Brand / Line</h3>
+      <!-- 1. Surface / Terrain Filter Group -->
+      <div class="filter-group" data-filter-group="surface">
+        <h3 class="filter-group__title">Surface</h3>
+        <div class="filter-group__options">
+          <label class="filter-checkbox">
+            <input type="checkbox" name="surface" value="road" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Road</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="surface" value="trail" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Trail</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" name="surface" value="track" class="filter-checkbox__input">
+            <span class="filter-checkbox__box" aria-hidden="true"></span>
+            <span class="filter-checkbox__label">Track &amp; race</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 2. Cushioning / Feel Filter Group -->
+      <div class="filter-group" data-filter-group="cushioning">
+        <h3 class="filter-group__title">Cushioning</h3>
+        <div class="filter-pills">
+          <button type="button" class="filter-pill" data-filter-pill="cushioning" data-value="plush">Plush</button>
+          <button type="button" class="filter-pill" data-filter-pill="cushioning" data-value="balanced">Balanced</button>
+          <button type="button" class="filter-pill" data-filter-pill="cushioning" data-value="firm">Firm</button>
+        </div>
+      </div>
+
+      <!-- 3. Sport & Discipline Focus -->
+      <div class="filter-group" data-filter-group="activity">
+        <h3 class="filter-group__title">Sport &amp; Focus</h3>
         <div class="filter-links">
-          <button type="button" class="filter-link" data-filter-brand="castelli">Castelli</button>
+          <button type="button" class="filter-link" data-filter-activity="running">Running</button>
           <span class="filter-links__dot">·</span>
-          <button type="button" class="filter-link" data-filter-brand="camelbak">Camelbak</button>
+          <button type="button" class="filter-link" data-filter-activity="trail">Trail / Outdoor</button>
           <span class="filter-links__dot">·</span>
-          <button type="button" class="filter-link" data-filter-brand="cep">CEP</button>
+          <button type="button" class="filter-link" data-filter-activity="cycling">Cycling</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-activity="triathlon">Triathlon</button>
+        </div>
+      </div>
+
+      <!-- 4. Brand / Line -->
+      <div class="filter-group" data-filter-group="brand">
+        <h3 class="filter-group__title">Brand</h3>
+        <div class="filter-links">
+          <button type="button" class="filter-link" data-filter-brand="garmin">Garmin</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="brooks">Brooks</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="hoka">Hoka</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="saucony">Saucony</button>
+          <span class="filter-links__dot">·</span>
+          <button type="button" class="filter-link" data-filter-brand="oakley">Oakley</button>
           <span class="filter-links__dot">·</span>
           <button type="button" class="filter-link" data-filter-brand="hyperice">Hyperice</button>
           <span class="filter-links__dot">·</span>
-          <button type="button" class="filter-link" data-filter-brand="oakley">Oakley</button>
+          <button type="button" class="filter-link" data-filter-brand="shokz">Shokz</button>
         </div>
       </div>
     {%- endif -%}

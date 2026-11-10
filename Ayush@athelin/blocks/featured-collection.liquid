@@ -1,10 +1,11 @@
 {% doc %}
   Renders a collection product row ("In stock now — Garmin", "In stock now — Shoes").
-  Fetches live product data directly from Shopify collections with fallbacks and skeleton support.
+  Pulls newly added products sorted by creation date (newest first) and renders a pool
+  that automatically shuffles on load and at a continuous interval.
 
   @param {string} [title] - Header title
   @param {collection} [collection] - Target Shopify collection
-  @param {number} [products_to_show] - Product limit (default: 4)
+  @param {number} [products_to_show] - Visible product limit (default: 4)
   @param {string} [view_all_url] - URL for "View all"
   @param {string} [fallback_type] - 'garmin' or 'shoes'
 {% enddoc %}
@@ -12,137 +13,249 @@
 {%- assign fallback_mode = fallback_type | default: block.settings.fallback_type | default: 'garmin' -%}
 {%- assign collection_handle = collection | default: block.settings.collection -%}
 {%- if fallback_mode == 'shoes' -%}
-  {%- if collection_handle == blank or collection_handle == 'brooks' -%}
-    {%- assign collection_handle = 'hoka' -%}
-  {%- endif -%}
+  {%- assign collection_handle = 'brooks' -%}
 {%- endif -%}
 {%- assign target_collection = collections[collection_handle] -%}
-{%- assign limit = block.settings.products_to_show | default: 4 -%}
+{%- assign visible_limit = products_to_show | default: block.settings.products_to_show | default: 4 -%}
+{%- assign pool_limit = 16 -%}
 
-<section class="collection-section" {{ block.shopify_attributes }}>
+<section class="collection-section" data-featured-shuffle-section {{ block.shopify_attributes }}>
   <div class="section-header">
-    <h2 class="section-title">
-      {{ title | default: block.settings.title | default: 'In stock now' }}
-    </h2>
-    <a href="{{ block.settings.view_all_url | default: target_collection.url | default: routes.all_products_collection_url }}" class="section-link">
-      {{ block.settings.view_all_text | default: 'View all →' }}
-    </a>
+    <div class="section-header__left">
+      <h2 class="section-title">
+        {{ title | default: block.settings.title | default: 'In stock now' }}
+      </h2>
+      <span class="section-live-pill" title="Showing newly added products">New Arrivals</span>
+    </div>
+    <div class="section-header__right">
+      <button
+        type="button"
+        class="section-shuffle-btn"
+        data-shuffle-trigger
+        aria-label="Shuffle products"
+        title="Shuffle newly added products"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="16 3 21 3 21 8"></polyline>
+          <line x1="4" y1="20" x2="21" y2="3"></line>
+          <polyline points="21 16 21 21 16 21"></polyline>
+          <line x1="15" y1="15" x2="21" y2="21"></line>
+          <line x1="4" y1="4" x2="9" y2="9"></line>
+        </svg>
+        <span>Shuffle</span>
+      </button>
+      <a href="{{ view_all_url | default: block.settings.view_all_url | default: target_collection.url | default: routes.all_products_collection_url }}" class="section-link">
+        {{ block.settings.view_all_text | default: 'View all →' }}
+      </a>
+    </div>
   </div>
 
   <template class="product-skeleton-template" aria-hidden="true">
     {% render 'product-card-skeleton' %}
   </template>
 
-  <div class="products-grid">
-    {%- if target_collection != blank and target_collection.products.size > 0 -%}
-      {%- assign products_rendered = 0 -%}
-      {%- for product in target_collection.products -%}
-        {%- if product.available -%}
-          {% render 'product-card', product: product %}
-          {%- assign products_rendered = products_rendered | plus: 1 -%}
-          {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
-        {%- endif -%}
-      {%- endfor -%}
-      {%- if products_rendered < limit -%}
-        {%- for product in target_collection.products -%}
-          {%- unless product.available -%}
-            {% render 'product-card', product: product %}
-            {%- assign products_rendered = products_rendered | plus: 1 -%}
-            {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
-          {%- endunless -%}
-        {%- endfor -%}
+  <div
+    class="products-grid"
+    data-shuffle-grid
+    data-visible-limit="{{ visible_limit }}"
+  >
+    {%- assign products_rendered = 0 -%}
+    {%- assign seen_product_ids = '|' -%}
+
+    {%- if fallback_mode == 'shoes' -%}
+      {%- comment -%}
+        1. Scan all products in collections['brooks'] (paginated up to 250 so shoes past index 50 are never missed),
+           plus Hoka, Saucony, Running, and Vibram shoe collections.
+      {%- endcomment -%}
+      {%- if collections['brooks'] != blank -%}
+        {% paginate collections['brooks'].products by 250 %}
+          {%- assign brooks_sorted = collections['brooks'].products | sort: 'created_at' | reverse -%}
+          {%- for p in brooks_sorted -%}
+            {%- assign pid_token = '|' | append: p.id | append: '|' -%}
+            {%- unless seen_product_ids contains pid_token -%}
+              {%- assign p_check = p.title | append: ' ' | append: p.type | downcase -%}
+              {%- assign is_apparel_or_acc = false -%}
+              {%- if p_check contains 'short' or p_check contains 'shirt' or p_check contains 'tee' or p_check contains 'singlet' or p_check contains 'tank' or p_check contains 'jacket' or p_check contains 'vest' or p_check contains 'hoodie' or p_check contains 'pant' or p_check contains 'tight' or p_check contains 'legging' or p_check contains 'jogger' or p_check contains 'bra' or p_check contains 'brief' or p_check contains 'sock' or p_check contains 'cap' or p_check contains 'hat' or p_check contains 'visor' or p_check contains 'beanie' or p_check contains 'headband' or p_check contains 'glove' or p_check contains 'bag' or p_check contains 'backpack' or p_check contains 'belt' or p_check contains 'bottle' or p_check contains 'flask' or p_check contains 'sleeve' or p_check contains 'insole' or p_check contains 'lace' or p_check contains 'cleaner' or p_check contains 'apparel' or p_check contains 'clothing' or p_check contains 'jersey' or p_check contains 'bib' or p_check contains 'helmet' or p_check contains 'watch' or p_check contains 'sunglass' -%}
+                {%- assign is_apparel_or_acc = true -%}
+              {%- endif -%}
+
+              {%- unless is_apparel_or_acc -%}
+                {%- assign seen_product_ids = seen_product_ids | append: p.id | append: '|' -%}
+                {%- assign products_rendered = products_rendered | plus: 1 -%}
+                <div
+                  class="shuffle-card-slot{% if products_rendered > visible_limit %} is-shuffle-hidden{% endif %}"
+                  data-shuffle-slot
+                >
+                  {% render 'product-card', product: p %}
+                </div>
+                {%- if products_rendered >= pool_limit -%}{%- break -%}{%- endif -%}
+              {%- endunless -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        {% endpaginate %}
       {%- endif -%}
-      {%- if fallback_mode == 'shoes' and products_rendered < limit -%}
-        {%- for p in collections['saucony'].products -%}
-          {%- assign p_title_lower = p.title | downcase -%}
-          {%- if p_title_lower contains 'triumph' or p_title_lower contains 'shoe' -%}
-            {% render 'product-card', product: p %}
-            {%- assign products_rendered = products_rendered | plus: 1 -%}
-            {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
+
+      {%- comment -%}
+        2. Supplement the shuffle pool with shoes from Hoka, Saucony, Running, Vibram, and Giro
+           so there are always at least 4 cards visible and a full pool of newly added shoes to shuffle.
+      {%- endcomment -%}
+      {%- if products_rendered < pool_limit -%}
+        {%- assign extra_shoe_colls = 'hoka,saucony,running,vibram,giro' | split: ',' -%}
+        {%- for sh_handle in extra_shoe_colls -%}
+          {%- assign sh_coll = collections[sh_handle] -%}
+          {%- if sh_coll != blank and sh_coll.products.size > 0 -%}
+            {%- assign sh_sorted = sh_coll.products | sort: 'created_at' | reverse -%}
+            {%- for p in sh_sorted -%}
+              {%- assign pid_token = '|' | append: p.id | append: '|' -%}
+              {%- unless seen_product_ids contains pid_token -%}
+                {%- assign p_check = p.title | append: ' ' | append: p.type | downcase -%}
+                {%- assign is_apparel_or_acc = false -%}
+                {%- if p_check contains 'short' or p_check contains 'shirt' or p_check contains 'tee' or p_check contains 'singlet' or p_check contains 'tank' or p_check contains 'jacket' or p_check contains 'vest' or p_check contains 'hoodie' or p_check contains 'pant' or p_check contains 'tight' or p_check contains 'legging' or p_check contains 'jogger' or p_check contains 'bra' or p_check contains 'brief' or p_check contains 'sock' or p_check contains 'cap' or p_check contains 'hat' or p_check contains 'visor' or p_check contains 'beanie' or p_check contains 'headband' or p_check contains 'glove' or p_check contains 'bag' or p_check contains 'backpack' or p_check contains 'belt' or p_check contains 'bottle' or p_check contains 'flask' or p_check contains 'sleeve' or p_check contains 'insole' or p_check contains 'lace' or p_check contains 'cleaner' or p_check contains 'apparel' or p_check contains 'clothing' or p_check contains 'jersey' or p_check contains 'bib' or p_check contains 'helmet' or p_check contains 'watch' or p_check contains 'sunglass' -%}
+                  {%- assign is_apparel_or_acc = true -%}
+                {%- endif -%}
+
+                {%- assign is_valid_shoe = false -%}
+                {%- unless is_apparel_or_acc -%}
+                  {%- if p_check contains 'shoe' or p_check contains 'footwear' or p_check contains 'sneaker' or p_check contains 'trainer' or p_check contains 'fivefingers' or p_check contains 'clifton' or p_check contains 'bondi' or p_check contains 'mach' or p_check contains 'speedgoat' or p_check contains 'arahi' or p_check contains 'rincon' or p_check contains 'gaviota' or p_check contains 'challenger' or p_check contains 'mafate' or p_check contains 'tecton' or p_check contains 'cielo' or p_check contains 'rocket' or p_check contains 'skyward' or p_check contains 'kawana' or p_check contains 'transport' or p_check contains 'anacapa' or p_check contains 'kaha' or p_check contains 'ghost' or p_check contains 'glycerin' or p_check contains 'adrenaline' or p_check contains 'hyperion' or p_check contains 'cascadia' or p_check contains 'caldera' or p_check contains 'launch' or p_check contains 'revel' or p_check contains 'trace' or p_check contains 'triumph' or p_check contains 'endorphin' or p_check contains 'ride' or p_check contains 'kinvara' or p_check contains 'peregrine' or p_check contains 'guide' or p_check contains 'tempus' or p_check contains 'hurricane' or p_check contains 'omni' or p_check contains 'axon' or p_check contains 'cohesion' or p_check contains 'excursion' or p_check contains 'cadet' or p_check contains 'v-run' or p_check contains 'v-trail' or p_check contains 'v-alpha' or p_check contains 'v-train' or p_check contains 'kso' -%}
+                    {%- assign is_valid_shoe = true -%}
+                  {%- endif -%}
+                {%- endunless -%}
+
+                {%- if is_valid_shoe -%}
+                  {%- assign seen_product_ids = seen_product_ids | append: p.id | append: '|' -%}
+                  {%- assign products_rendered = products_rendered | plus: 1 -%}
+                  <div
+                    class="shuffle-card-slot{% if products_rendered > visible_limit %} is-shuffle-hidden{% endif %}"
+                    data-shuffle-slot
+                  >
+                    {% render 'product-card', product: p %}
+                  </div>
+                  {%- if products_rendered >= pool_limit -%}{%- break -%}{%- endif -%}
+                {%- endif -%}
+              {%- endunless -%}
+            {%- endfor -%}
           {%- endif -%}
+          {%- if products_rendered >= pool_limit -%}{%- break -%}{%- endif -%}
         {%- endfor -%}
       {%- endif -%}
-      {%- if fallback_mode == 'shoes' and products_rendered < limit -%}
-        {%- for p in collections['giro'].products -%}
-          {%- assign p_title_lower = p.title | downcase -%}
-          {%- if p_title_lower contains 'shoe' or p_title_lower contains 'cadet' -%}
-            {% render 'product-card', product: p %}
-            {%- assign products_rendered = products_rendered | plus: 1 -%}
-            {%- if products_rendered >= limit -%}{%- break -%}{%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endif -%}
+
     {%- else -%}
+      {%- comment -%} Garmin Watch Section: paginate up to 250 and sort newest first {%- endcomment -%}
+      {%- assign watch_coll = target_collection | default: collections['garmin'] -%}
+      {%- if watch_coll != blank -%}
+        {% paginate watch_coll.products by 250 %}
+          {%- assign garmin_sorted = watch_coll.products | sort: 'created_at' | reverse -%}
+          {%- for p in garmin_sorted -%}
+            {%- assign pid_token = '|' | append: p.id | append: '|' -%}
+            {%- unless seen_product_ids contains pid_token -%}
+              {%- assign p_check = p.title | append: ' ' | append: p.type | downcase -%}
+              {%- unless p_check contains 'strap' or p_check contains 'band' or p_check contains 'cable' or p_check contains 'mount' or p_check contains 'sensor' -%}
+                {%- if p.available -%}
+                  {%- assign seen_product_ids = seen_product_ids | append: p.id | append: '|' -%}
+                  {%- assign products_rendered = products_rendered | plus: 1 -%}
+                  <div
+                    class="shuffle-card-slot{% if products_rendered > visible_limit %} is-shuffle-hidden{% endif %}"
+                    data-shuffle-slot
+                  >
+                    {% render 'product-card', product: p %}
+                  </div>
+                  {%- if products_rendered >= pool_limit -%}{%- break -%}{%- endif -%}
+                {%- endif -%}
+              {%- endunless -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        {% endpaginate %}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%} Fallback if store catalog has 0 matching products {%- endcomment -%}
+    {%- if products_rendered == 0 -%}
       {%- if fallback_mode == 'shoes' -%}
-        {% render 'product-card',
-          fallback_title: 'AdiZERO Adios Pro',
-          fallback_brand: 'ADIDAS',
-          fallback_price: '₹19,000/-',
-          fallback_emi: '₹3,997/mo',
-          fallback_image: 'product-shoe-1.png',
-          fallback_card_bg: '#d1d2cc',
-          fallback_swatches: '#171b2e,#dc2626,#16a34a'
-        %}
-        {% render 'product-card',
-          fallback_title: 'AdiZERO Boston 12',
-          fallback_brand: 'NIKE',
-          fallback_price: '₹19,000/-',
-          fallback_emi: '₹3,997/mo',
-          fallback_image: 'product-shoe-2.png',
-          fallback_card_bg: '#f1f1f1',
-          fallback_swatches: '#16a34a,#dc2626,#171b2e'
-        %}
-        {% render 'product-card',
-          fallback_title: 'AdiZERO Prime X2',
-          fallback_brand: 'NIKE',
-          fallback_price: '₹18,000/-',
-          fallback_emi: '₹3,887/mo',
-          fallback_image: 'product-shoe-3.png',
-          fallback_card_bg: '#f1f1f1',
-          fallback_swatches: '#8b5cf6,#171b2e,#dc2626'
-        %}
-        {% render 'product-card',
-          fallback_title: 'AdiZERO Takumi Sen',
-          fallback_brand: 'NIKE',
-          fallback_price: '₹19,000/-',
-          fallback_emi: '₹3,997/mo',
-          fallback_image: 'product-shoe-4.png',
-          fallback_card_bg: '#f1f1f1',
-          fallback_swatches: '#000000,#ef4444,#3b82f6'
-        %}
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'AdiZERO Adios Pro',
+            fallback_brand: 'ADIDAS',
+            fallback_price: '₹19,000/-',
+            fallback_emi: '₹3,997/mo',
+            fallback_image: 'product-shoe-1.png',
+            fallback_card_bg: '#d1d2cc',
+            fallback_swatches: '#171b2e,#dc2626,#16a34a'
+          %}
+        </div>
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'AdiZERO Boston 12',
+            fallback_brand: 'NIKE',
+            fallback_price: '₹19,000/-',
+            fallback_emi: '₹3,997/mo',
+            fallback_image: 'product-shoe-2.png',
+            fallback_card_bg: '#f1f1f1',
+            fallback_swatches: '#16a34a,#dc2626,#171b2e'
+          %}
+        </div>
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'AdiZERO Prime X2',
+            fallback_brand: 'NIKE',
+            fallback_price: '₹18,000/-',
+            fallback_emi: '₹3,887/mo',
+            fallback_image: 'product-shoe-3.png',
+            fallback_card_bg: '#f1f1f1',
+            fallback_swatches: '#8b5cf6,#171b2e,#dc2626'
+          %}
+        </div>
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'AdiZERO Takumi Sen',
+            fallback_brand: 'NIKE',
+            fallback_price: '₹19,000/-',
+            fallback_emi: '₹3,997/mo',
+            fallback_image: 'product-shoe-4.png',
+            fallback_card_bg: '#f1f1f1',
+            fallback_swatches: '#000000,#ef4444,#3b82f6'
+          %}
+        </div>
       {%- else -%}
-        {% render 'product-card',
-          fallback_title: 'Forerunner 970',
-          fallback_brand: 'GARMIN',
-          fallback_price: '₹92,990',
-          fallback_emi: '₹30,997/mo',
-          fallback_image: 'product-garmin-1.png',
-          fallback_swatches: '#65a30d,#000000,#f97316'
-        %}
-        {% render 'product-card',
-          fallback_title: 'Epix Pro (Gen 2) Sapphire',
-          fallback_brand: 'GARMIN',
-          fallback_price: '₹92,990',
-          fallback_emi: '₹30,997/mo',
-          fallback_image: 'product-garmin-2.png',
-          fallback_swatches: '#000000,#65a30d,#f97316'
-        %}
-        {% render 'product-card',
-          fallback_title: 'Forerunner 970 Slate',
-          fallback_brand: 'GARMIN',
-          fallback_price: '₹82,990',
-          fallback_emi: '₹30,997/mo',
-          fallback_image: 'product-garmin-3.png',
-          fallback_swatches: '#f97316,#000000,#65a30d'
-        %}
-        {% render 'product-card',
-          fallback_title: 'Forerunner 970 Solar',
-          fallback_brand: 'GARMIN',
-          fallback_price: '₹92,990',
-          fallback_emi: '₹30,997/mo',
-          fallback_image: 'product-garmin-4.png',
-          fallback_swatches: '#f97316,#65a30d,#000000'
-        %}
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'Forerunner 970',
+            fallback_brand: 'GARMIN',
+            fallback_price: '₹92,990',
+            fallback_emi: '₹30,997/mo',
+            fallback_image: 'product-garmin-1.png',
+            fallback_swatches: '#65a30d,#000000,#f97316'
+          %}
+        </div>
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'Epix Pro (Gen 2) Sapphire',
+            fallback_brand: 'GARMIN',
+            fallback_price: '₹92,990',
+            fallback_emi: '₹30,997/mo',
+            fallback_image: 'product-garmin-2.png',
+            fallback_swatches: '#000000,#65a30d,#f97316'
+          %}
+        </div>
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'Forerunner 970 Slate',
+            fallback_brand: 'GARMIN',
+            fallback_price: '₹82,990',
+            fallback_emi: '₹30,997/mo',
+            fallback_image: 'product-garmin-3.png',
+            fallback_swatches: '#f97316,#000000,#65a30d'
+          %}
+        </div>
+        <div class="shuffle-card-slot" data-shuffle-slot>
+          {% render 'product-card',
+            fallback_title: 'Forerunner 970 Solar',
+            fallback_brand: 'GARMIN',
+            fallback_price: '₹92,990',
+            fallback_emi: '₹30,997/mo',
+            fallback_image: 'product-garmin-4.png',
+            fallback_swatches: '#f97316,#65a30d,#000000'
+          %}
+        </div>
       {%- endif -%}
     {%- endif -%}
   </div>
@@ -192,6 +305,11 @@
         { "value": "shoes", "label": "Athletic Shoes" }
       ],
       "default": "garmin"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection"
     }
   ]
 }

@@ -1,0 +1,32 @@
+{% comment %}
+  Athelin Wishlist Page Section
+  Controllable via Shopify Theme Editor schema
+{% endcomment %}
+
+<div class="section-main-wishlist" {{ section.shopify_attributes }}>
+  {% render 'wishlist-content',
+    custom_title: section.settings.title,
+    custom_subtitle: section.settings.subtitle
+  %}
+</div>
+
+{% schema %}
+{
+  "name": "Wishlist Page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Page Title",
+      "default": "My Saved Gear"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Page Subtitle",
+      "default": "Your personal shortlist of Garmin smartwatches, running shoes, and endurance performance gear."
+    }
+  ]
+}
+{% endschema %}
+

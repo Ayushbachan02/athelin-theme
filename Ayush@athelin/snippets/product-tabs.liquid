@@ -3,6 +3,15 @@
   Matches Figma: Overview, Specifications, Compare models, Reviews (128), Q&A, Shipping & returns
 {% endcomment %}
 
+{%- assign raw_tab_rating = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value | default: product.metafields.loox.avg_rating | default: product.metafields.yotpo.reviews_average | default: product.metafields.stamped.reviews_average | default: product.metafields.custom.rating.value | default: product.metafields.custom.rating -%}
+{%- assign raw_tab_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | default: product.metafields.loox.num_reviews | default: product.metafields.yotpo.reviews_count | default: product.metafields.stamped.reviews_count | default: product.metafields.custom.rating_count.value | default: product.metafields.custom.rating_count -%}
+{%- assign tab_rating_value = raw_tab_rating | plus: 0.0 -%}
+{%- assign tab_rating_count = raw_tab_count | plus: 0 -%}
+{%- assign has_real_reviews = false -%}
+{%- if tab_rating_value > 0 and tab_rating_count > 0 -%}
+  {%- assign has_real_reviews = true -%}
+{%- endif -%}
+
 <div class="product-tabs-section" data-product-tabs>
   <!-- Horizontal Tab Bar -->
   <nav class="product-tabs-nav" role="tablist" aria-label="Product Details Tabs">
@@ -36,16 +45,18 @@
     >
       Compare models
     </button>
-    <button
-      type="button"
-      class="product-tab-btn"
-      role="tab"
-      aria-selected="false"
-      data-tab-target="reviews"
-      id="tab-btn-reviews"
-    >
-      Reviews (128)
-    </button>
+    {%- if has_real_reviews -%}
+      <button
+        type="button"
+        class="product-tab-btn"
+        role="tab"
+        aria-selected="false"
+        data-tab-target="reviews"
+        id="tab-btn-reviews"
+      >
+        Reviews ({{ tab_rating_count }})
+      </button>
+    {%- endif -%}
     <button
       type="button"
       class="product-tab-btn"
@@ -90,6 +101,16 @@
     {%- endif -%}
   </div>
 
+  {%- assign tab_meta = product.title | append: ' ' | append: product.type | append: ' ' | append: product.vendor | downcase -%}
+  {%- assign tab_cat = 'gear' -%}
+  {%- if tab_meta contains 'garmin' or tab_meta contains 'forerunner' or tab_meta contains 'fenix' or tab_meta contains 'fēnix' or tab_meta contains 'epix' or tab_meta contains 'instinct' or tab_meta contains 'venu' or tab_meta contains 'watch' -%}
+    {%- assign tab_cat = 'watch' -%}
+  {%- elsif tab_meta contains 'shoe' or tab_meta contains 'hoka' or tab_meta contains 'brooks' or tab_meta contains 'saucony' or tab_meta contains 'vibram' or tab_meta contains 'clifton' or tab_meta contains 'bondi' or tab_meta contains 'ghost' or tab_meta contains 'glycerin' -%}
+    {%- assign tab_cat = 'shoe' -%}
+  {%- elsif tab_meta contains 'oakley' or tab_meta contains 'sunglass' or tab_meta contains 'eyewear' -%}
+    {%- assign tab_cat = 'eyewear' -%}
+  {%- endif -%}
+
   <!-- 2. Specifications Panel -->
   <div class="product-tab-panel" role="tabpanel" data-tab-panel="specifications" aria-labelledby="tab-btn-specifications">
     <div class="product-overview-card">
@@ -114,11 +135,21 @@
           </tr>
           <tr>
             <th>Warranty</th>
-            <td>1 Year Authorised Brand Warranty · Instant digital registration</td>
+            <td>Authorised Brand Warranty · Instant digital registration</td>
           </tr>
           <tr>
             <th>Box Contents</th>
-            <td>1x Unit, Quick Start Guide, Charging Cable / Fit Toolkit, Verification Card</td>
+            <td>
+              {%- if tab_cat == 'watch' -%}
+                1x {{ product.title }}, USB-C Charging/Data Cable, Quick Start Documentation, Warranty Card
+              {%- elsif tab_cat == 'shoe' -%}
+                1x Pair {{ product.title }}, Original Brand Box, Athelin Fit &amp; Authenticity Card
+              {%- elsif tab_cat == 'eyewear' -%}
+                1x {{ product.title }}, Hard Protective Vault Case, Microbag Cleaning Pouch, Nosepad Kit
+              {%- else -%}
+                1x {{ product.title }}, Manufacturer Documentation, Authenticity &amp; Warranty Card
+              {%- endif -%}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -127,44 +158,102 @@
   </div>
 
   <!-- 3. Compare Models Panel -->
-  <div class="product-tab-panel" role="tabpanel" data-tab-panel="compare" aria-labelledby="tab-btn-compare">
-    <div class="product-overview-card">
-      <h3 class="product-overview-card__title">Endurance Lineup Comparison</h3>
-      <div class="product-overview-card__body">
-        <p class="product-overview-card__p">
-          <strong>Entry Tier:</strong> Standard battery life, core biometric tracking, baseline cushioning.
-        </p>
-        <p class="product-overview-card__p">
-          <strong>This Model ({{ product.title }}):</strong> Multi-band GPS, titanium / carbon engineered support, advanced race pace &amp; heart rate metrics, rapid charging.
-        </p>
-        <p class="product-overview-card__p">
-          <strong>Flagship Pro Tier:</strong> Solar charging lens, ultra-durable sapphire glass, expedition maps, 30+ day stamina.
-        </p>
+  <div class="product-tab-panel" id="product-tab-compare" role="tabpanel" data-tab-panel="compare" aria-labelledby="tab-btn-compare">
+    <div class="product-overview-card pdp-compare-card" data-pdp-compare-section>
+      <div class="pdp-compare-card__header">
+        <div>
+          <span class="pdp-compare-card__eyebrow">SIDE-BY-SIDE COMPARISON</span>
+          <h3 class="product-overview-card__title" style="margin: 2px 0 4px 0;">
+            Compare {{ product.title }} With Other Models
+          </h3>
+          <p class="pdp-compare-card__sub">
+            Add this model to your comparison list or launch the dedicated Compare Models page to search and compare any product in our store.
+          </p>
+        </div>
+
+        <div class="pdp-compare-card__actions">
+          <button
+            type="button"
+            class="pdp-compare-card__btn pdp-compare-card__btn--outline"
+            data-compare-btn
+          >
+            + Add to Compare
+          </button>
+          <a
+            href="/pages/compare"
+            class="pdp-compare-card__btn pdp-compare-card__btn--primary"
+            data-compare-add-and-go
+          >
+            Compare Models Page <span data-compare-count-badge></span> →
+          </a>
+        </div>
       </div>
+
+      <!-- Inline Comparison Matrix Inside the Compare Tab -->
+      <div class="pdp-compare-card__table-wrap" data-pdp-compare-table-wrap></div>
+
+      <!-- Footer CTA to Search Any Product on Dedicated Compare Page -->
+      <div class="pdp-compare-card__footer">
+        <span>Want to compare against a specific watch, shoe, or gear model?</span>
+        <a href="/pages/compare" class="pdp-compare-card__footer-link" data-compare-add-and-go>
+          Search &amp; Add Any Product on Compare Page →
+        </a>
+      </div>
+
+      {%- comment -%} Provide related same-brand / same-collection products for instant comparison {%- endcomment -%}
+      {%- assign rel_source = product.collections.first.products | default: collections['all'].products -%}
+      <script type="application/json" data-pdp-related-compare-json>
+        [
+          {%- assign rel_count = 0 -%}
+          {%- for rp in rel_source limit: 30 -%}
+            {%- if rp.id != product.id and rel_count < 3 -%}
+              {%- assign rp_var = rp.selected_or_first_available_variant -%}
+              {%- assign rp_emi = rp.price | divided_by: 3 -%}
+              {%- if rel_count > 0 -%},{%- endif -%}
+              {
+                "id": {{ rp.id | append: '' | json }},
+                "handle": {{ rp.handle | json }},
+                "title": {{ rp.title | json }},
+                "vendor": {{ rp.vendor | default: 'ATHELIN' | json }},
+                "type": {{ rp.type | default: 'Endurance Gear' | json }},
+                "url": {{ rp.url | json }},
+                "image": {% if rp.featured_image %}{{ rp.featured_image | image_url: width: 500 | json }}{% else %}{{ 'product-garmin-1.png' | asset_url | json }}{% endif %},
+                "price": {{ rp.price | money | strip_html | json }},
+                "priceRaw": {{ rp.price | json }},
+                "emi": {{ rp_emi | money | strip_html | append: '/mo' | json }},
+                "available": {{ rp.available | json }},
+                "variantId": {{ rp_var.id | append: '' | json }},
+                "sku": {{ rp_var.sku | default: rp.handle | upcase | json }},
+                "summary": {{ rp.description | strip_html | strip_newlines | truncate: 140 | json }}
+              }
+              {%- assign rel_count = rel_count | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+        ]
+      </script>
     </div>
   </div>
 
-  <!-- 4. Reviews Panel -->
-  <div class="product-tab-panel" id="product-tab-reviews" role="tabpanel" data-tab-panel="reviews" aria-labelledby="tab-btn-reviews">
-    <div class="product-overview-card">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <h3 class="product-overview-card__title" style="margin: 0;">Verified Athlete Reviews (128)</h3>
-        <span style="font-size: 11px; font-weight: 700; color: #10b981;">★ 4.6 Overall Score</span>
-      </div>
-      <div class="product-overview-card__body">
-        <div style="border-bottom: 1px solid #f1f2f4; padding-bottom: 12px; margin-bottom: 12px;">
-          <div style="font-weight: 700; margin-bottom: 2px;">"Game changer for marathon build-up" ★★★★★</div>
-          <div style="color: #767d96; font-size: 9.5px; margin-bottom: 4px;">Arjun M. · Verified Runner · 2 weeks ago</div>
-          <div>Unbelievable comfort and battery stamina. Athelin fitted and delivered within 48 hours.</div>
+  <!-- 4. Reviews Panel (Only rendered when product has real rating) -->
+  {%- if has_real_reviews -%}
+    <div class="product-tab-panel" id="product-tab-reviews" role="tabpanel" data-tab-panel="reviews" aria-labelledby="tab-btn-reviews">
+      <div class="product-overview-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h3 class="product-overview-card__title" style="margin: 0;">Verified Athlete Reviews ({{ tab_rating_count }})</h3>
+          <span style="font-size: 11px; font-weight: 700; color: #10b981;">★ {{ tab_rating_value | round: 1 }} Overall Score</span>
         </div>
-        <div>
-          <div style="font-weight: 700; margin-bottom: 2px;">"Exact sizing, premium feel" ★★★★☆</div>
-          <div style="color: #767d96; font-size: 9.5px; margin-bottom: 4px;">Pooja K. · Verified Triathlete · 1 month ago</div>
-          <div>Responsive cushioning with solid energy return. Highly recommend opting for the accessories bundle.</div>
+        <div class="product-overview-card__body">
+          {%- if product.metafields.judgeme.widget != blank -%}
+            {{ product.metafields.judgeme.widget }}
+          {%- elsif product.metafields.spr.reviews != blank -%}
+            {{ product.metafields.spr.reviews }}
+          {%- else -%}
+            <p class="product-overview-card__p">Rated {{ tab_rating_value | round: 1 }} out of 5 based on {{ tab_rating_count }} verified customer {{ tab_rating_count | pluralize: 'review', 'reviews' }}.</p>
+          {%- endif -%}
         </div>
       </div>
     </div>
-  </div>
+  {%- endif -%}
 
   <!-- 5. Q&A Panel -->
   <div class="product-tab-panel" role="tabpanel" data-tab-panel="qa" aria-labelledby="tab-btn-qa">

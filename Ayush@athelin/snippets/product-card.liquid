@@ -31,9 +31,12 @@
 
 {%- comment -%} Determine Brand & Logo Asset {%- endcomment -%}
 {%- assign brand_key = '' -%}
+{%- assign vendor_low = '' -%}
 {%- if has_product -%}
+  {%- assign vendor_low = card_product.vendor | default: '' | downcase | strip -%}
   {%- assign brand_search = card_product.vendor | append: ' ' | append: card_product.title | append: ' ' | append: card_product.tags | downcase -%}
 {%- else -%}
+  {%- assign vendor_low = fallback_brand | default: '' | downcase | strip -%}
   {%- assign brand_search = fallback_brand | default: '' | downcase -%}
 {%- endif -%}
 
@@ -49,8 +52,6 @@
   {%- assign brand_key = 'saucony' -%}
 {%- elsif brand_search contains 'asics' -%}
   {%- assign brand_key = 'asics' -%}
-{%- elsif brand_search contains 'on' -%}
-  {%- assign brand_key = 'on' -%}
 {%- elsif brand_search contains 'oakley' -%}
   {%- assign brand_key = 'oakley' -%}
 {%- elsif brand_search contains 'shokz' -%}
@@ -61,6 +62,8 @@
   {%- assign brand_key = 'vibram' -%}
 {%- elsif brand_search contains 'hoka' -%}
   {%- assign brand_key = 'hoka' -%}
+{%- elsif vendor_low == 'on' or vendor_low == 'on running' or brand_search contains 'on running' or brand_search contains 'cloudmonster' or brand_search contains 'cloudsurfer' or brand_search contains 'cloudflow' -%}
+  {%- assign brand_key = 'on' -%}
 {%- endif -%}
 
 {%- assign effective_image_bg = card_image_bg | default: fallback_card_bg | default: '#ffffff' -%}
@@ -76,28 +79,36 @@
   {%- endif -%}
 {%- endif -%}
 
-{%- comment -%} Watch series & attributes {%- endcomment -%}
+{%- comment -%} Watch series & Shoe / Gear filter attributes {%- endcomment -%}
 {%- assign watch_series = '' -%}
 {%- assign watch_display = '' -%}
 {%- assign watch_size = '' -%}
 {%- assign watch_activity = '' -%}
+{%- assign computed_surface = surface | default: '' -%}
+{%- assign computed_cushioning = cushioning | default: '' -%}
+{%- assign computed_sizes = size | default: '' -%}
+{%- assign computed_drop = '' -%}
+{%- assign computed_width = 'standard' -%}
+{%- assign computed_created = 0 -%}
 
 {%- if has_product -%}
   {%- assign title_low = card_product.title | downcase -%}
+  {%- assign type_low = card_product.type | downcase -%}
   {%- assign tags_low = card_product.tags | join: ' ' | downcase -%}
-  {%- assign all_meta_text = title_low | append: ' ' | append: tags_low -%}
+  {%- assign all_meta_text = title_low | append: ' ' | append: type_low | append: ' ' | append: tags_low | append: ' ' | append: brand_search -%}
+  {%- assign computed_created = card_product.created_at | date: '%s' | plus: 0 -%}
 
   {%- if title_low contains 'forerunner' -%}
     {%- assign watch_series = 'forerunner' -%}
-  {%- elsif title_low contains 'fenix' or title_low contains 'fēnix' or title_low contains 'epix' -%}
+  {%- elsif title_low contains 'fenix' or title_low contains 'fēnix' or title_low contains 'epix' or title_low contains 'quatix' or title_low contains 'tactix' -%}
     {%- assign watch_series = 'fenix' -%}
-  {%- elsif title_low contains 'instinct' -%}
+  {%- elsif title_low contains 'instinct' or title_low contains 'descent' -%}
     {%- assign watch_series = 'instinct' -%}
   {%- elsif title_low contains 'marq' -%}
     {%- assign watch_series = 'marq' -%}
-  {%- elsif title_low contains 'venu' or title_low contains 'vívo' or title_low contains 'vivo' or title_low contains 'lily' -%}
+  {%- elsif title_low contains 'venu' or title_low contains 'vívo' or title_low contains 'vivo' or title_low contains 'lily' or title_low contains 'index' -%}
     {%- assign watch_series = 'venu' -%}
-  {%- elsif title_low contains 'edge' -%}
+  {%- elsif title_low contains 'edge' or title_low contains 'varia' or title_low contains 'rally' or title_low contains 'tacx' -%}
     {%- assign watch_series = 'edge' -%}
   {%- elsif title_low contains 'approach' -%}
     {%- assign watch_series = 'approach' -%}
@@ -105,45 +116,183 @@
     {%- assign watch_series = 'enduro' -%}
   {%- endif -%}
 
-  {%- if all_meta_text contains 'amoled' -%}
+  {%- if all_meta_text contains 'amoled' or watch_series == 'venu' or watch_series == 'marq' or title_low contains '165' or title_low contains '265' or title_low contains '570' or title_low contains '965' or title_low contains '970' or title_low contains 'epix' -%}
     {%- assign watch_display = watch_display | append: ' amoled' -%}
   {%- endif -%}
-  {%- if all_meta_text contains 'solar' or all_meta_text contains 'mip' -%}
+  {%- if all_meta_text contains 'solar' or all_meta_text contains 'mip' or watch_series == 'instinct' or watch_series == 'enduro' or title_low contains '255' or title_low contains '955' -%}
     {%- assign watch_display = watch_display | append: ' solar' -%}
   {%- endif -%}
 
-  {%- if title_low contains '40mm' or title_low contains '41mm' or title_low contains '42mm' or title_low contains '43mm' or title_low contains '42 mm' or title_low contains '43 mm' or title_low contains '41 mm' -%}
+  {%- if title_low contains '40mm' or title_low contains '41mm' or title_low contains '42mm' or title_low contains '43mm' or title_low contains '42 mm' or title_low contains '43 mm' or title_low contains '41 mm' or title_low contains '165' or title_low contains '265s' or title_low contains 'lily' or title_low contains 'venu 3s' -%}
     {%- assign watch_size = '41-43' -%}
-  {%- elsif title_low contains '45mm' or title_low contains '46mm' or title_low contains '47mm' or title_low contains '45 mm' or title_low contains '47 mm' -%}
-    {%- assign watch_size = '45-47' -%}
-  {%- elsif title_low contains '50mm' or title_low contains '51mm' or title_low contains '50 mm' or title_low contains '51 mm' -%}
+  {%- elsif title_low contains '50mm' or title_low contains '51mm' or title_low contains '50 mm' or title_low contains '51 mm' or watch_series == 'enduro' or title_low contains '2x' or title_low contains 'tactix' -%}
     {%- assign watch_size = '50-51' -%}
+  {%- elsif title_low contains '45mm' or title_low contains '46mm' or title_low contains '47mm' or title_low contains '45 mm' or title_low contains '47 mm' or watch_series != '' -%}
+    {%- assign watch_size = '45-47' -%}
   {%- endif -%}
 
-  {%- if all_meta_text contains 'run' or all_meta_text contains 'marathon' -%}
+  {%- if all_meta_text contains 'run' or all_meta_text contains 'marathon' or watch_series == 'forerunner' or watch_series == 'venu' -%}
     {%- assign watch_activity = watch_activity | append: ' running' -%}
   {%- endif -%}
-  {%- if all_meta_text contains 'trail' or all_meta_text contains 'outdoor' or all_meta_text contains 'tactical' -%}
+  {%- if all_meta_text contains 'trail' or all_meta_text contains 'outdoor' or all_meta_text contains 'tactical' or watch_series == 'fenix' or watch_series == 'instinct' or watch_series == 'enduro' -%}
     {%- assign watch_activity = watch_activity | append: ' trail' -%}
   {%- endif -%}
-  {%- if all_meta_text contains 'cycl' or all_meta_text contains 'bike' -%}
+  {%- if all_meta_text contains 'cycl' or all_meta_text contains 'bike' or watch_series == 'edge' -%}
     {%- assign watch_activity = watch_activity | append: ' cycling' -%}
   {%- endif -%}
-  {%- if all_meta_text contains 'golf' -%}
+  {%- if all_meta_text contains 'golf' or watch_series == 'approach' -%}
     {%- assign watch_activity = watch_activity | append: ' golf' -%}
   {%- endif -%}
-  {%- if all_meta_text contains 'swim' or all_meta_text contains 'triathlon' -%}
+  {%- if all_meta_text contains 'swim' or all_meta_text contains 'triathlon' or title_low contains '965' or title_low contains '970' or title_low contains '955' or title_low contains '265' or watch_series == 'fenix' or watch_series == 'enduro' -%}
     {%- assign watch_activity = watch_activity | append: ' triathlon' -%}
   {%- endif -%}
+
+  {%- comment -%} Shoe Surface detection {%- endcomment -%}
+  {%- if computed_surface == blank -%}
+    {%- if all_meta_text contains 'trail' or all_meta_text contains 'speedgoat' or all_meta_text contains 'mafate' or all_meta_text contains 'challenger' or all_meta_text contains 'cascadia' or all_meta_text contains 'caldera' or all_meta_text contains 'catamount' or all_meta_text contains 'divide' or all_meta_text contains 'peregrine' or all_meta_text contains 'xodus' or all_meta_text contains 'zinal' or all_meta_text contains 'tecton' or all_meta_text contains 'stinson' or all_meta_text contains 'v-trail' or all_meta_text contains 'spyridon' or all_meta_text contains 'mono' or all_meta_text contains 'oso' or all_meta_text contains 'leadville' -%}
+      {%- assign computed_surface = 'trail' -%}
+    {%- elsif all_meta_text contains 'track' or all_meta_text contains 'spike' or all_meta_text contains 'carbon' or all_meta_text contains 'cielo' or all_meta_text contains 'rocket' or all_meta_text contains 'hyperion' or all_meta_text contains 'endorphin' or all_meta_text contains 'sinister' or all_meta_text contains 'mach x' or all_meta_text contains 'race' -%}
+      {%- assign computed_surface = 'track' -%}
+    {%- else -%}
+      {%- assign computed_surface = 'road' -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- comment -%} Shoe Cushioning detection {%- endcomment -%}
+  {%- if computed_cushioning == blank -%}
+    {%- if all_meta_text contains 'firm' or all_meta_text contains 'responsive' or all_meta_text contains 'minimal' or all_meta_text contains 'barefoot' or all_meta_text contains 'fivefingers' or all_meta_text contains 'vibram' or all_meta_text contains 'luna' or all_meta_text contains 'hyperion' or all_meta_text contains 'kinvara' or all_meta_text contains 'launch' or all_meta_text contains 'cielo' or all_meta_text contains 'rocket' -%}
+      {%- assign computed_cushioning = 'firm' -%}
+    {%- elsif all_meta_text contains 'plush' or all_meta_text contains 'max' or all_meta_text contains 'bondi' or all_meta_text contains 'glycerin' or all_meta_text contains 'triumph' or all_meta_text contains 'skyward' or all_meta_text contains 'gaviota' or all_meta_text contains 'clifton' or all_meta_text contains 'kaha' or all_meta_text contains 'anacapa' or all_meta_text contains 'stinson' or all_meta_text contains 'hurricane' or all_meta_text contains 'beast' or all_meta_text contains 'ariel' -%}
+      {%- assign computed_cushioning = 'plush' -%}
+    {%- else -%}
+      {%- assign computed_cushioning = 'balanced' -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- comment -%} Shoe Heel-to-Toe Drop detection {%- endcomment -%}
+  {%- if all_meta_text contains '0mm' or all_meta_text contains 'zero' or all_meta_text contains 'vibram' or all_meta_text contains 'fivefingers' or all_meta_text contains 'luna' or all_meta_text contains 'kinvara' or all_meta_text contains 'speedgoat' or all_meta_text contains 'mach' or all_meta_text contains '4mm' -%}
+    {%- assign computed_drop = '0-4' -%}
+  {%- elsif all_meta_text contains '10mm' or all_meta_text contains '12mm' or all_meta_text contains 'ghost' or all_meta_text contains 'adrenaline' or all_meta_text contains 'glycerin' or all_meta_text contains 'launch' or all_meta_text contains 'revel' -%}
+    {%- assign computed_drop = '9plus' -%}
+  {%- else -%}
+    {%- assign computed_drop = '5-8' -%}
+  {%- endif -%}
+
+  {%- comment -%} Shoe Width detection {%- endcomment -%}
+  {%- if all_meta_text contains 'wide' or all_meta_text contains '2e' or all_meta_text contains '4e' -%}
+    {%- assign computed_width = 'wide standard' -%}
+  {%- else -%}
+    {%- assign computed_width = 'standard' -%}
+  {%- endif -%}
+
+  {%- comment -%} Extract available sizes from product variants {%- endcomment -%}
+  {%- if computed_sizes == blank -%}
+    {%- assign size_tokens = '' -%}
+    {%- for v in card_product.variants -%}
+      {%- if v.available -%}
+        {%- assign vt = ' ' | append: v.title | downcase | replace: '/', ' ' | replace: '-', ' ' | replace: 'uk', '' | replace: 'us', '' | replace: 'eu', '' | append: ' ' -%}
+        {%- for sz_check in (6..12) -%}
+          {%- assign sz_str = sz_check | append: '' -%}
+          {%- assign sz_pad = ' ' | append: sz_str | append: ' ' -%}
+          {%- assign sz_dot = ' ' | append: sz_str | append: '.' -%}
+          {%- if vt contains sz_pad or vt contains sz_dot -%}
+            {%- unless size_tokens contains sz_pad -%}
+              {%- assign size_tokens = size_tokens | append: ' ' | append: sz_str | append: ' ' -%}
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- assign computed_sizes = size_tokens | strip -%}
+    {%- if computed_sizes == blank -%}
+      {%- assign computed_sizes = '6 7 8 9 10 11 12' -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- assign card_id = '' -%}
+{%- assign card_handle = '' -%}
+{%- assign card_title = '' -%}
+{%- assign card_vendor = '' -%}
+{%- assign card_url = '' -%}
+{%- assign card_image = '' -%}
+{%- assign card_price = '' -%}
+{%- assign card_emi = '' -%}
+{%- assign card_specs = '' -%}
+{%- assign card_variant_id = '' -%}
+
+{%- if has_product -%}
+  {%- assign card_id = card_product.id | append: '' -%}
+  {%- assign card_handle = card_product.handle -%}
+  {%- assign card_title = card_product.title -%}
+  {%- assign card_vendor = card_product.vendor | default: 'ATHELIN' -%}
+  {%- assign card_url = card_product.url -%}
+  {%- if card_product.featured_image -%}
+    {%- assign card_image = card_product.featured_image | image_url: width: 600 -%}
+  {%- else -%}
+    {%- assign card_image = 'product-garmin-1.png' | asset_url -%}
+  {%- endif -%}
+  {%- assign card_price = card_product.price | money -%}
+  {%- assign emi_calc = card_product.price | divided_by: 3 -%}
+  {%- assign card_emi = emi_calc | money | append: '/mo' -%}
+  {%- assign card_specs = specs | default: fallback_specs | default: card_product.type | default: 'Road · Plush · 8mm drop' -%}
+  {%- assign card_variant_id = card_product.selected_or_first_available_variant.id -%}
+{%- else -%}
+  {%- assign card_title = fallback_title | default: 'Forerunner 970' -%}
+  {%- assign card_handle = card_title | handleize -%}
+  {%- assign card_id = 'fallback-' | append: card_handle -%}
+  {%- assign card_vendor = fallback_brand | default: 'GARMIN' -%}
+  {%- assign card_url = routes.all_products_collection_url -%}
+  {%- assign card_image = fallback_image | default: 'product-garmin-1.png' | asset_url -%}
+  {%- assign card_price = fallback_price | default: '₹92,990' -%}
+  {%- assign card_emi = fallback_emi | default: '₹30,997/mo' -%}
+  {%- assign card_specs = specs | default: fallback_specs | default: 'Endurance Performance Gear' -%}
+{%- endif -%}
+
+{%- comment -%} Extract real product rating & review count from Shopify / review app metafields {%- endcomment -%}
+{%- assign real_rating_value = 0 -%}
+{%- assign real_rating_count = 0 -%}
+{%- if has_product -%}
+  {%- assign raw_rating = card_product.metafields.reviews.rating.value.rating | default: card_product.metafields.reviews.rating.value | default: card_product.metafields.loox.avg_rating | default: card_product.metafields.yotpo.reviews_average | default: card_product.metafields.stamped.reviews_average | default: card_product.metafields.custom.rating.value | default: card_product.metafields.custom.rating -%}
+  {%- assign raw_count = rating_count | default: card_product.metafields.reviews.rating_count.value | default: card_product.metafields.reviews.rating_count | default: card_product.metafields.loox.num_reviews | default: card_product.metafields.yotpo.reviews_count | default: card_product.metafields.stamped.reviews_count | default: card_product.metafields.custom.rating_count.value | default: card_product.metafields.custom.rating_count -%}
+  {%- assign real_rating_value = raw_rating | plus: 0.0 -%}
+  {%- assign real_rating_count = raw_count | plus: 0 -%}
+{%- endif -%}
+{%- assign real_rating_stars = '' -%}
+{%- if real_rating_value > 0 and real_rating_count > 0 -%}
+  {%- assign rounded_stars = real_rating_value | round -%}
+  {%- if rounded_stars > 5 -%}{%- assign rounded_stars = 5 -%}{%- endif -%}
+  {%- for i in (1..5) -%}
+    {%- if i <= rounded_stars -%}
+      {%- assign real_rating_stars = real_rating_stars | append: '★' -%}
+    {%- else -%}
+      {%- assign real_rating_stars = real_rating_stars | append: '☆' -%}
+    {%- endif -%}
+  {%- endfor -%}
 {%- endif -%}
 
 <div
   class="product-card"
   data-product-card
+  data-product-id="{{ card_id | escape }}"
+  data-product-handle="{{ card_handle | escape }}"
+  data-product-title="{{ card_title | escape }}"
+  data-product-vendor="{{ card_vendor | escape }}"
+  data-product-url="{{ card_url | escape }}"
+  data-product-image="{{ card_image | escape }}"
+  data-product-price="{{ card_price | strip_html | escape }}"
+  data-product-emi="{{ card_emi | strip_html | escape }}"
+  data-product-specs="{{ card_specs | escape }}"
+  data-variant-id="{{ card_variant_id }}"
   data-brand="{{ brand_key | default: brand_search | escape }}"
-  data-surface="{{ surface | default: 'road' | escape }}"
-  data-cushioning="{{ cushioning | default: 'plush' | escape }}"
-  data-size="{{ size | default: '9' | escape }}"
+  data-surface="{{ computed_surface | default: 'road' | escape }}"
+  data-cushioning="{{ computed_cushioning | default: 'plush' | escape }}"
+  data-size="{{ computed_sizes | default: '9' | escape }}"
+  data-drop="{{ computed_drop | default: '5-8' | escape }}"
+  data-width="{{ computed_width | default: 'standard' | escape }}"
+  data-created="{{ computed_created }}"
+  data-product-rating="{{ real_rating_value }}"
+  data-product-rating-count="{{ real_rating_count }}"
   data-price="{% if has_product %}{{ card_product.price }}{% else %}{{ fallback_price_raw | default: 1599900 }}{% endif %}"
   data-available="{% if has_product %}{{ card_product.available }}{% else %}true{% endif %}"
   data-series="{{ watch_series | strip | escape }}"
@@ -242,10 +391,12 @@
         {%- endcase -%}
       </div>
 
-      <div class="product-card__rating">
-        <span class="product-card__stars">★★★★★</span>
-        <span class="product-card__rating-count">{{ rating_count | default: 64 }}</span>
-      </div>
+      {%- if real_rating_value > 0 and real_rating_count > 0 -%}
+        <div class="product-card__rating">
+          <span class="product-card__stars">{{ real_rating_stars }}</span>
+          <span class="product-card__rating-count">{{ real_rating_count }}</span>
+        </div>
+      {%- endif -%}
     </div>
 
     <h3 class="product-card__title">
@@ -285,69 +436,147 @@
 
     <div class="product-card__swatches" data-swatches>
       {%- if has_product -%}
-        {%- if card_product.variants.size > 1 -%}
-          {%- for variant in card_product.variants limit: 5 -%}
-            {%- assign var_title_lower = variant.title | downcase -%}
+        {%- comment -%}
+          Render ONLY unique color circles: number of unique colors = number of circles.
+          Never render separate circles for Size / Width / UK / US / EU variants.
+        {%- endcomment -%}
+        {%- assign seen_swatch_hexes = '|' -%}
+        {%- assign rendered_swatch_count = 0 -%}
+
+        {%- for variant in card_product.variants -%}
+          {%- assign var_key = variant.title | strip | downcase -%}
+          {%- assign primary_part = var_key | split: '/' | first | split: '-' | first | strip -%}
+
+          {%- assign swatch_bg = '' -%}
+
+          {%- comment -%} 1. Check primary color part (before '/' or '-') first {%- endcomment -%}
+          {%- if primary_part contains 'orange' or primary_part contains 'amber' or primary_part contains 'coral' or primary_part contains 'peach' or primary_part contains 'flame' or primary_part contains 'mandarin' or primary_part contains 'tangerine' or primary_part contains 'cherry' -%}
+            {%- assign swatch_bg = '#ea580c' -%}
+          {%- elsif primary_part contains 'teal' or primary_part contains 'petrol' or primary_part contains 'cyan' or primary_part contains 'turquoise' or primary_part contains 'aqua' or primary_part contains 'lagoon' -%}
+            {%- assign swatch_bg = '#0d9488' -%}
+          {%- elsif primary_part contains 'blue' or primary_part contains 'navy' or primary_part contains 'captain' or primary_part contains 'ocean' or primary_part contains 'regatta' or primary_part contains 'cobalt' or primary_part contains 'indigo' or primary_part contains 'peacoat' or primary_part contains 'sky' -%}
+            {%- assign swatch_bg = '#1e3a8a' -%}
+          {%- elsif primary_part contains 'red' or primary_part contains 'crimson' or primary_part contains 'burgundy' or primary_part contains 'maroon' or primary_part contains 'ruby' -%}
+            {%- assign swatch_bg = '#dc2626' -%}
+          {%- elsif primary_part contains 'lime' or primary_part contains 'neon' or primary_part contains 'volt' or primary_part contains 'chartreuse' -%}
+            {%- assign swatch_bg = '#84cc16' -%}
+          {%- elsif primary_part contains 'green' or primary_part contains 'olive' or primary_part contains 'sage' or primary_part contains 'forest' or primary_part contains 'mint' or primary_part contains 'emerald' -%}
+            {%- assign swatch_bg = '#15803d' -%}
+          {%- elsif primary_part contains 'yellow' or primary_part contains 'gold' or primary_part contains 'citron' or primary_part contains 'lemon' -%}
+            {%- assign swatch_bg = '#eab308' -%}
+          {%- elsif primary_part contains 'purple' or primary_part contains 'violet' or primary_part contains 'lavender' or primary_part contains 'plum' or primary_part contains 'lilac' -%}
+            {%- assign swatch_bg = '#7e22ce' -%}
+          {%- elsif primary_part contains 'pink' or primary_part contains 'rose' or primary_part contains 'magenta' or primary_part contains 'berry' or primary_part contains 'fuchsia' -%}
+            {%- assign swatch_bg = '#ec4899' -%}
+          {%- elsif primary_part contains 'brown' or primary_part contains 'tan' or primary_part contains 'beige' or primary_part contains 'sand' or primary_part contains 'khaki' or primary_part contains 'copper' or primary_part contains 'bronze' or primary_part contains 'oat' -%}
+            {%- assign swatch_bg = '#78350f' -%}
+          {%- elsif primary_part contains 'silver' or primary_part contains 'titanium' or primary_part contains 'grey' or primary_part contains 'gray' or primary_part contains 'slate' or primary_part contains 'steel' or primary_part contains 'ash' or primary_part contains 'alloy' -%}
+            {%- assign swatch_bg = '#94a3b8' -%}
+          {%- elsif primary_part contains 'white' or primary_part contains 'snow' or primary_part contains 'ivory' or primary_part contains 'cream' or primary_part contains 'coconut' or primary_part contains 'alabaster' -%}
+            {%- assign swatch_bg = '#ffffff' -%}
+          {%- elsif primary_part contains 'black' or primary_part contains 'stealth' or primary_part contains 'dark' or primary_part contains 'carbon' or primary_part contains 'onyx' or primary_part contains 'charcoal' or primary_part contains 'graphite' or primary_part contains 'ebony' -%}
             {%- assign swatch_bg = '#18181b' -%}
+          {%- endif -%}
 
-            {%- if var_title_lower contains 'white' or var_title_lower contains 'snow' -%}
-              {%- assign swatch_bg = '#ffffff' -%}
-            {%- elsif var_title_lower contains 'black' or var_title_lower contains 'stealth' or var_title_lower contains 'dark' or var_title_lower contains 'carbon' or var_title_lower contains 'onyx' -%}
-              {%- assign swatch_bg = '#18181b' -%}
-            {%- elsif var_title_lower contains 'blue' or var_title_lower contains 'navy' or var_title_lower contains 'captain' or var_title_lower contains 'ocean' or var_title_lower contains 'regatta' -%}
-              {%- assign swatch_bg = '#1e3a8a' -%}
-            {%- elsif var_title_lower contains 'silver' or var_title_lower contains 'titanium' or var_title_lower contains 'grey' or var_title_lower contains 'gray' or var_title_lower contains 'slate' or var_title_lower contains 'steel' -%}
-              {%- assign swatch_bg = '#94a3b8' -%}
-            {%- elsif var_title_lower contains 'red' or var_title_lower contains 'crimson' -%}
-              {%- assign swatch_bg = '#dc2626' -%}
-            {%- elsif var_title_lower contains 'green' or var_title_lower contains 'olive' or var_title_lower contains 'sage' -%}
-              {%- assign swatch_bg = '#15803d' -%}
-            {%- elsif var_title_lower contains 'orange' or var_title_lower contains 'amber' -%}
+          {%- comment -%} 2. Fallback to full variant title (checking vibrant colors before neutral white/black) {%- endcomment -%}
+          {%- if swatch_bg == '' -%}
+            {%- if var_key contains 'orange' or var_key contains 'amber' or var_key contains 'coral' or var_key contains 'peach' or var_key contains 'flame' or var_key contains 'mandarin' or var_key contains 'tangerine' -%}
               {%- assign swatch_bg = '#ea580c' -%}
-            {%- elsif var_title_lower contains 'yellow' or var_title_lower contains 'gold' -%}
-              {%- assign swatch_bg = '#eab308' -%}
-            {%- elsif var_title_lower contains 'purple' or var_title_lower contains 'violet' -%}
-              {%- assign swatch_bg = '#7e22ce' -%}
-            {%- elsif var_title_lower contains 'pink' or var_title_lower contains 'rose' -%}
-              {%- assign swatch_bg = '#ec4899' -%}
-            {%- elsif var_title_lower contains 'brown' or var_title_lower contains 'tan' -%}
-              {%- assign swatch_bg = '#78350f' -%}
-            {%- elsif var_title_lower contains 'teal' or var_title_lower contains 'cyan' -%}
+            {%- elsif var_key contains 'teal' or var_key contains 'petrol' or var_key contains 'cyan' or var_key contains 'turquoise' or var_key contains 'aqua' or var_key contains 'lagoon' -%}
               {%- assign swatch_bg = '#0d9488' -%}
-            {%- else -%}
-              {%- assign swatch_bg = '#475569' -%}
+            {%- elsif var_key contains 'blue' or var_key contains 'navy' or var_key contains 'captain' or var_key contains 'ocean' or var_key contains 'regatta' or var_key contains 'cobalt' or var_key contains 'indigo' or var_key contains 'peacoat' or var_key contains 'sky' -%}
+              {%- assign swatch_bg = '#1e3a8a' -%}
+            {%- elsif var_key contains 'red' or var_key contains 'crimson' or var_key contains 'burgundy' or var_key contains 'maroon' or var_key contains 'cherry' or var_key contains 'ruby' -%}
+              {%- assign swatch_bg = '#dc2626' -%}
+            {%- elsif var_key contains 'lime' or var_key contains 'neon' or var_key contains 'volt' or var_key contains 'chartreuse' -%}
+              {%- assign swatch_bg = '#84cc16' -%}
+            {%- elsif var_key contains 'green' or var_key contains 'olive' or var_key contains 'sage' or var_key contains 'forest' or var_key contains 'mint' or var_key contains 'emerald' -%}
+              {%- assign swatch_bg = '#15803d' -%}
+            {%- elsif var_key contains 'yellow' or var_key contains 'gold' or var_key contains 'citron' or var_key contains 'lemon' -%}
+              {%- assign swatch_bg = '#eab308' -%}
+            {%- elsif var_key contains 'purple' or var_key contains 'violet' or var_key contains 'lavender' or var_key contains 'plum' or var_key contains 'lilac' -%}
+              {%- assign swatch_bg = '#7e22ce' -%}
+            {%- elsif var_key contains 'pink' or var_key contains 'rose' or var_key contains 'magenta' or var_key contains 'berry' or var_key contains 'fuchsia' -%}
+              {%- assign swatch_bg = '#ec4899' -%}
+            {%- elsif var_key contains 'brown' or var_key contains 'tan' or var_key contains 'beige' or var_key contains 'sand' or var_key contains 'khaki' or var_key contains 'copper' or var_key contains 'bronze' or var_key contains 'oat' -%}
+              {%- assign swatch_bg = '#78350f' -%}
+            {%- elsif var_key contains 'silver' or var_key contains 'titanium' or var_key contains 'grey' or var_key contains 'gray' or var_key contains 'slate' or var_key contains 'steel' or var_key contains 'ash' or var_key contains 'alloy' -%}
+              {%- assign swatch_bg = '#94a3b8' -%}
+            {%- elsif var_key contains 'white' or var_key contains 'snow' or var_key contains 'ivory' or var_key contains 'cream' or var_key contains 'coconut' or var_key contains 'alabaster' -%}
+              {%- assign swatch_bg = '#ffffff' -%}
+            {%- elsif var_key contains 'black' or var_key contains 'stealth' or var_key contains 'dark' or var_key contains 'carbon' or var_key contains 'onyx' or var_key contains 'charcoal' or var_key contains 'graphite' or var_key contains 'ebony' -%}
+              {%- assign swatch_bg = '#18181b' -%}
             {%- endif -%}
+          {%- endif -%}
 
-            {%- assign var_img_url = '' -%}
-            {%- if variant.featured_image -%}
-              {%- assign var_img_url = variant.featured_image | image_url: width: 600 -%}
-            {%- elsif card_product.images[forloop.index0] -%}
-              {%- assign var_img_url = card_product.images[forloop.index0] | image_url: width: 600 -%}
-            {%- else -%}
-              {%- assign var_img_url = card_product.featured_image | image_url: width: 600 -%}
-            {%- endif -%}
+          {%- if swatch_bg != '' -%}
+            {%- assign hex_token = '|' | append: swatch_bg | append: '|' -%}
+            {%- unless seen_swatch_hexes contains hex_token -%}
+              {%- assign seen_swatch_hexes = seen_swatch_hexes | append: swatch_bg | append: '|' -%}
+              {%- assign rendered_swatch_count = rendered_swatch_count | plus: 1 -%}
 
-            <button
-              type="button"
-              class="product-card__swatch {% if forloop.first %}product-card__swatch--active{% endif %}"
-              data-variant-img="{{ var_img_url }}"
-              style="background-color: {{ swatch_bg }};{% if swatch_bg == '#ffffff' %} border: 1.5px solid #cbd5e1;{% endif %}"
-              aria-label="Select {{ variant.title | escape }}"
-              title="{{ variant.title | escape }}"
-            ></button>
-          {%- endfor -%}
-        {%- elsif card_product.images.size > 1 -%}
-          {%- comment -%} Single variant product with multiple gallery photos {%- endcomment -%}
-          {%- for image in card_product.images limit: 4 -%}
-            <button
-              type="button"
-              class="product-card__swatch product-card__swatch--thumb {% if forloop.first %}product-card__swatch--active{% endif %}"
-              data-variant-img="{{ image | image_url: width: 600 }}"
-              style="background-image: url('{{ image | image_url: width: 140 }}');"
-              aria-label="View photo {{ forloop.index }}"
-              title="View photo {{ forloop.index }}"
-            ></button>
-          {%- endfor -%}
+              {%- assign var_img_url = '' -%}
+              {%- if variant.featured_image -%}
+                {%- assign var_img_url = variant.featured_image | image_url: width: 600 -%}
+              {%- elsif variant.featured_media and variant.featured_media.preview_image -%}
+                {%- assign var_img_url = variant.featured_media.preview_image | image_url: width: 600 -%}
+              {%- elsif card_product.featured_image -%}
+                {%- assign var_img_url = card_product.featured_image | image_url: width: 600 -%}
+              {%- endif -%}
+
+              {%- assign clean_color_label = variant.option1 | default: variant.title -%}
+
+              <button
+                type="button"
+                class="product-card__swatch {% if rendered_swatch_count == 1 %}product-card__swatch--active{% endif %}"
+                data-variant-id="{{ variant.id }}"
+                data-variant-title="{{ clean_color_label | escape }}"
+                data-variant-price="{{ variant.price | money | strip_html | escape }}"
+                {% if var_img_url != blank %}data-variant-img="{{ var_img_url }}"{% endif %}
+                style="background-color: {{ swatch_bg }};{% if swatch_bg == '#ffffff' %} border: 1.5px solid #cbd5e1;{% endif %}"
+                aria-label="Color: {{ clean_color_label | escape }}"
+                title="{{ clean_color_label | escape }}"
+              ></button>
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- comment -%} If no variant title contained a color keyword (e.g. Default Title or numeric sizes only), render 1 circle {%- endcomment -%}
+        {%- if rendered_swatch_count == 0 -%}
+          {%- assign prod_color_context = card_product.title | append: ' ' | append: card_product.tags | downcase -%}
+          {%- assign single_var = card_product.selected_or_first_available_variant -%}
+          {%- assign single_bg = '#18181b' -%}
+          {%- if prod_color_context contains 'orange' or prod_color_context contains 'coral' -%}
+            {%- assign single_bg = '#ea580c' -%}
+          {%- elsif prod_color_context contains 'teal' or prod_color_context contains 'cyan' -%}
+            {%- assign single_bg = '#0d9488' -%}
+          {%- elsif prod_color_context contains 'blue' or prod_color_context contains 'navy' -%}
+            {%- assign single_bg = '#1e3a8a' -%}
+          {%- elsif prod_color_context contains 'red' or prod_color_context contains 'crimson' -%}
+            {%- assign single_bg = '#dc2626' -%}
+          {%- elsif prod_color_context contains 'lime' or prod_color_context contains 'neon' -%}
+            {%- assign single_bg = '#84cc16' -%}
+          {%- elsif prod_color_context contains 'green' or prod_color_context contains 'olive' -%}
+            {%- assign single_bg = '#15803d' -%}
+          {%- elsif prod_color_context contains 'yellow' or prod_color_context contains 'gold' -%}
+            {%- assign single_bg = '#eab308' -%}
+          {%- elsif prod_color_context contains 'grey' or prod_color_context contains 'gray' or prod_color_context contains 'silver' or prod_color_context contains 'titanium' -%}
+            {%- assign single_bg = '#94a3b8' -%}
+          {%- elsif prod_color_context contains 'white' or prod_color_context contains 'ivory' -%}
+            {%- assign single_bg = '#ffffff' -%}
+          {%- endif -%}
+
+          <button
+            type="button"
+            class="product-card__swatch product-card__swatch--active"
+            data-variant-id="{{ single_var.id }}"
+            data-variant-title="{{ card_product.title | escape }}"
+            data-variant-price="{{ single_var.price | money | strip_html | escape }}"
+            {% if card_product.featured_image %}data-variant-img="{{ card_product.featured_image | image_url: width: 600 }}"{% endif %}
+            style="background-color: {{ single_bg }};{% if single_bg == '#ffffff' %} border: 1.5px solid #cbd5e1;{% endif %}"
+            aria-label="{{ card_product.title | escape }}"
+            title="{{ card_product.title | escape }}"
+          ></button>
         {%- endif -%}
       {%- else -%}
         {%- if fallback_swatches != blank -%}
@@ -357,9 +586,17 @@
               type="button"
               class="product-card__swatch {% if forloop.first %}product-card__swatch--active{% endif %}"
               style="background-color: {{ color | strip }};"
-              aria-label="Color {{ color | strip }}"
+              aria-label="Variant {{ forloop.index }}"
             ></button>
           {%- endfor -%}
+        {%- else -%}
+          <button
+            type="button"
+            class="product-card__swatch product-card__swatch--active"
+            style="background-color: #18181b;"
+            aria-label="{{ fallback_title | default: 'Standard Variant' | escape }}"
+            title="{{ fallback_title | default: 'Standard Variant' | escape }}"
+          ></button>
         {%- endif -%}
       {%- endif -%}
     </div>

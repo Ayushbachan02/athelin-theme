@@ -38,11 +38,27 @@
   <!-- 2. Product Title -->
   <h1 class="product-buy-box__title">{{ product.title }}</h1>
 
-  <!-- 3. Review Rating Stars -->
-  <a href="#product-tab-reviews" class="product-buy-box__reviews">
-    <span class="product-buy-box__stars" aria-hidden="true">★★★★☆</span>
-    <span class="product-buy-box__rating-meta">4.6 · 128 reviews · 12 Q&amp;A</span>
-  </a>
+  <!-- 3. Real Review Rating Stars (Only shown when product has real rating) -->
+  {%- assign raw_pdp_rating = product.metafields.reviews.rating.value.rating | default: product.metafields.reviews.rating.value | default: product.metafields.loox.avg_rating | default: product.metafields.yotpo.reviews_average | default: product.metafields.stamped.reviews_average | default: product.metafields.custom.rating.value | default: product.metafields.custom.rating -%}
+  {%- assign raw_pdp_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | default: product.metafields.loox.num_reviews | default: product.metafields.yotpo.reviews_count | default: product.metafields.stamped.reviews_count | default: product.metafields.custom.rating_count.value | default: product.metafields.custom.rating_count -%}
+  {%- assign pdp_rating_value = raw_pdp_rating | plus: 0.0 -%}
+  {%- assign pdp_rating_count = raw_pdp_count | plus: 0 -%}
+  {%- if pdp_rating_value > 0 and pdp_rating_count > 0 -%}
+    {%- assign pdp_stars = '' -%}
+    {%- assign pdp_rounded = pdp_rating_value | round -%}
+    {%- if pdp_rounded > 5 -%}{%- assign pdp_rounded = 5 -%}{%- endif -%}
+    {%- for i in (1..5) -%}
+      {%- if i <= pdp_rounded -%}
+        {%- assign pdp_stars = pdp_stars | append: '★' -%}
+      {%- else -%}
+        {%- assign pdp_stars = pdp_stars | append: '☆' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    <a href="#product-tab-reviews" class="product-buy-box__reviews">
+      <span class="product-buy-box__stars" aria-hidden="true">{{ pdp_stars }}</span>
+      <span class="product-buy-box__rating-meta">{{ pdp_rating_value | round: 1 }} · {{ pdp_rating_count }} {{ pdp_rating_count | pluralize: 'review', 'reviews' }}</span>
+    </a>
+  {%- endif -%}
 
   <!-- 4. Price & Lime EMI Pill -->
   <div class="product-buy-box__price-wrap">
@@ -66,46 +82,180 @@
     <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id-input>
     <input type="hidden" name="quantity" value="1">
 
-    {%- if product.variants.size > 1 -%}
-      <div class="product-buy-box__variants">
-        <div class="product-buy-box__variant-label-row">
-          <span class="product-buy-box__variant-label-title">Colour</span>
-          <span class="product-buy-box__variant-label-value" data-variant-active-val>{{ current_variant.title }}</span>
-        </div>
+    {%- unless product.has_only_default_variant -%}
+      <div class="product-buy-box__variants" data-pdp-variant-picker>
+        {%- for option in product.options_with_values -%}
+          {%- assign opt_name_low = option.name | downcase | strip -%}
+          {%- assign opt_index = forloop.index0 -%}
+          {%- assign is_color_opt = false -%}
+          {%- if opt_name_low contains 'color' or opt_name_low contains 'colour' or opt_name_low contains 'shade' -%}
+            {%- assign is_color_opt = true -%}
+          {%- endif -%}
 
-        <div class="product-buy-box__swatch-list">
-          {%- for variant in product.variants -%}
-            <button
-              type="button"
-              class="product-buy-box__swatch-btn{% if variant.id == current_variant.id %} is-selected{% endif %}"
-              data-swatch-variant
-              data-variant-id="{{ variant.id }}"
-              data-variant-title="{{ variant.title | escape }}"
-              data-variant-price="{{ variant.price | money }}"
-              data-variant-available="{{ variant.available }}"
-              data-variant-img="{% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 }}{% endif %}"
-              title="{{ variant.title | escape }}{% unless variant.available %} (Sold out){% endunless %}"
-            >
-              {%- if variant.featured_image -%}
-                <img
-                  src="{{ variant.featured_image | image_url: width: 120, height: 120 }}"
-                  alt="{{ variant.title | escape }}"
-                  class="product-buy-box__swatch-img"
-                  width="44"
-                  height="44"
-                >
-              {%- else -%}
-                <span style="display:block;width:100%;height:100%;border-radius:50%;background:#e2e8f0;"></span>
+          <div class="pdp-option-group" data-option-group data-option-index="{{ opt_index }}" data-option-name="{{ option.name | escape }}">
+            <div class="pdp-option-group__header">
+              <div class="pdp-option-group__title-wrap">
+                <span class="pdp-option-group__label">{{ option.name }}</span>
+                <span class="pdp-option-group__sep">:</span>
+                <span class="pdp-option-group__selected" data-option-selected-val="{{ opt_index }}" data-locked-val="{{ option.selected_value | escape }}">{{ option.selected_value }}</span>
+              </div>
+              {%- if is_color_opt -%}
+                {%- assign sel_color_avail = false -%}
+                {%- for variant in product.variants -%}
+                  {%- if variant.options[opt_index] == option.selected_value and variant.available -%}
+                    {%- assign sel_color_avail = true -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                <span class="pdp-option-group__status-badge{% unless sel_color_avail %} is-soldout{% endunless %}" data-option-header-status="{{ opt_index }}">
+                  {%- if sel_color_avail -%}In stock{%- else -%}Sold out{%- endif -%}
+                </span>
+              {%- elsif opt_name_low contains 'size' -%}
+                <span class="pdp-option-group__hint">Select {{ option.name | downcase }}</span>
               {%- endif -%}
-            </button>
+            </div>
 
-            {%- unless variant.available -%}
-              <span class="product-buy-box__swatch-soldout-badge">{{ variant.title }} — sold out</span>
-            {%- endunless -%}
-          {%- endfor -%}
-        </div>
+            {%- if is_color_opt -%}
+              <div class="pdp-color-grid" role="radiogroup" aria-label="{{ option.name | escape }}">
+                {%- for value in option.values -%}
+                  {%- assign rep_variant = nil -%}
+                  {%- assign any_available_for_val = false -%}
+                  {%- for variant in product.variants -%}
+                    {%- if variant.options[opt_index] == value -%}
+                      {%- if rep_variant == nil -%}
+                        {%- assign rep_variant = variant -%}
+                      {%- endif -%}
+                      {%- if variant.featured_image and rep_variant.featured_image == nil -%}
+                        {%- assign rep_variant = variant -%}
+                      {%- endif -%}
+                      {%- if variant.available -%}
+                        {%- assign any_available_for_val = true -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  {%- assign val_low = value | downcase -%}
+                  {%- assign dot_hex = '#18181b' -%}
+                  {%- if val_low contains 'white' or val_low contains 'snow' or val_low contains 'ivory' -%}
+                    {%- assign dot_hex = '#ffffff' -%}
+                  {%- elsif val_low contains 'neon' or val_low contains 'lime' or val_low contains 'volt' -%}
+                    {%- assign dot_hex = '#d4f933' -%}
+                  {%- elsif val_low contains 'yellow' or val_low contains 'gold' or val_low contains 'citron' -%}
+                    {%- assign dot_hex = '#eab308' -%}
+                  {%- elsif val_low contains 'teal' or val_low contains 'petrol' or val_low contains 'cyan' or val_low contains 'aqua' -%}
+                    {%- assign dot_hex = '#0d9488' -%}
+                  {%- elsif val_low contains 'blue' or val_low contains 'navy' or val_low contains 'ocean' or val_low contains 'cobalt' -%}
+                    {%- assign dot_hex = '#1e3a8a' -%}
+                  {%- elsif val_low contains 'red' or val_low contains 'crimson' or val_low contains 'burgundy' -%}
+                    {%- assign dot_hex = '#dc2626' -%}
+                  {%- elsif val_low contains 'green' or val_low contains 'olive' or val_low contains 'sage' or val_low contains 'mint' -%}
+                    {%- assign dot_hex = '#15803d' -%}
+                  {%- elsif val_low contains 'orange' or val_low contains 'coral' or val_low contains 'amber' or val_low contains 'cerise' -%}
+                    {%- assign dot_hex = '#ea580c' -%}
+                  {%- elsif val_low contains 'purple' or val_low contains 'violet' or val_low contains 'lavender' or val_low contains 'dusk' -%}
+                    {%- assign dot_hex = '#7e22ce' -%}
+                  {%- elsif val_low contains 'pink' or val_low contains 'rose' or val_low contains 'magenta' -%}
+                    {%- assign dot_hex = '#ec4899' -%}
+                  {%- elsif val_low contains 'brown' or val_low contains 'tan' or val_low contains 'sand' or val_low contains 'beige' -%}
+                    {%- assign dot_hex = '#78350f' -%}
+                  {%- elsif val_low contains 'silver' or val_low contains 'grey' or val_low contains 'gray' or val_low contains 'slate' or val_low contains 'titanium' -%}
+                    {%- assign dot_hex = '#94a3b8' -%}
+                  {%- endif -%}
+
+                  <button
+                    type="button"
+                    class="pdp-color-option{% if option.selected_value == value %} is-selected{% endif %}{% unless any_available_for_val %} is-soldout{% endunless %}"
+                    data-pdp-option-btn
+                    data-option-index="{{ opt_index }}"
+                    data-option-value="{{ value | escape }}"
+                    data-option-available="{% if any_available_for_val %}true{% else %}false{% endif %}"
+                    role="radio"
+                    aria-checked="{% if option.selected_value == value %}true{% else %}false{% endif %}"
+                    aria-label="{{ option.name | escape }}: {{ value | escape }}{% unless any_available_for_val %} (Sold out){% endunless %}"
+                    title="{{ value | escape }}{% unless any_available_for_val %} — Sold out{% endunless %}"
+                  >
+                    <span class="pdp-color-option__media">
+                      {%- if rep_variant and rep_variant.featured_image -%}
+                        <img
+                          src="{{ rep_variant.featured_image | image_url: width: 140, height: 140 }}"
+                          alt="{{ value | escape }}"
+                          class="pdp-color-option__img"
+                          width="48"
+                          height="48"
+                          loading="lazy"
+                        >
+                      {%- else -%}
+                        <span
+                          class="pdp-color-option__dot"
+                          style="background-color: {{ dot_hex }};{% if dot_hex == '#ffffff' %} border: 1px solid #cbd5e1;{% endif %}"
+                        ></span>
+                      {%- endif -%}
+                    </span>
+                  </button>
+                {%- endfor -%}
+              </div>
+
+            {%- else -%}
+              <div class="pdp-pill-grid" role="radiogroup" aria-label="{{ option.name | escape }}">
+                {%- for value in option.values -%}
+                  {%- assign combo_available = false -%}
+                  {%- for variant in product.variants -%}
+                    {%- if variant.options[opt_index] == value -%}
+                      {%- assign matches_other_opts = true -%}
+                      {%- if opt_index != 0 and product.options.size > 0 and variant.option1 != current_variant.option1 -%}
+                        {%- assign matches_other_opts = false -%}
+                      {%- endif -%}
+                      {%- if opt_index != 1 and product.options.size > 1 and variant.option2 != current_variant.option2 -%}
+                        {%- assign matches_other_opts = false -%}
+                      {%- endif -%}
+                      {%- if matches_other_opts and variant.available -%}
+                        {%- assign combo_available = true -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+
+                  <button
+                    type="button"
+                    class="pdp-pill-option{% if option.selected_value == value %} is-selected{% endif %}{% unless combo_available %} is-soldout{% endunless %}"
+                    data-pdp-option-btn
+                    data-option-index="{{ opt_index }}"
+                    data-option-value="{{ value | escape }}"
+                    data-option-available="{% if combo_available %}true{% else %}false{% endif %}"
+                    role="radio"
+                    aria-checked="{% if option.selected_value == value %}true{% else %}false{% endif %}"
+                    title="{{ option.name | escape }}: {{ value | escape }}{% unless combo_available %} (Sold out){% endunless %}"
+                  >
+                    <span class="pdp-pill-option__text">{{ value }}</span>
+                  </button>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+
+        <script type="application/json" data-pdp-variants-json>
+          [
+            {%- for variant in product.variants -%}
+              {%- assign v_emi = variant.price | divided_by: 3 -%}
+              {
+                "id": {{ variant.id | json }},
+                "title": {{ variant.title | json }},
+                "option1": {{ variant.option1 | json }},
+                "option2": {{ variant.option2 | json }},
+                "option3": {{ variant.option3 | json }},
+                "options": {{ variant.options | json }},
+                "available": {{ variant.available | json }},
+                "price": {{ variant.price | json }},
+                "price_formatted": {{ variant.price | money | strip_html | json }},
+                "compare_at_price": {{ variant.compare_at_price | default: 0 | json }},
+                "compare_price_formatted": {{ variant.compare_at_price | money | strip_html | json }},
+                "emi_formatted": {{ v_emi | money | strip_html | append: '/mo' | json }},
+                "featured_image": {% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 | json }}{% elsif variant.featured_media and variant.featured_media.preview_image %}{{ variant.featured_media.preview_image | image_url: width: 1200 | json }}{% else %}null{% endif %}
+              }{% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+          ]
+        </script>
       </div>
-    {%- endif -%}
+    {%- endunless -%}
 
     <!-- 6. Live Stock Indicator -->
     <div class="product-buy-box__stock-indicator">
@@ -127,8 +277,33 @@
       <button type="button" class="product-buy-box__pincode-trigger" data-pincode-trigger>Change</button>
     </div>
 
-    <!-- 8. Action Buttons (Add to Cart + Compare) -->
-    <div class="product-buy-box__cta-row">
+    <!-- 8. Action Buttons (Add to Cart + Wishlist + Compare) -->
+    {%- assign pdp_img = '' -%}
+    {%- if product.featured_image -%}
+      {%- assign pdp_img = product.featured_image | image_url: width: 600 -%}
+    {%- else -%}
+      {%- assign pdp_img = 'product-garmin-1.png' | asset_url -%}
+    {%- endif -%}
+    <div
+      class="product-buy-box__cta-row"
+      data-product-card
+      data-pdp-compare-source
+      data-product-id="{{ product.id }}"
+      data-product-handle="{{ product.handle | escape }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-vendor="{{ product.vendor | default: 'ATHELIN' | escape }}"
+      data-product-type="{{ product.type | default: 'Endurance Gear' | escape }}"
+      data-product-url="{{ product.url | escape }}"
+      data-product-image="{{ pdp_img | escape }}"
+      data-product-price="{{ current_variant.price | money | strip_html | escape }}"
+      data-price="{{ current_variant.price }}"
+      data-product-emi="{{ emi_amount | money | strip_html | append: '/mo' | escape }}"
+      data-product-specs="{{ product.type | default: 'Endurance Sports Gear' | escape }}"
+      data-product-sku="{{ current_variant.sku | default: product.handle | upcase | escape }}"
+      data-product-summary="{{ product.description | strip_html | strip_newlines | truncate: 140 | escape }}"
+      data-available="{% if current_variant.available %}true{% else %}false{% endif %}"
+      data-variant-id="{{ current_variant.id }}"
+    >
       <button
         type="submit"
         class="product-buy-box__btn-cart"
@@ -142,8 +317,33 @@
         {%- endif -%}
       </button>
 
-      <button type="button" class="product-buy-box__btn-compare" onclick="alert('Added to product comparison');">
-        Compare
+      <button
+        type="button"
+        class="product-buy-box__btn-wishlist"
+        data-wishlist-btn
+        aria-label="Save {{ product.title | escape }} to wishlist"
+        title="Save to Wishlist"
+      >
+        <svg class="icon-heart-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="product-buy-box__btn-compare"
+        data-compare-btn
+        aria-label="Add {{ product.title | escape }} to compare"
+      >
+        + Compare
+      </button>
+    </div>
+
+    <!-- Live Compare Tray Link on Every Product Page -->
+    <div class="product-buy-box__compare-tray" data-pdp-compare-tray>
+      <button type="button" class="product-buy-box__compare-action" data-compare-add-and-go>
+        <span>⇄ Compare this model side-by-side</span>
+        <span class="product-buy-box__compare-link-text">Open Compare Page <span data-compare-count-badge></span> →</span>
       </button>
     </div>
   {% endform %}
